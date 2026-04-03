@@ -2,77 +2,13 @@ import streamlit as st
 import pandas as pd
 import os
 from datetime import datetime, date, time as dtime
+from theme import inject_theme, page_header, metric_card, section_card, detail_row, status_badge, ACCENT, POS, NEG
 
 st.set_page_config(page_title="Driving", page_icon="🚗", layout="wide")
 
-st.markdown("""
-<style>
-:root {
-    --accent: #8a7055;
-    --pos: #5a9a6a; --neg: #b87070;
-    --border: 1px solid rgba(0,0,0,0.07);
-    --shadow: 0 1px 3px rgba(0,0,0,0.04);
-    --radius: 18px;
-}
-@media (prefers-color-scheme: dark) {
-    :root {
-        --accent: #b08a65;
-        --border: 1px solid rgba(255,255,255,0.07);
-        --shadow: 0 1px 3px rgba(0,0,0,0.12);
-        --pos: #7ab88a;
-    }
-}
-[data-theme="dark"] {
-    --accent: #b08a65;
-    --border: 1px solid rgba(255,255,255,0.07);
-    --shadow: 0 1px 3px rgba(0,0,0,0.12);
-    --pos: #7ab88a;
-}
+inject_theme()
 
-.stDecoration { display: none !important; }
-html, body, [class*="css"] { font-family: Georgia, 'Times New Roman', serif !important; }
-.block-container {
-    max-width: 1200px;
-    padding-top: 4rem !important;
-    padding-bottom: 4rem !important;
-}
-div[data-testid="stForm"] {
-    border: none !important; padding: 0 !important; background: transparent !important;
-}
-div[data-testid="stTextInput"] input {
-    border-radius: 12px !important;
-    border: 1px solid rgba(0,0,0,0.12) !important;
-    font-family: Georgia, serif !important;
-}
-div.stButton > button {
-    border-radius: 12px !important;
-    border: 1px solid rgba(0,0,0,0.14) !important;
-    font-weight: 400 !important;
-    font-family: Georgia, serif !important;
-    background: var(--secondary-background-color) !important;
-    color: inherit !important;
-}
-div.stButton > button:hover {
-    border-color: var(--accent) !important;
-}
-</style>
-""", unsafe_allow_html=True)
-
-if "dark_mode" not in st.session_state:
-    st.session_state["dark_mode"] = False
-_dark = st.session_state["dark_mode"]
-_bg    = "#0e1117" if _dark else "#f5f0e8"
-_sbg   = "#161b22" if _dark else "#ede8de"
-_color = "#fafafa" if _dark else "#3a3028"
-st.markdown(f"""<style>
-.stApp {{ background-color: {_bg} !important; color: {_color} !important; }}
-section[data-testid="stSidebar"] > div:first-child {{ background-color: {_sbg} !important; }}
-header[data-testid="stHeader"] {{ background-color: {_bg} !important; }}
-</style>""", unsafe_allow_html=True)
-
-st.title("🚗 Driving Command Center")
-st.subheader("Track your driving performance and daily income")
-st.markdown("---")
+st.markdown(page_header("Driving", "Income tracking"), unsafe_allow_html=True)
 
 DATA_FOLDER = "data"
 DRIVING_FILE = os.path.join(DATA_FOLDER, "driving.csv")
@@ -180,7 +116,7 @@ col1, col2 = st.columns(2)
 # INPUT SECTION
 # =========================
 with col1:
-    st.header("📝 Enter Driving Data")
+    st.markdown('<div class="section-title">Enter Driving Data</div>', unsafe_allow_html=True)
     st.caption(f"Saving record for: {selected_date}")
 
     with st.form("driving_form"):
@@ -266,39 +202,56 @@ with col1:
 # DASHBOARD
 # =========================
 with col2:
-    st.header("📊 Driving Dashboard")
+    st.markdown('<div class="section-title">Driving Dashboard</div>', unsafe_allow_html=True)
 
     selected_data = driving_df[driving_df["date"] == selected_date]
 
     if not selected_data.empty:
         row = selected_data.iloc[0]
 
-        st.write(f"**Viewing Date:** {selected_date}")
-        st.write(f"**Day Type:** {row['day_type']}")
-
         if row["day_type"] == "Off Day":
-            st.info("😴 Rest Day — No driving recorded")
+            st.markdown(metric_card("Status", "Rest Day", f"No driving on {selected_date}"), unsafe_allow_html=True)
         else:
-            st.write(f"**Start Time:** {row['start_time']}")
-            st.write(f"**End Time:** {row['end_time']}")
-            st.write(f"**Hours Driven:** {float(row['hours_driven']):.2f}")
-            st.write(f"**Earnings:** ${float(row['earnings']):.2f}")
-            st.write(f"**Hourly Rate:** ${float(row['hourly_rate']):.2f}/hr")
+            # Earnings metric card
+            earn_val = float(row['earnings'])
+            earn_color = POS if earn_val >= DAILY_TARGET else NEG
+            st.markdown(
+                metric_card("Earnings", f"${earn_val:.2f}", f"Target: ${DAILY_TARGET:.0f}", color=earn_color),
+                unsafe_allow_html=True
+            )
 
+            # Detail rows inside a card
+            hours_val = float(row['hours_driven'])
+            rate_val = float(row['hourly_rate'])
+            rate_cls = "positive" if rate_val >= HOURLY_TARGET else "negative"
+
+            details_html = (
+                detail_row("Date", selected_date)
+                + detail_row("Start Time", str(row['start_time']))
+                + detail_row("End Time", str(row['end_time']))
+                + detail_row("Hours Driven", f"{hours_val:.2f}")
+                + detail_row("Hourly Rate", f"${rate_val:.2f}/hr", cls=rate_cls)
+            )
+            st.markdown(section_card("Session Details", details_html), unsafe_allow_html=True)
+
+            # Target status badge
             if row["target_status"] == "Target Achieved":
-                st.success("✅ Target Achieved")
+                badge_html = status_badge("Target Achieved", POS)
             else:
-                st.warning(f"⚠️ Below ${DAILY_TARGET:.0f} Target")
+                badge_html = status_badge(f"Below ${DAILY_TARGET:.0f} Target", NEG)
 
-            if float(row["hourly_rate"]) >= HOURLY_TARGET:
-                st.success(f"💪 Good hourly rate (>= ${HOURLY_TARGET:.0f}/hr)")
+            # Hourly rate badge
+            if rate_val >= HOURLY_TARGET:
+                rate_badge = status_badge(f"Good Rate (>= ${HOURLY_TARGET:.0f}/hr)", POS)
             else:
-                st.warning(f"📉 Hourly rate below ${HOURLY_TARGET:.0f}/hr")
+                rate_badge = status_badge(f"Rate Below ${HOURLY_TARGET:.0f}/hr", NEG)
+
+            st.markdown(f'<div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:12px">{badge_html} {rate_badge}</div>', unsafe_allow_html=True)
     else:
-        st.info("No driving record saved for this date yet.")
+        st.markdown(metric_card("Status", "No Data", f"No record for {selected_date}"), unsafe_allow_html=True)
 
 # =========================
 # NOTE
 # =========================
-st.markdown("---")
-st.caption("Finance page handles expenses. Driving page only tracks income.")
+st.markdown('<div class="divider"></div>', unsafe_allow_html=True)
+st.markdown('<p class="c-muted">Finance page handles expenses. Driving page only tracks income.</p>', unsafe_allow_html=True)
