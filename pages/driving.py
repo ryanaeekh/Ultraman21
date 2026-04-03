@@ -8,28 +8,39 @@ st.set_page_config(page_title="Driving", page_icon="🚗", layout="wide")
 st.markdown("""
 <style>
 :root {
-    --accent: #a08060;
-    --pos: #6a9e7a; --neg: #b87070;
-    --border: 1px solid rgba(128,128,128,0.09);
-    --shadow: 0 1px 4px rgba(0,0,0,0.04), 0 6px 20px rgba(0,0,0,0.04);
-    --radius: 16px;
+    --accent: #8a7055;
+    --pos: #5a9a6a; --neg: #b87070;
+    --border: 1px solid rgba(0,0,0,0.07);
+    --shadow: 0 1px 3px rgba(0,0,0,0.04);
+    --radius: 18px;
 }
+@media (prefers-color-scheme: dark) {
+    :root {
+        --accent: #b08a65;
+        --border: 1px solid rgba(255,255,255,0.07);
+        --shadow: 0 1px 3px rgba(0,0,0,0.12);
+        --pos: #7ab88a;
+    }
+}
+html, body, [class*="css"] { font-family: Georgia, 'Times New Roman', serif !important; }
 .block-container {
     max-width: 1200px;
-    padding-top: 2rem !important;
-    padding-bottom: 2rem !important;
+    padding-top: 4rem !important;
+    padding-bottom: 4rem !important;
 }
 div[data-testid="stForm"] {
     border: none !important; padding: 0 !important; background: transparent !important;
 }
 div[data-testid="stTextInput"] input {
     border-radius: 12px !important;
-    border: 1px solid rgba(128,128,128,0.15) !important;
+    border: 1px solid rgba(0,0,0,0.12) !important;
+    font-family: Georgia, serif !important;
 }
 div.stButton > button {
     border-radius: 12px !important;
-    border: 1px solid rgba(128,128,128,0.15) !important;
-    font-weight: 600 !important;
+    border: 1px solid rgba(0,0,0,0.14) !important;
+    font-weight: 400 !important;
+    font-family: Georgia, serif !important;
     background: var(--secondary-background-color) !important;
     color: inherit !important;
 }
