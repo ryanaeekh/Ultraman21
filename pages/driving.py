@@ -28,9 +28,7 @@ st.markdown("""
     --shadow: 0 1px 3px rgba(0,0,0,0.12);
     --pos: #7ab88a;
 }
-html:not([data-theme="dark"]) .stApp { background-color: #f5f0e8 !important; color: #3a3028 !important; }
-html:not([data-theme="dark"]) section[data-testid="stSidebar"] > div:first-child { background-color: #ede8de !important; }
-html:not([data-theme="dark"]) header[data-testid="stHeader"] { background-color: #f5f0e8 !important; }
+
 .stDecoration { display: none !important; }
 html, body, [class*="css"] { font-family: Georgia, 'Times New Roman', serif !important; }
 .block-container {
