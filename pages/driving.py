@@ -28,6 +28,10 @@ st.markdown("""
     --shadow: 0 1px 3px rgba(0,0,0,0.12);
     --pos: #7ab88a;
 }
+.stApp { background-color: #f5f0e8; color: #3a3028; }
+section[data-testid="stSidebar"] > div:first-child { background-color: #ede8de; }
+[data-theme="dark"] .stApp { background-color: unset; color: unset; }
+[data-theme="dark"] section[data-testid="stSidebar"] > div:first-child { background-color: unset; }
 html, body, [class*="css"] { font-family: Georgia, 'Times New Roman', serif !important; }
 .block-container {
     max-width: 1200px;

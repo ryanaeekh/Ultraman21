@@ -172,6 +172,12 @@ st.markdown("""
     --pos: #7ab88a;
 }
 
+/* ── LIGHT-MODE WARM BACKGROUNDS ── */
+.stApp { background-color: #f5f0e8; color: #3a3028; }
+section[data-testid="stSidebar"] > div:first-child { background-color: #ede8de; }
+[data-theme="dark"] .stApp { background-color: unset; color: unset; }
+[data-theme="dark"] section[data-testid="stSidebar"] > div:first-child { background-color: unset; }
+
 /* ── TYPOGRAPHY ── */
 html, body, [class*="css"] {
     font-family: Georgia, 'Times New Roman', serif !important;
