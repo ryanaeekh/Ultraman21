@@ -259,32 +259,43 @@ st.markdown(
     :root {
         --um-radius-lg: 18px;
         --um-radius-md: 12px;
-        --border: 1px solid rgba(128,128,128,0.09);
-        --shadow: 0 1px 4px rgba(0,0,0,0.04), 0 6px 20px rgba(0,0,0,0.04);
-        --accent: #a08060;
-        --pos: #6a9e7a; --neg: #b87070;
+        --border: 1px solid rgba(0,0,0,0.07);
+        --shadow: 0 1px 3px rgba(0,0,0,0.04);
+        --accent: #8a7055;
+        --pos: #5a9a6a; --neg: #b87070;
     }
+    @media (prefers-color-scheme: dark) {
+        :root {
+            --accent: #b08a65;
+            --border: 1px solid rgba(255,255,255,0.07);
+            --shadow: 0 1px 3px rgba(0,0,0,0.12);
+            --pos: #7ab88a;
+        }
+    }
+    html, body, [class*="css"] { font-family: Georgia, 'Times New Roman', serif !important; }
 
     .block-container {
-        padding-top: 2rem !important;
+        padding-top: 4rem !important;
+        padding-bottom: 4rem !important;
     }
 
     h1, h2, h3 {
         margin-bottom: 0.35rem !important;
+        font-weight: 500 !important;
     }
 
     .page-subtitle {
         font-size: 16px;
-        line-height: 1.6;
-        opacity: 0.70;
+        line-height: 1.7;
+        opacity: 0.65;
         margin-bottom: 0.6rem;
     }
 
     .summary-row {
         display: flex;
-        gap: 12px;
+        gap: 14px;
         flex-wrap: wrap;
-        margin: 0.6rem 0 1.2rem 0;
+        margin: 0.6rem 0 1.4rem 0;
     }
 
     .summary-card {
@@ -292,65 +303,66 @@ st.markdown(
         min-width: 210px;
         border: var(--border);
         border-radius: 18px;
-        padding: 14px 16px;
+        padding: 18px 22px;
         background: var(--secondary-background-color);
         box-shadow: var(--shadow);
     }
 
     .summary-label {
-        font-size: 13px;
-        opacity: 0.65;
-        margin-bottom: 6px;
+        font-size: 10px;
+        text-transform: uppercase;
+        letter-spacing: 0.12em;
+        font-weight: 400;
+        opacity: 0.55;
+        margin-bottom: 8px;
     }
 
     .summary-value {
         font-size: 24px;
-        font-weight: 700;
+        font-weight: 500;
         line-height: 1.2;
     }
 
     .section-card {
         border: var(--border);
-        border-radius: 20px;
-        padding: 18px;
+        border-radius: 18px;
+        padding: 24px 28px;
         background: var(--secondary-background-color);
         box-shadow: var(--shadow);
-        margin-bottom: 16px;
+        margin-bottom: 18px;
     }
 
-    .tight-top {
-        margin-top: -6px;
-    }
+    .tight-top { margin-top: -6px; }
 
     .small-note {
         font-size: 13px;
-        opacity: 0.70;
+        opacity: 0.65;
         margin-top: -2px;
         margin-bottom: 12px;
     }
 
     .record-card {
         border: var(--border);
-        border-radius: 14px;
-        padding: 12px 14px;
+        border-radius: 12px;
+        padding: 14px 18px;
         background: var(--secondary-background-color);
         margin-bottom: 10px;
     }
 
     .record-title {
         font-size: 15px;
-        font-weight: 600;
+        font-weight: 500;
         margin-bottom: 4px;
     }
 
     .record-sub {
         font-size: 13px;
-        opacity: 0.72;
+        opacity: 0.65;
     }
 
     .pill {
         display: inline-block;
-        padding: 6px 10px;
+        padding: 6px 12px;
         border-radius: 999px;
         background: var(--secondary-background-color);
         border: var(--border);
@@ -368,25 +380,24 @@ st.markdown(
     div[data-testid="stTextArea"] textarea,
     div[data-testid="stTextInput"] input {
         border-radius: 12px !important;
+        font-family: Georgia, serif !important;
     }
 
     div.stButton > button {
         border-radius: 12px !important;
-        border: 1px solid rgba(128,128,128,0.15) !important;
+        border: 1px solid rgba(0,0,0,0.14) !important;
         padding: 0.45rem 0.95rem !important;
-        font-weight: 600 !important;
+        font-weight: 400 !important;
+        font-family: Georgia, serif !important;
         background: var(--secondary-background-color) !important;
         color: inherit !important;
     }
 
     div.stButton > button:hover {
         border-color: var(--accent) !important;
-        transition: 0.18s ease;
     }
 
-    div[data-testid="stSelectbox"] {
-        margin-top: -6px;
-    }
+    div[data-testid="stSelectbox"] { margin-top: -6px; }
     </style>
     """,
     unsafe_allow_html=True,
