@@ -4,6 +4,7 @@ from datetime import date, timedelta
 
 import pandas as pd
 import streamlit as st
+from theme import inject_theme, page_header, metric_card, detail_row, section_card, ACCENT, POS, NEG
 
 st.set_page_config(page_title="Weekly Review", page_icon="📅", layout="wide")
 
@@ -193,124 +194,30 @@ for d in week_dates:
 
 
 # =========================================================
-# STYLING
+# THEME + HEADER
 # =========================================================
-st.markdown("""
-<style>
-/* ── TOKENS ── */
-:root {
-    --border: 1px solid rgba(0,0,0,0.07);
-    --shadow: 0 1px 3px rgba(0,0,0,0.04);
-    --radius-lg: 18px; --radius-md: 12px;
-    --accent: #8a7055;
-    --pos: #5a9a6a; --neg: #b87070;
-}
-@media (prefers-color-scheme: dark) {
-    :root {
-        --accent: #b08a65;
-        --border: 1px solid rgba(255,255,255,0.07);
-        --shadow: 0 1px 3px rgba(0,0,0,0.12);
-        --pos: #7ab88a;
-    }
-}
-[data-theme="dark"] {
-    --accent: #b08a65;
-    --border: 1px solid rgba(255,255,255,0.07);
-    --shadow: 0 1px 3px rgba(0,0,0,0.12);
-    --pos: #7ab88a;
-}
+inject_theme()
 
-.stDecoration { display: none !important; }
-html, body, [class*="css"] { font-family: Georgia, 'Times New Roman', serif !important; }
-
-.block-container { max-width:1200px; padding-top:4rem !important; padding-bottom:4rem !important; }
-.metric-card { border:var(--border); border-radius:var(--radius-lg); padding:22px 22px 18px; background:var(--secondary-background-color); box-shadow:var(--shadow); min-height:130px; height:100%; }
-.metric-label { font-size:10px; opacity:0.55; margin-bottom:7px; text-transform:uppercase; letter-spacing:0.12em; font-weight:400; }
-.metric-value { font-size:2rem; font-weight:500; line-height:1.1; margin-bottom:5px; letter-spacing:-0.02em; }
-.metric-sub { font-size:13px; opacity:0.68; line-height:1.6; }
-.section-card { border:var(--border); border-radius:var(--radius-lg); padding:24px 28px; background:var(--secondary-background-color); box-shadow:var(--shadow); height:100%; }
-.section-title { font-size:1rem; font-weight:500; margin-bottom:1rem; letter-spacing:-0.01em; }
-.detail-list { display:grid; gap:0; }
-.detail-row { display:flex; justify-content:space-between; align-items:center; gap:16px; padding:11px 0; border-bottom:1px solid rgba(0,0,0,0.05); font-size:0.93rem; }
-.detail-row:last-child { border-bottom:none; }
-.detail-key { opacity:0.65; } .detail-value { font-weight:500; text-align:right; }
-.positive { color: var(--pos); }
-.negative { color: var(--neg); }
-.day-table { width:100%; border-collapse:collapse; font-size:0.9rem; }
-.day-table th { text-align:left; padding:10px 12px; border-bottom:2px solid rgba(0,0,0,0.08); font-size:10px; text-transform:uppercase; letter-spacing:0.12em; opacity:0.55; font-weight:400; }
-.day-table td { padding:10px 12px; border-bottom:1px solid rgba(0,0,0,0.05); }
-.day-table tr:last-child td { border-bottom:none; }
-.page-subtitle { font-size:1rem; opacity:0.6; margin-top:-8px; margin-bottom:20px; }
-</style>
-""", unsafe_allow_html=True)
-
-if "dark_mode" not in st.session_state:
-    st.session_state["dark_mode"] = False
-_dark = st.session_state["dark_mode"]
-_bg = "#0e1117" if _dark else "#f5f0e8"
-_sbg = "#161b22" if _dark else "#ede8de"
-_color = "#fafafa" if _dark else "#3a3028"
-st.markdown(f"""<style>
-.stApp {{ background-color: {_bg} !important; color: {_color} !important; }}
-section[data-testid="stSidebar"] > div:first-child {{ background-color: {_sbg} !important; }}
-header[data-testid="stHeader"] {{ background-color: {_bg} !important; }}
-</style>""", unsafe_allow_html=True)
-
-
-# =========================================================
-# HEADER
-# =========================================================
-st.title("📅 Weekly Review")
-st.markdown(
-    '<div class="page-subtitle">'
-    + week_start.strftime("%b %d") + " — " + today_obj.strftime("%b %d, %Y")
-    + '</div>',
-    unsafe_allow_html=True,
-)
+start_str = week_start.strftime("%b %d")
+end_str = today_obj.strftime("%b %d, %Y")
+st.markdown(page_header("Weekly Review", f"{start_str} — {end_str}"), unsafe_allow_html=True)
 
 # =========================================================
 # TOP METRIC CARDS
 # =========================================================
-net_cls = "positive" if week_net > 0 else ("negative" if week_net < 0 else "")
+net_color = POS if week_net > 0 else (NEG if week_net < 0 else "")
 net_sign = "+" if week_net > 0 else ""
+score_color = POS if week_avg_score >= 70 else (NEG if week_avg_score < 50 else ACCENT)
 
 c1, c2, c3, c4 = st.columns(4)
 with c1:
-    st.markdown(
-        '<div class="metric-card">'
-        '<div class="metric-label">Week Income</div>'
-        '<div class="metric-value">$' + f"{week_income:,.2f}" + '</div>'
-        '<div class="metric-sub">Driving earnings</div>'
-        '</div>',
-        unsafe_allow_html=True,
-    )
+    st.markdown(metric_card("Week Income", f"${week_income:,.2f}", "Driving earnings"), unsafe_allow_html=True)
 with c2:
-    st.markdown(
-        '<div class="metric-card">'
-        '<div class="metric-label">Week Expenses</div>'
-        '<div class="metric-value">$' + f"{week_total_exp:,.2f}" + '</div>'
-        '<div class="metric-sub">Variable $' + f"{week_variable_exp:,.2f}" + ' + Fixed $' + f"{week_fixed:,.2f}" + '</div>'
-        '</div>',
-        unsafe_allow_html=True,
-    )
+    st.markdown(metric_card("Week Expenses", f"${week_total_exp:,.2f}", f"Variable ${week_variable_exp:,.2f} + Fixed ${week_fixed:,.2f}"), unsafe_allow_html=True)
 with c3:
-    st.markdown(
-        '<div class="metric-card">'
-        '<div class="metric-label">Week Net</div>'
-        '<div class="metric-value ' + net_cls + '">' + net_sign + '$' + f"{week_net:,.2f}" + '</div>'
-        '<div class="metric-sub">Income minus total expenses</div>'
-        '</div>',
-        unsafe_allow_html=True,
-    )
+    st.markdown(metric_card("Week Net", f"{net_sign}${week_net:,.2f}", "Income minus total expenses", color=net_color), unsafe_allow_html=True)
 with c4:
-    st.markdown(
-        '<div class="metric-card">'
-        '<div class="metric-label">Avg Score</div>'
-        '<div class="metric-value">' + str(week_avg_score) + '<span style="font-size:0.5em;opacity:0.5"> /100</span></div>'
-        '<div class="metric-sub">7-day execution average</div>'
-        '</div>',
-        unsafe_allow_html=True,
-    )
+    st.markdown(metric_card("Avg Score", f'{week_avg_score}<span style="font-size:0.5em;opacity:0.5"> /100</span>', "7-day execution average", color=score_color), unsafe_allow_html=True)
 
 st.markdown("<div style='height:20px'></div>", unsafe_allow_html=True)
 
@@ -326,22 +233,11 @@ with col_fin:
         ("Variable Expenses", f"${week_variable_exp:,.2f}", "negative" if week_variable_exp > 0 else ""),
         ("Fixed Expenses (7d share)", f"${week_fixed:,.2f}", "negative" if week_fixed > 0 else ""),
         ("Total Expenses", f"${week_total_exp:,.2f}", "negative" if week_total_exp > 0 else ""),
-        ("Net Result", (net_sign + "$" + f"{week_net:,.2f}"), net_cls),
+        ("Net Result", (net_sign + "$" + f"{week_net:,.2f}"), "positive" if week_net > 0 else ("negative" if week_net < 0 else "")),
     ]:
-        rows_html += (
-            '<div class="detail-row">'
-            '<div class="detail-key">' + key + '</div>'
-            '<div class="detail-value ' + cls + '">' + val + '</div>'
-            '</div>'
-        )
+        rows_html += detail_row(key, val, cls)
 
-    st.markdown(
-        '<div class="section-card">'
-        '<div class="section-title">Financial Breakdown</div>'
-        '<div class="detail-list">' + rows_html + '</div>'
-        '</div>',
-        unsafe_allow_html=True,
-    )
+    st.markdown(section_card("Financial Breakdown", rows_html), unsafe_allow_html=True)
 
 with col_exec:
     score_cls = "positive" if week_avg_score >= 70 else ("negative" if week_avg_score < 50 else "")
@@ -353,20 +249,9 @@ with col_exec:
         ("Worst Day", worst_day, ""),
         ("Days Logged", str(len(planner_df[planner_df["date"].isin(week_dates)])) + " / 7" if not planner_df.empty and "date" in planner_df.columns else "0 / 7", ""),
     ]:
-        exec_rows_html += (
-            '<div class="detail-row">'
-            '<div class="detail-key">' + key + '</div>'
-            '<div class="detail-value ' + cls + '">' + val + '</div>'
-            '</div>'
-        )
+        exec_rows_html += detail_row(key, val, cls)
 
-    st.markdown(
-        '<div class="section-card">'
-        '<div class="section-title">Execution Summary</div>'
-        '<div class="detail-list">' + exec_rows_html + '</div>'
-        '</div>',
-        unsafe_allow_html=True,
-    )
+    st.markdown(section_card("Execution Summary", exec_rows_html), unsafe_allow_html=True)
 
 st.markdown("<div style='height:20px'></div>", unsafe_allow_html=True)
 
@@ -376,9 +261,9 @@ st.markdown("<div style='height:20px'></div>", unsafe_allow_html=True)
 table_rows = ""
 for row in day_rows:
     net_val = row["Net"]
-    net_td_cls = "positive" if net_val > 0 else ("negative" if net_val < 0 else "")
+    net_td_cls = "c-pos" if net_val > 0 else ("c-neg" if net_val < 0 else "")
     net_prefix = "+" if net_val > 0 else ""
-    score_td_cls = "positive" if row["Score"] >= 70 else ("negative" if row["Score"] < 50 and row["Score"] > 0 else "")
+    score_td_cls = "c-pos" if row["Score"] >= 70 else ("c-neg" if row["Score"] < 50 and row["Score"] > 0 else "")
     table_rows += (
         '<tr>'
         '<td>' + row["Date"] + '</td>'
@@ -389,13 +274,11 @@ for row in day_rows:
         '</tr>'
     )
 
-st.markdown(
-    '<div class="section-card">'
-    '<div class="section-title">Day-by-Day Breakdown</div>'
+day_table_html = (
     '<table class="day-table">'
     '<thead><tr><th>Date</th><th>Score</th><th>Income</th><th>Expense</th><th>Net</th></tr></thead>'
     '<tbody>' + table_rows + '</tbody>'
     '</table>'
-    '</div>',
-    unsafe_allow_html=True,
 )
+
+st.markdown(section_card("Day-by-Day Breakdown", day_table_html), unsafe_allow_html=True)
