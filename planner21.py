@@ -577,8 +577,7 @@ if page == "Today":
     if checklist_raw:
         items = [i.strip() for i in checklist_raw.split(",") if i.strip()]
         if items:
-            st.markdown('<div class="section-card">', unsafe_allow_html=True)
-            st.markdown('<div class="section-title">☑️ Morning Checklist</div>', unsafe_allow_html=True)
+            st.markdown('<div class="section-label">☑️ Morning Checklist</div>', unsafe_allow_html=True)
             done_count = 0
             for item in items:
                 key = f"checklist_{item}"
@@ -588,7 +587,6 @@ if page == "Today":
                 if checked:
                     done_count += 1
             st.caption(f"{done_count}/{len(items)} completed")
-            st.markdown('</div>', unsafe_allow_html=True)
 
     # --- Daily entry form ---
     _p1 = clean_text(today_row["priority_1"]) if today_row is not None else ""
