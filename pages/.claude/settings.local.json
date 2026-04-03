@@ -1,0 +1,15 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(python -m streamlit run planner21.py)",
+      "Bash(bash:*)",
+      "Bash(git init:*)",
+      "Bash(git add:*)",
+      "Bash(git commit:*)",
+      "Bash(git config:*)"
+    ],
+    "additionalDirectories": [
+      "c:\\Users\\ryana\\OneDrive\\Desktop\\Ultraman21"
+    ]
+  }
+}
