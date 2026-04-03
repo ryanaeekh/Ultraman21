@@ -79,6 +79,20 @@ DRIVING_FILE = os.path.join(DATA_FOLDER, "driving.csv")
 
 os.makedirs(DATA_FOLDER, exist_ok=True)
 
+BACKUP_FOLDER = os.path.join(DATA_FOLDER, "backups")
+os.makedirs(BACKUP_FOLDER, exist_ok=True)
+
+def backup_csv(filepath):
+    """Create a timestamped backup before writing."""
+    if os.path.exists(filepath):
+        from datetime import datetime as dt_cls
+        import shutil, glob
+        basename = os.path.basename(filepath).replace(".csv", "")
+        stamp = dt_cls.now().strftime("%Y%m%d_%H%M%S")
+        shutil.copy2(filepath, os.path.join(BACKUP_FOLDER, f"{basename}_{stamp}.csv"))
+        for old in sorted(glob.glob(os.path.join(BACKUP_FOLDER, f"{basename}_*.csv")))[:-20]:
+            os.remove(old)
+
 SETTINGS_FILE = os.path.join(DATA_FOLDER, "settings.csv")
 DAILY_TARGET = 250.0
 HOURLY_TARGET = 30.0
@@ -205,6 +219,7 @@ with col1:
 
                 driving_df = driving_df[driving_df["date"] != selected_date]
                 driving_df = pd.concat([driving_df, new_row], ignore_index=True)
+                backup_csv(DRIVING_FILE)
                 driving_df.to_csv(DRIVING_FILE, index=False)
 
                 st.success(f"😴 Off day saved for {selected_date}.")
@@ -241,6 +256,7 @@ with col1:
                     driving_df = driving_df[driving_df["date"] != selected_date]
                     driving_df = pd.concat([driving_df, new_row], ignore_index=True)
                     driving_df = driving_df.sort_values("date", ascending=False)
+                    backup_csv(DRIVING_FILE)
                     driving_df.to_csv(DRIVING_FILE, index=False)
 
                     st.success(f"🚗 Driving record saved for {selected_date}.")

@@ -16,6 +16,20 @@ EXERCISE_FILE = os.path.join(DATA_DIR, "exercise.csv")
 if not os.path.exists(DATA_DIR):
     os.makedirs(DATA_DIR, exist_ok=True)
 
+BACKUP_FOLDER = os.path.join(DATA_DIR, "backups")
+os.makedirs(BACKUP_FOLDER, exist_ok=True)
+
+def backup_csv(filepath):
+    """Create a timestamped backup before writing."""
+    if os.path.exists(filepath):
+        from datetime import datetime as dt_cls
+        import shutil, glob
+        basename = os.path.basename(filepath).replace(".csv", "")
+        stamp = dt_cls.now().strftime("%Y%m%d_%H%M%S")
+        shutil.copy2(filepath, os.path.join(BACKUP_FOLDER, f"{basename}_{stamp}.csv"))
+        for old in sorted(glob.glob(os.path.join(BACKUP_FOLDER, f"{basename}_*.csv")))[:-20]:
+            os.remove(old)
+
 EXERCISE_COLUMNS = [
     "date",
     "status",
@@ -65,6 +79,7 @@ def safe_text(value):
 
 
 def save_exercise_df(df):
+    backup_csv(EXERCISE_FILE)
     df = ensure_columns(df, EXERCISE_COLUMNS)
     df.to_csv(EXERCISE_FILE, index=False)
 

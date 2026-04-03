@@ -15,6 +15,20 @@ SETTINGS_FILE = os.path.join(DATA_FOLDER, "settings.csv")
 
 os.makedirs(DATA_FOLDER, exist_ok=True)
 
+BACKUP_FOLDER = os.path.join(DATA_FOLDER, "backups")
+os.makedirs(BACKUP_FOLDER, exist_ok=True)
+
+def backup_csv(filepath):
+    """Create a timestamped backup before writing."""
+    if os.path.exists(filepath):
+        from datetime import datetime as dt_cls
+        import shutil, glob
+        basename = os.path.basename(filepath).replace(".csv", "")
+        stamp = dt_cls.now().strftime("%Y%m%d_%H%M%S")
+        shutil.copy2(filepath, os.path.join(BACKUP_FOLDER, f"{basename}_{stamp}.csv"))
+        for old in sorted(glob.glob(os.path.join(BACKUP_FOLDER, f"{basename}_*.csv")))[:-20]:
+            os.remove(old)
+
 # =========================================================
 # REQUIRED COLUMNS
 # =========================================================
@@ -85,11 +99,13 @@ def invalidate_cache():
 
 
 def save_planner(df: pd.DataFrame):
+    backup_csv(PLANNER_FILE)
     df.to_csv(PLANNER_FILE, index=False)
     invalidate_cache()
 
 
 def save_settings(df: pd.DataFrame):
+    backup_csv(SETTINGS_FILE)
     df.to_csv(SETTINGS_FILE, index=False)
     invalidate_cache()
 
@@ -944,3 +960,25 @@ elif page == "Settings":
                 save_settings(settings_df)
                 st.success("Checklist saved.")
                 st.rerun()
+
+        st.markdown("<div style='height:16px'></div>", unsafe_allow_html=True)
+        st.markdown('<div class="section-label">🔄 Restore from Backup</div>', unsafe_allow_html=True)
+        backup_dir = os.path.join(DATA_FOLDER, "backups")
+        if os.path.exists(backup_dir):
+            backups = sorted([f for f in os.listdir(backup_dir) if f.endswith(".csv")], reverse=True)
+            if backups:
+                selected_backup = st.selectbox("Select backup", backups[:20])
+                if st.button("Restore selected backup"):
+                    import shutil
+                    for prefix in ["planner", "settings", "driving", "finance", "monthly_expenses", "exercise", "journal"]:
+                        if selected_backup.startswith(prefix):
+                            target = os.path.join(DATA_FOLDER, f"{prefix}.csv")
+                            shutil.copy2(os.path.join(backup_dir, selected_backup), target)
+                            invalidate_cache()
+                            st.success(f"Restored {prefix}.csv from {selected_backup}")
+                            st.rerun()
+                            break
+            else:
+                st.info("No backups found yet.")
+        else:
+            st.info("Backup directory not created yet.")

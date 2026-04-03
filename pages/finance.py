@@ -20,6 +20,20 @@ MONTHLY_FILE = os.path.join(DATA_DIR, "monthly_expenses.csv")
 
 os.makedirs(DATA_DIR, exist_ok=True)
 
+BACKUP_FOLDER = os.path.join(DATA_DIR, "backups")
+os.makedirs(BACKUP_FOLDER, exist_ok=True)
+
+def backup_csv(filepath):
+    """Create a timestamped backup before writing."""
+    if os.path.exists(filepath):
+        from datetime import datetime as dt_cls
+        import shutil, glob
+        basename = os.path.basename(filepath).replace(".csv", "")
+        stamp = dt_cls.now().strftime("%Y%m%d_%H%M%S")
+        shutil.copy2(filepath, os.path.join(BACKUP_FOLDER, f"{basename}_{stamp}.csv"))
+        for old in sorted(glob.glob(os.path.join(BACKUP_FOLDER, f"{basename}_*.csv")))[:-20]:
+            os.remove(old)
+
 DAILY_BUDGET = 50.0
 MONTHLY_BUDGET = 1500.0
 if os.path.exists(SETTINGS_FILE):
@@ -91,10 +105,12 @@ def safe_float(value):
 
 
 def save_finance(df):
+    backup_csv(FINANCE_FILE)
     df.to_csv(FINANCE_FILE, index=False)
 
 
 def save_monthly(df):
+    backup_csv(MONTHLY_FILE)
     df.to_csv(MONTHLY_FILE, index=False)
 
 
