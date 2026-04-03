@@ -413,6 +413,18 @@ st.markdown(
     unsafe_allow_html=True,
 )
 
+if "dark_mode" not in st.session_state:
+    st.session_state["dark_mode"] = False
+_dark = st.session_state["dark_mode"]
+_bg    = "#0e1117" if _dark else "#f5f0e8"
+_sbg   = "#161b22" if _dark else "#ede8de"
+_color = "#fafafa" if _dark else "#3a3028"
+st.markdown(f"""<style>
+.stApp {{ background-color: {_bg} !important; color: {_color} !important; }}
+section[data-testid="stSidebar"] > div:first-child {{ background-color: {_sbg} !important; }}
+header[data-testid="stHeader"] {{ background-color: {_bg} !important; }}
+</style>""", unsafe_allow_html=True)
+
 # =========================================================
 # LOAD DATA
 # =========================================================

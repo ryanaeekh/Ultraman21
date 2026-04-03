@@ -52,6 +52,7 @@ today = str(date.today())
 # =========================================================
 for key, default in [
     ("page", "Today"),
+    ("dark_mode", False),
 ]:
     if key not in st.session_state:
         st.session_state[key] = default
@@ -432,6 +433,16 @@ section[data-testid="stSidebar"] span { font-size: 14px !important; }
 </style>
 """, unsafe_allow_html=True)
 
+_dark = st.session_state.get("dark_mode", False)
+_bg    = "#0e1117" if _dark else "#f5f0e8"
+_sbg   = "#161b22" if _dark else "#ede8de"
+_color = "#fafafa" if _dark else "#3a3028"
+st.markdown(f"""<style>
+.stApp {{ background-color: {_bg} !important; color: {_color} !important; }}
+section[data-testid="stSidebar"] > div:first-child {{ background-color: {_sbg} !important; }}
+header[data-testid="stHeader"] {{ background-color: {_bg} !important; }}
+</style>""", unsafe_allow_html=True)
+
 # =========================================================
 # LOAD DATA
 # =========================================================
@@ -468,6 +479,7 @@ with st.sidebar:
         unsafe_allow_html=True,
     )
     st.markdown("<div style='height:18px'></div>", unsafe_allow_html=True)
+    st.toggle("🌙 Dark mode", key="dark_mode")
 
     page = st.radio(
         "Navigate",
