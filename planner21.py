@@ -22,7 +22,7 @@ PLANNER_COLS = [
     "date", "priority_1", "priority_2", "priority_3",
     "focus_done", "run_done", "income_done", "reflection", "score",
 ]
-SETTINGS_COLS = ["long_term_goals", "daily_income_target", "hourly_rate_target", "daily_budget", "monthly_budget"]
+SETTINGS_COLS = ["long_term_goals", "daily_income_target", "hourly_rate_target", "daily_budget", "monthly_budget", "checklist_items"]
 
 # =========================================================
 # FILE SETUP
@@ -31,7 +31,7 @@ if not os.path.exists(PLANNER_FILE):
     pd.DataFrame(columns=PLANNER_COLS).to_csv(PLANNER_FILE, index=False)
 
 if not os.path.exists(SETTINGS_FILE):
-    pd.DataFrame([{"long_term_goals": "", "daily_income_target": 250, "hourly_rate_target": 30, "daily_budget": 50, "monthly_budget": 1500}]).to_csv(SETTINGS_FILE, index=False)
+    pd.DataFrame([{"long_term_goals": "", "daily_income_target": 250, "hourly_rate_target": 30, "daily_budget": 50, "monthly_budget": 1500, "checklist_items": "Wake on time,Read 10 pages,Meditate"}]).to_csv(SETTINGS_FILE, index=False)
 
 
 def _ensure_columns(path, required_cols, default_row=None):
@@ -43,7 +43,7 @@ def _ensure_columns(path, required_cols, default_row=None):
 
 
 _ensure_columns(PLANNER_FILE, PLANNER_COLS)
-_ensure_columns(SETTINGS_FILE, SETTINGS_COLS, {"long_term_goals": "", "daily_income_target": 250, "hourly_rate_target": 30, "daily_budget": 50, "monthly_budget": 1500})
+_ensure_columns(SETTINGS_FILE, SETTINGS_COLS, {"long_term_goals": "", "daily_income_target": 250, "hourly_rate_target": 30, "daily_budget": 50, "monthly_budget": 1500, "checklist_items": "Wake on time,Read 10 pages,Meditate"})
 
 today = str(date.today())
 
@@ -552,6 +552,28 @@ if page == "Today":
             unsafe_allow_html=True,
         )
 
+    # ── Morning checklist ──
+    checklist_raw = ""
+    if not settings_df.empty and "checklist_items" in settings_df.columns:
+        checklist_raw = str(settings_df.loc[0, "checklist_items"]).strip()
+        if checklist_raw.lower() == "nan":
+            checklist_raw = ""
+    if checklist_raw:
+        items = [i.strip() for i in checklist_raw.split(",") if i.strip()]
+        if items:
+            st.markdown('<div class="section-card">', unsafe_allow_html=True)
+            st.markdown('<div class="section-title">☑️ Morning Checklist</div>', unsafe_allow_html=True)
+            done_count = 0
+            for item in items:
+                key = f"checklist_{item}"
+                if key not in st.session_state:
+                    st.session_state[key] = False
+                checked = st.checkbox(item, value=st.session_state[key], key=key)
+                if checked:
+                    done_count += 1
+            st.caption(f"{done_count}/{len(items)} completed")
+            st.markdown('</div>', unsafe_allow_html=True)
+
     # --- Daily entry form ---
     _p1 = clean_text(today_row["priority_1"]) if today_row is not None else ""
     _p2 = clean_text(today_row["priority_2"]) if today_row is not None else ""
@@ -901,4 +923,24 @@ elif page == "Settings":
                 settings_df.loc[0, "monthly_budget"] = monthly_budget
                 save_settings(settings_df)
                 st.success("Budgets saved.")
+                st.rerun()
+
+        st.markdown("<div style='height:16px'></div>", unsafe_allow_html=True)
+        st.markdown('<div class="section-label">☑️ Morning Checklist</div>', unsafe_allow_html=True)
+        current_checklist = ""
+        if "checklist_items" in settings_df.columns and not settings_df.empty:
+            current_checklist = str(settings_df.loc[0, "checklist_items"]).strip()
+            if current_checklist.lower() == "nan":
+                current_checklist = "Wake on time,Read 10 pages,Meditate"
+        with st.form("checklist_form"):
+            checklist_input = st.text_area(
+                "Checklist items (comma-separated)",
+                value=current_checklist,
+                placeholder="Wake on time, Read 10 pages, Meditate",
+                height=80,
+            )
+            if st.form_submit_button("💾 Save Checklist", use_container_width=True):
+                settings_df.loc[0, "checklist_items"] = checklist_input.strip()
+                save_settings(settings_df)
+                st.success("Checklist saved.")
                 st.rerun()
