@@ -36,7 +36,7 @@ PLANNER_COLS = [
     "date", "priority_1", "priority_2", "priority_3",
     "focus_done", "run_done", "income_done", "reflection", "score",
 ]
-SETTINGS_COLS = ["long_term_goals", "daily_income_target", "hourly_rate_target", "daily_budget", "monthly_budget", "checklist_items"]
+SETTINGS_COLS = ["long_term_goals", "daily_income_target", "hourly_rate_target", "daily_budget", "monthly_budget", "checklist_items", "expense_categories"]
 
 # =========================================================
 # FILE SETUP
@@ -45,7 +45,7 @@ if not os.path.exists(PLANNER_FILE):
     pd.DataFrame(columns=PLANNER_COLS).to_csv(PLANNER_FILE, index=False)
 
 if not os.path.exists(SETTINGS_FILE):
-    pd.DataFrame([{"long_term_goals": "", "daily_income_target": 250, "hourly_rate_target": 30, "daily_budget": 50, "monthly_budget": 1500, "checklist_items": "Wake on time,Read 10 pages,Meditate"}]).to_csv(SETTINGS_FILE, index=False)
+    pd.DataFrame([{"long_term_goals": "", "daily_income_target": 250, "hourly_rate_target": 30, "daily_budget": 50, "monthly_budget": 1500, "checklist_items": "Wake on time,Read 10 pages,Meditate", "expense_categories": "Food,Transport,Bills,Shopping,Health,Family,Other"}]).to_csv(SETTINGS_FILE, index=False)
 
 
 def _ensure_columns(path, required_cols, default_row=None):
@@ -57,7 +57,7 @@ def _ensure_columns(path, required_cols, default_row=None):
 
 
 _ensure_columns(PLANNER_FILE, PLANNER_COLS)
-_ensure_columns(SETTINGS_FILE, SETTINGS_COLS, {"long_term_goals": "", "daily_income_target": 250, "hourly_rate_target": 30, "daily_budget": 50, "monthly_budget": 1500, "checklist_items": "Wake on time,Read 10 pages,Meditate"})
+_ensure_columns(SETTINGS_FILE, SETTINGS_COLS, {"long_term_goals": "", "daily_income_target": 250, "hourly_rate_target": 30, "daily_budget": 50, "monthly_budget": 1500, "checklist_items": "Wake on time,Read 10 pages,Meditate", "expense_categories": "Food,Transport,Bills,Shopping,Health,Family,Other"})
 
 today = str(date.today())
 

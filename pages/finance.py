@@ -46,6 +46,18 @@ if os.path.exists(SETTINGS_FILE):
     except Exception:
         pass
 
+DEFAULT_CATEGORIES = ["Food", "Transport", "Bills", "Shopping", "Health", "Family", "Other"]
+EXPENSE_CATEGORIES = DEFAULT_CATEGORIES[:]
+if os.path.exists(SETTINGS_FILE):
+    try:
+        _settings = pd.read_csv(SETTINGS_FILE)
+        if "expense_categories" in _settings.columns and not _settings.empty:
+            raw = str(_settings.loc[0, "expense_categories"]).strip()
+            if raw and raw.lower() != "nan":
+                EXPENSE_CATEGORIES = [c.strip() for c in raw.split(",") if c.strip()]
+    except Exception:
+        pass
+
 # =========================================================
 # REQUIRED COLUMNS
 # =========================================================
@@ -577,7 +589,7 @@ with left_col:
 
         category = st.selectbox(
             "Expense Category",
-            ["Food", "Transport", "Bills", "Shopping", "Health", "Family", "Other"],
+            EXPENSE_CATEGORIES,
         )
 
         expense_amount = st.number_input(
@@ -646,7 +658,7 @@ with left_col:
 
             if st.session_state.edit_daily_index == original_index:
                 with st.form(f"edit_daily_form_{original_index}"):
-                    options = ["Food", "Transport", "Bills", "Shopping", "Health", "Family", "Other"]
+                    options = EXPENSE_CATEGORIES
                     current_category = clean_text(row["category"])
                     if current_category not in options:
                         current_category = "Other"
@@ -867,3 +879,25 @@ with right_col:
         st.info("No finance or driving record saved for this date yet.")
 
     st.markdown("</div>", unsafe_allow_html=True)
+
+st.markdown("---")
+st.subheader("⚙️ Manage Expense Categories")
+st.caption("Add or remove categories. Changes apply to the dropdown above after page reload.")
+
+new_cat = st.text_input("Add new category")
+if st.button("Add Category") and new_cat.strip():
+    if new_cat.strip() not in EXPENSE_CATEGORIES:
+        EXPENSE_CATEGORIES.append(new_cat.strip())
+        if os.path.exists(SETTINGS_FILE):
+            try:
+                _settings = pd.read_csv(SETTINGS_FILE)
+                _settings.loc[0, "expense_categories"] = ",".join(EXPENSE_CATEGORIES)
+                _settings.to_csv(SETTINGS_FILE, index=False)
+                st.success(f"Added '{new_cat.strip()}'")
+                st.rerun()
+            except Exception:
+                st.error("Failed to save category")
+    else:
+        st.warning("Category already exists")
+
+st.write("Current categories: " + ", ".join(EXPENSE_CATEGORIES))
