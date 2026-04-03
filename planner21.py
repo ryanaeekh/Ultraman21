@@ -440,8 +440,8 @@ today_score = int(today_row["score"]) if today_row is not None else 0
 # =========================================================
 with st.sidebar:
     st.markdown(
-        '<div style="font-size:1.35rem;font-weight:900;letter-spacing:-0.02em;'
-        'color:#a08060;margin-bottom:14px">⚡ Mission21</div>',
+        '<div style="font-size:1.35rem;font-weight:500;letter-spacing:-0.02em;'
+        'color:#8a7055;margin-bottom:14px">⚡ Mission21</div>',
         unsafe_allow_html=True,
     )
     st.markdown(
