@@ -596,10 +596,7 @@ if page == "Today":
     _p3 = clean_text(today_row["priority_3"]) if today_row is not None else ""
     _refl = clean_text(today_row["reflection"]) if today_row is not None else ""
 
-    st.markdown(
-        '<div class="section-card"><div class="section-title">📝 Daily Entry</div></div>',
-        unsafe_allow_html=True,
-    )
+    st.markdown('<div class="section-label">📝 Daily Entry</div>', unsafe_allow_html=True)
 
     with st.form("today_form", clear_on_submit=False):
         p1 = st.text_input("Priority 1", value=_p1)
