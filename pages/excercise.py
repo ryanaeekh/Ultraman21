@@ -130,54 +130,63 @@ today_row = get_today_row(exercise_df, today_str)
 st.markdown(
     """
     <style>
-    .block-container {
-        max-width: 1250px;
-        padding-top: 1.8rem !important;
-        padding-bottom: 2rem !important;
-    }
-
     :root {
-        --accent: #a08060;
-        --pos: #6a9e7a; --neg: #b87070;
-        --border: 1px solid rgba(128,128,128,0.09);
-        --shadow: 0 1px 4px rgba(0,0,0,0.04), 0 6px 20px rgba(0,0,0,0.04);
+        --accent: #8a7055;
+        --pos: #5a9a6a; --neg: #b87070;
+        --border: 1px solid rgba(0,0,0,0.07);
+        --shadow: 0 1px 3px rgba(0,0,0,0.04);
+    }
+    @media (prefers-color-scheme: dark) {
+        :root {
+            --accent: #b08a65;
+            --border: 1px solid rgba(255,255,255,0.07);
+            --shadow: 0 1px 3px rgba(0,0,0,0.12);
+            --pos: #7ab88a;
+        }
+    }
+    html, body, [class*="css"] { font-family: Georgia, 'Times New Roman', serif !important; }
+
+    .block-container {
+        max-width: 1200px;
+        padding-top: 4rem !important;
+        padding-bottom: 4rem !important;
     }
 
     .page-subtitle {
         font-size: 1rem;
-        opacity: 0.65;
+        opacity: 0.60;
         margin-top: -4px;
-        margin-bottom: 1.2rem;
+        margin-bottom: 1.4rem;
     }
 
     .hero-banner {
         border: var(--border);
-        border-radius: 20px;
-        padding: 18px 22px;
+        border-radius: 18px;
+        padding: 22px 28px;
         background: var(--secondary-background-color);
         box-shadow: var(--shadow);
-        margin-bottom: 16px;
+        margin-bottom: 18px;
     }
 
     .hero-label {
-        font-size: 11px;
+        font-size: 10px;
         opacity: 0.55;
-        letter-spacing: 0.08em;
+        letter-spacing: 0.12em;
         text-transform: uppercase;
-        font-weight: 700;
+        font-weight: 400;
         margin-bottom: 8px;
     }
 
     .hero-value {
         font-size: 1.3rem;
-        font-weight: 700;
-        line-height: 1.45;
+        font-weight: 500;
+        line-height: 1.5;
     }
 
     .metric-card {
         border: var(--border);
-        border-radius: 20px;
-        padding: 18px;
+        border-radius: 18px;
+        padding: 22px;
         background: var(--secondary-background-color);
         box-shadow: var(--shadow);
         min-height: 150px;
@@ -191,17 +200,17 @@ st.markdown(
     }
 
     .metric-label {
-        font-size: 11px;
-        opacity: 0.60;
+        font-size: 10px;
+        opacity: 0.55;
         margin-bottom: 8px;
         text-transform: uppercase;
-        letter-spacing: 0.07em;
-        font-weight: 700;
+        letter-spacing: 0.12em;
+        font-weight: 400;
     }
 
     .metric-value {
         font-size: 2rem;
-        font-weight: 800;
+        font-weight: 500;
         line-height: 1.1;
         margin-bottom: 6px;
         letter-spacing: -0.02em;
@@ -210,61 +219,62 @@ st.markdown(
 
     .metric-sub {
         font-size: 13px;
-        opacity: 0.72;
-        line-height: 1.5;
+        opacity: 0.65;
+        line-height: 1.6;
     }
 
     .metric-icon {
         font-size: 1.45rem;
-        opacity: 0.80;
+        opacity: 0.70;
     }
 
     .section-card {
         border: var(--border);
-        border-radius: 20px;
-        padding: 20px;
+        border-radius: 18px;
+        padding: 24px 28px;
         background: var(--secondary-background-color);
         box-shadow: var(--shadow);
         height: 100%;
     }
 
     .section-title {
-        font-size: 1.05rem;
-        font-weight: 800;
+        font-size: 1rem;
+        font-weight: 500;
         margin-bottom: 1rem;
         letter-spacing: -0.01em;
     }
 
     .small-note {
         font-size: 0.90rem;
-        opacity: 0.68;
-        line-height: 1.55;
+        opacity: 0.65;
+        line-height: 1.6;
     }
 
     .success-box {
-        padding: 12px 14px;
+        padding: 12px 16px;
         border-radius: 12px;
-        background: rgba(106,158,122,0.09);
-        border: 1px solid rgba(106,158,122,0.22);
+        background: rgba(90,154,106,0.08);
+        border: 1px solid rgba(90,154,106,0.20);
         margin-top: 10px;
         margin-bottom: 8px;
-        font-weight: 600;
+        font-weight: 400;
     }
 
     .warning-box {
-        padding: 12px 14px;
+        padding: 12px 16px;
         border-radius: 12px;
-        background: rgba(200,160,80,0.09);
-        border: 1px solid rgba(200,160,80,0.20);
+        background: rgba(200,160,80,0.08);
+        border: 1px solid rgba(200,160,80,0.18);
         margin-top: 10px;
         margin-bottom: 8px;
-        font-weight: 600;
+        font-weight: 400;
     }
 
     div.stButton > button {
         border-radius: 12px !important;
-        border: 1px solid rgba(128,128,128,0.15) !important;
-        font-weight: 600 !important;
+        border: 1px solid rgba(0,0,0,0.14) !important;
+        font-weight: 400 !important;
+        font-family: Georgia, serif !important;
         background: var(--secondary-background-color) !important;
         color: inherit !important;
     }
