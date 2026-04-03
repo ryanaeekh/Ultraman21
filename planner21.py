@@ -142,6 +142,18 @@ def compute_weekly_avg(df):
     return round(week_df["score"].mean()) if not week_df.empty else 0
 
 
+def compute_habit_streak(df, habit_col):
+    """Return current consecutive-day streak where habit_col is True."""
+    if df.empty or habit_col not in df.columns:
+        return 0
+    completed = set(df[df[habit_col] == True]["date"].astype(str).tolist())
+    streak, check = 0, date.today()
+    while str(check) in completed:
+        streak += 1
+        check -= timedelta(days=1)
+    return streak
+
+
 # =========================================================
 # STYLING
 # =========================================================
@@ -711,6 +723,10 @@ elif page == "Insights":
         run_rate     = round(planner_df["run_done"].sum()   / total_days * 100)
         income_rate  = round(planner_df["income_done"].sum()/ total_days * 100)
 
+        focus_streak  = compute_habit_streak(planner_df, "focus_done")
+        run_streak    = compute_habit_streak(planner_df, "run_done")
+        income_streak = compute_habit_streak(planner_df, "income_done")
+
         # ── Stat cards ──
         st.markdown(
             f'<div class="ins-grid">'
@@ -750,6 +766,24 @@ elif page == "Insights":
                     f'<div class="habit-bar-shell">'
                     f'<div class="habit-bar-fill" style="width:{pct}%"></div></div>'
                     f'<div style="font-size:12px;opacity:.5;margin-top:7px">{pct}% of days</div>'
+                    f'</div>',
+                    unsafe_allow_html=True,
+                )
+
+        st.markdown("<div style='height:8px'></div>", unsafe_allow_html=True)
+        st.markdown('<div class="section-label">Current habit streaks</div>', unsafe_allow_html=True)
+        hs1, hs2, hs3 = st.columns(3, gap="medium")
+        for col, name, streak_val in [
+            (hs1, "✅ Priorities", focus_streak),
+            (hs2, "🏃 Run",       run_streak),
+            (hs3, "💰 Income",    income_streak),
+        ]:
+            with col:
+                st.markdown(
+                    f'<div class="ins-card">'
+                    f'<div class="ins-card-label">{name} Streak</div>'
+                    f'<div class="ins-card-value">{streak_val}</div>'
+                    f'<div class="ins-card-sub">🔥 consecutive days</div>'
                     f'</div>',
                     unsafe_allow_html=True,
                 )
