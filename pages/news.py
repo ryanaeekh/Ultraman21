@@ -4,6 +4,7 @@ from datetime import datetime
 import requests
 import streamlit as st
 from dotenv import load_dotenv
+from theme import inject_theme, page_header
 
 load_dotenv()
 
@@ -15,58 +16,7 @@ NEWS_API_KEY = os.getenv("NEWS_API_KEY", "")
 # =========================================================
 # STYLING
 # =========================================================
-st.markdown("""
-<style>
-:root {
-    --accent: #8a7055; --pos: #5a9a6a; --neg: #b87070;
-    --border: 1px solid rgba(0,0,0,0.07); --shadow: 0 1px 3px rgba(0,0,0,0.04);
-}
-@media (prefers-color-scheme: dark) {
-    :root { --accent: #b08a65; --border: 1px solid rgba(255,255,255,0.07); --shadow: 0 1px 3px rgba(0,0,0,0.12); --pos: #7ab88a; }
-}
-[data-theme="dark"] { --accent: #b08a65; --border: 1px solid rgba(255,255,255,0.07); --shadow: 0 1px 3px rgba(0,0,0,0.12); --pos: #7ab88a; }
-.stDecoration { display: none !important; }
-html, body, [class*="css"] { font-family: Georgia, 'Times New Roman', serif !important; }
-.block-container { max-width: 1200px; padding-top: 4rem !important; padding-bottom: 4rem !important; }
-
-.news-card {
-    border: var(--border); border-radius: 18px;
-    padding: 22px 28px; background: var(--secondary-background-color);
-    box-shadow: var(--shadow); margin-bottom: 14px;
-    transition: border-color 0.15s ease;
-}
-.news-card:hover { border-color: rgba(138,112,85,0.30); }
-.news-source { font-size: 10px; opacity: 0.55; letter-spacing: 0.12em; text-transform: uppercase; font-weight: 400; margin-bottom: 6px; }
-.news-title { font-size: 1.1rem; font-weight: 500; line-height: 1.5; margin-bottom: 8px; }
-.news-title a { color: inherit; text-decoration: none; }
-.news-title a:hover { color: var(--accent); }
-.news-desc { font-size: 0.92rem; opacity: 0.75; line-height: 1.7; margin-bottom: 8px; }
-.news-meta { font-size: 12px; opacity: 0.45; }
-.section-label {
-    font-size: 10px; font-weight: 400; letter-spacing: 0.12em;
-    text-transform: uppercase; opacity: 0.55; margin-bottom: 14px; margin-top: 24px;
-}
-
-div.stButton > button {
-    border-radius: 12px !important; border: 1px solid rgba(0,0,0,0.14) !important;
-    font-weight: 400 !important; font-family: Georgia, serif !important;
-    background: var(--secondary-background-color) !important; color: inherit !important;
-}
-div.stButton > button:hover { border-color: var(--accent) !important; }
-</style>
-""", unsafe_allow_html=True)
-
-if "dark_mode" not in st.session_state:
-    st.session_state["dark_mode"] = False
-_dark = st.session_state["dark_mode"]
-_bg = "#0e1117" if _dark else "#f5f0e8"
-_sbg = "#161b22" if _dark else "#ede8de"
-_color = "#fafafa" if _dark else "#3a3028"
-st.markdown(f"""<style>
-.stApp {{ background-color: {_bg} !important; color: {_color} !important; }}
-section[data-testid="stSidebar"] > div:first-child {{ background-color: {_sbg} !important; }}
-header[data-testid="stHeader"] {{ background-color: {_bg} !important; }}
-</style>""", unsafe_allow_html=True)
+inject_theme()
 
 
 # =========================================================
@@ -141,11 +91,7 @@ def render_articles(articles, empty_msg="No articles found."):
 # =========================================================
 # PAGE
 # =========================================================
-st.title("📰 News")
-st.markdown(
-    '<div style="opacity:0.6;margin-bottom:1.4rem">Breaking news and topics that matter — auto-refreshes every 30 minutes.</div>',
-    unsafe_allow_html=True,
-)
+st.markdown(page_header("News", "Breaking news and topics that matter — auto-refreshes every 30 minutes."), unsafe_allow_html=True)
 
 if not NEWS_API_KEY:
     st.warning("⚠️ No News API key found. Add your key to the `.env` file in the project root:")
