@@ -1,0 +1,318 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Planner21 — Zen Design Preview</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: Georgia, 'Times New Roman', serif;
+    background: #f5f0e8;
+    color: #3a3028;
+    display: flex;
+    gap: 0;
+    min-height: 100vh;
+  }
+
+  /* ── TOGGLE ── */
+  .mode-toggle {
+    position: fixed;
+    top: 16px; right: 20px;
+    z-index: 100;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    background: rgba(255,255,255,0.6);
+    backdrop-filter: blur(8px);
+    border: 1px solid rgba(0,0,0,0.1);
+    border-radius: 999px;
+    padding: 6px 14px;
+    font-family: Georgia, serif;
+    font-size: 12px;
+    color: #7a6a50;
+    cursor: pointer;
+    user-select: none;
+  }
+  .mode-toggle:hover { background: rgba(255,255,255,0.85); }
+
+  /* ── DARK MODE ── */
+  body.dark {
+    background: #1e1a16;
+    color: #e0d8cc;
+  }
+  body.dark .sidebar { background: #171310; border-color: rgba(255,255,255,0.05); }
+  body.dark .main { background: #1e1a16; }
+  body.dark .card { background: #27221c; border-color: rgba(255,255,255,0.06); }
+  body.dark .score-card { background: #27221c; border-color: rgba(255,255,255,0.06); }
+  body.dark .badge { background: rgba(255,255,255,0.06); color: #c8b89a; }
+  body.dark .badge.done { background: rgba(100,150,110,0.15); color: #7ab88a; }
+  body.dark .badge.miss { opacity: 0.3; }
+  body.dark .plan-item { border-color: rgba(255,255,255,0.05); }
+  body.dark .input-mock { background: rgba(255,255,255,0.05); border-color: rgba(255,255,255,0.10); color: #e0d8cc; }
+  body.dark .btn { background: #27221c; border-color: rgba(255,255,255,0.10); color: #c8b89a; }
+  body.dark .btn:hover { border-color: #b08a65; }
+  body.dark .accent { color: #b08a65; }
+  body.dark .quote-bar { background: rgba(255,255,255,0.04); border-color: rgba(255,255,255,0.08); color: #c0b0a0; }
+  body.dark .mode-toggle { background: rgba(0,0,0,0.4); color: #c8b89a; border-color: rgba(255,255,255,0.1); }
+  body.dark .progress-shell { background: rgba(255,255,255,0.08); }
+  body.dark .nav-item.active { background: rgba(176,138,101,0.12); }
+  body.dark .nav-item:hover { background: rgba(255,255,255,0.04); }
+  body.dark .section-label { color: #a09080; }
+  body.dark .sub { color: #a09080; }
+
+  /* ── SIDEBAR ── */
+  .sidebar {
+    width: 200px;
+    flex-shrink: 0;
+    background: #ede8de;
+    border-right: 1px solid rgba(0,0,0,0.06);
+    padding: 40px 16px 24px;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+  }
+  .sidebar-logo {
+    font-size: 1rem;
+    font-weight: 600;
+    color: #8a7055;
+    letter-spacing: 0.04em;
+    padding: 0 12px;
+    margin-bottom: 28px;
+  }
+  .nav-item {
+    padding: 9px 12px;
+    border-radius: 10px;
+    font-size: 13.5px;
+    cursor: pointer;
+    color: #5a4a38;
+    transition: background 0.15s;
+  }
+  .nav-item:hover { background: rgba(0,0,0,0.04); }
+  .nav-item.active {
+    background: rgba(138,112,85,0.12);
+    color: #8a7055;
+    font-weight: 500;
+  }
+
+  /* ── MAIN ── */
+  .main {
+    flex: 1;
+    padding: 48px 52px 48px 48px;
+    max-width: 720px;
+    overflow-y: auto;
+  }
+
+  /* ── PAGE HEADER ── */
+  .page-header { margin-bottom: 36px; }
+  .dateline {
+    font-size: 11px;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: #9a8a70;
+    margin-bottom: 10px;
+  }
+  .page-title {
+    font-size: 2.2rem;
+    font-weight: 500;
+    letter-spacing: -0.01em;
+    line-height: 1.1;
+    color: #4a3a28;
+  }
+  .accent { color: #8a7055; }
+
+  /* ── SECTION LABEL ── */
+  .section-label {
+    font-size: 10px;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: #9a8870;
+    margin-bottom: 14px;
+    font-weight: 400;
+  }
+
+  /* ── CARDS ── */
+  .card {
+    background: #faf7f2;
+    border: 1px solid rgba(0,0,0,0.07);
+    border-radius: 18px;
+    padding: 28px 32px;
+    margin-bottom: 20px;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.04);
+  }
+
+  /* ── SCORE CARD ── */
+  .score-card {
+    background: #faf7f2;
+    border: 1px solid rgba(0,0,0,0.07);
+    border-radius: 18px;
+    padding: 28px 32px;
+    margin-bottom: 20px;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.04);
+  }
+  .score-value {
+    font-size: 3.6rem;
+    font-weight: 500;
+    color: #8a7055;
+    line-height: 1;
+    letter-spacing: -0.02em;
+  }
+  .score-denom { font-size: 1.4rem; opacity: 0.35; }
+  .score-status { font-size: 0.88rem; color: #7a9a82; margin: 10px 0 18px; font-weight: 400; }
+  .progress-shell {
+    height: 3px;
+    background: rgba(0,0,0,0.07);
+    border-radius: 999px;
+    overflow: hidden;
+    margin-bottom: 18px;
+  }
+  .progress-bar { height: 100%; background: #8a7055; border-radius: 999px; }
+
+  /* ── BADGES ── */
+  .badges { display: flex; gap: 8px; flex-wrap: wrap; }
+  .badge {
+    padding: 6px 14px;
+    border-radius: 999px;
+    font-size: 12px;
+    background: rgba(0,0,0,0.05);
+    color: #7a6a50;
+    letter-spacing: 0.01em;
+  }
+  .badge.done { background: rgba(100,150,110,0.12); color: #5a9a6a; }
+  .badge.miss { opacity: 0.35; }
+
+  /* ── PLAN ITEMS ── */
+  .plan-item {
+    display: flex;
+    align-items: flex-start;
+    gap: 14px;
+    padding: 13px 0;
+    border-bottom: 1px solid rgba(0,0,0,0.05);
+  }
+  .plan-item:last-child { border-bottom: none; }
+  .plan-num { font-size: 11px; color: #9a8870; min-width: 18px; padding-top: 2px; }
+  .plan-body .plan-title { font-size: 14px; font-weight: 500; color: #3a3028; line-height: 1.5; }
+  .plan-body .sub { font-size: 12px; color: #9a8870; margin-top: 3px; line-height: 1.5; }
+
+  /* ── INPUTS ── */
+  .input-mock {
+    width: 100%;
+    border-radius: 12px;
+    border: 1px solid rgba(0,0,0,0.12);
+    padding: 11px 14px;
+    font-family: Georgia, serif;
+    font-size: 14px;
+    color: #3a3028;
+    background: #faf7f2;
+    margin-bottom: 10px;
+    outline: none;
+  }
+  .input-mock:focus { border-color: #8a7055; box-shadow: 0 0 0 3px rgba(138,112,85,0.10); }
+
+  /* ── BUTTON ── */
+  .btn {
+    padding: 9px 22px;
+    border-radius: 12px;
+    border: 1px solid rgba(0,0,0,0.14);
+    font-family: Georgia, serif;
+    font-size: 13.5px;
+    font-weight: 400;
+    background: #faf7f2;
+    color: #5a4a38;
+    cursor: pointer;
+    transition: border-color 0.15s;
+  }
+  .btn:hover { border-color: #8a7055; }
+
+  /* ── REFLECTION ── */
+  .quote-bar {
+    border: 1px solid rgba(0,0,0,0.07);
+    border-radius: 14px;
+    padding: 16px 20px;
+    font-size: 14px;
+    line-height: 1.8;
+    color: #7a6a52;
+    background: rgba(0,0,0,0.02);
+    font-style: italic;
+  }
+</style>
+</head>
+<body>
+
+<div class="mode-toggle" onclick="document.body.classList.toggle('dark'); this.textContent = document.body.classList.contains('dark') ? '☀ Light' : '◑ Dark'">◑ Dark</div>
+
+<div class="sidebar">
+  <div class="sidebar-logo">Planner21</div>
+  <div class="nav-item active">Today</div>
+  <div class="nav-item">Dashboard</div>
+  <div class="nav-item">Finance</div>
+  <div class="nav-item">Driving</div>
+  <div class="nav-item">Exercise</div>
+  <div class="nav-item">Settings</div>
+</div>
+
+<div class="main">
+  <!-- Page header -->
+  <div class="page-header">
+    <div class="dateline">Thursday · April 3, 2026</div>
+    <div class="page-title">Today</div>
+  </div>
+
+  <!-- Score -->
+  <div class="section-label">Score</div>
+  <div class="score-card">
+    <div class="score-value">80<span class="score-denom">/100</span></div>
+    <div class="score-status">Strong Progress</div>
+    <div class="progress-shell"><div class="progress-bar" style="width:80%"></div></div>
+    <div class="badges">
+      <div class="badge done">Priorities done</div>
+      <div class="badge done">Run done</div>
+      <div class="badge miss">Income target</div>
+    </div>
+  </div>
+
+  <!-- Today's plan -->
+  <div class="section-label" style="margin-top:28px">Today's plan</div>
+  <div class="card">
+    <div class="plan-item">
+      <div class="plan-num">1</div>
+      <div class="plan-body">
+        <div class="plan-title">Finish race training plan</div>
+        <div class="sub">Priority · marked done</div>
+      </div>
+    </div>
+    <div class="plan-item">
+      <div class="plan-num">2</div>
+      <div class="plan-body">
+        <div class="plan-title">Review monthly budget</div>
+        <div class="sub">Priority · pending</div>
+      </div>
+    </div>
+    <div class="plan-item">
+      <div class="plan-num">3</div>
+      <div class="plan-body">
+        <div class="plan-title">Rest &amp; reflect</div>
+        <div class="sub">Priority · pending</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Reflection -->
+  <div class="section-label" style="margin-top:28px">Reflection</div>
+  <div class="card">
+    <div class="quote-bar">Good morning session, focused on the long run. Need to improve on income targets this week.</div>
+  </div>
+
+  <!-- Add entry -->
+  <div class="section-label" style="margin-top:28px">Add entry</div>
+  <div class="card">
+    <input class="input-mock" placeholder="Priority 1" />
+    <input class="input-mock" placeholder="Priority 2" />
+    <input class="input-mock" placeholder="Priority 3" />
+    <button class="btn">Save</button>
+  </div>
+</div>
+
+</body>
+</html>

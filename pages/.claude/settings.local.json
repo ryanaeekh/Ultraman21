@@ -6,7 +6,14 @@
       "Bash(git init:*)",
       "Bash(git add:*)",
       "Bash(git commit:*)",
-      "Bash(git config:*)"
+      "Bash(git config:*)",
+      "Bash(mkdir:*)",
+      "Bash(python:*)",
+      "Bash(pkill -f \"streamlit run\")",
+      "Bash(curl -s -o /dev/null -w \"%{http_code}\" http://localhost:8501)",
+      "Bash(curl -s -o /dev/null -w \"%{http_code}\" http://localhost:8502)",
+      "Bash(curl -s -o /dev/null -w \"%{http_code}\" http://localhost:8503)",
+      "Bash(curl -s -o /dev/null -w \"%{http_code}\" http://localhost:8504)"
     ],
     "additionalDirectories": [
       "c:\\Users\\ryana\\OneDrive\\Desktop\\Ultraman21"

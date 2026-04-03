@@ -1,0 +1,74 @@
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Lora:wght@400;500;600&family=Noto+Serif:wght@400;600&family=Playfair+Display:wght@400;500;600&display=swap" rel="stylesheet">
+
+<style>
+  .font-preview {
+    background: #f5f0e8;
+    border-radius: 16px;
+    padding: 28px 32px;
+    margin: 0;
+    border: 1px solid rgba(0,0,0,0.06);
+  }
+  .font-preview .page-title { font-size: 2rem; font-weight: 600; color: #7a6a50; line-height: 1.1; margin-bottom: 6px; }
+  .font-preview .label { font-size: 10px; letter-spacing: 0.14em; text-transform: uppercase; opacity: 0.45; margin-bottom: 16px; display: block; }
+  .font-preview .body-text { font-size: 14.5px; line-height: 1.9; color: #4a3f30; opacity: 0.82; }
+  .font-preview .score { font-size: 3rem; font-weight: 600; color: #7a6a50; line-height: 1; margin: 12px 0 4px; }
+  .font-preview .meta { font-size: 12px; opacity: 0.5; margin-top: 8px; }
+
+  .font-a { font-family: Georgia, 'Times New Roman', serif; }
+  .font-b { font-family: 'Lora', Georgia, serif; }
+  .font-c { font-family: 'Playfair Display', Georgia, serif; }
+</style>
+
+<h2>Which typeface feels most zen?</h2>
+<p class="subtitle">Each option shows the same Planner content — same layout, same colors, different font.</p>
+
+<div class="cards">
+  <div class="card" data-choice="a" onclick="toggleSelect(this)">
+    <div class="card-image">
+      <div class="font-preview font-a">
+        <span class="label">Thursday · April 3</span>
+        <div class="page-title">Today</div>
+        <div class="body-text">Finish race training plan<br>Review monthly budget<br>Rest &amp; reflect</div>
+        <div class="score">80<span style="font-size:1.2rem;opacity:0.4">/100</span></div>
+        <div class="meta">Strong Progress</div>
+      </div>
+    </div>
+    <div class="card-body">
+      <h3>A — Georgia (system serif)</h3>
+      <p>Always available, no loading. Classic and familiar. The safe zen choice.</p>
+    </div>
+  </div>
+
+  <div class="card" data-choice="b" onclick="toggleSelect(this)">
+    <div class="card-image">
+      <div class="font-preview font-b">
+        <span class="label">Thursday · April 3</span>
+        <div class="page-title">Today</div>
+        <div class="body-text">Finish race training plan<br>Review monthly budget<br>Rest &amp; reflect</div>
+        <div class="score">80<span style="font-size:1.2rem;opacity:0.4">/100</span></div>
+        <div class="meta">Strong Progress</div>
+      </div>
+    </div>
+    <div class="card-body">
+      <h3>B — Lora (Google Fonts)</h3>
+      <p>Literary, warm, slightly more refined than Georgia. Popular in minimal editorial design.</p>
+    </div>
+  </div>
+
+  <div class="card" data-choice="c" onclick="toggleSelect(this)">
+    <div class="card-image">
+      <div class="font-preview font-c">
+        <span class="label">Thursday · April 3</span>
+        <div class="page-title">Today</div>
+        <div class="body-text">Finish race training plan<br>Review monthly budget<br>Rest &amp; reflect</div>
+        <div class="score">80<span style="font-size:1.2rem;opacity:0.4">/100</span></div>
+        <div class="meta">Strong Progress</div>
+      </div>
+    </div>
+    <div class="card-body">
+      <h3>C — Playfair Display (Google Fonts)</h3>
+      <p>High-contrast, dramatic serifs. More decorative — closer to a luxury print aesthetic.</p>
+    </div>
+  </div>
+</div>
