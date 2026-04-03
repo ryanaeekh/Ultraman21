@@ -4,6 +4,8 @@ from datetime import date
 import pandas as pd
 import streamlit as st
 
+from theme import inject_theme, page_header, metric_card, section_card, status_badge as theme_badge, progress_bar, ACCENT, POS
+
 st.set_page_config(page_title="Exercise", page_icon="🏃", layout="wide")
 
 # =========================================================
@@ -140,195 +142,14 @@ today_str = str(date.today())
 today_row = get_today_row(exercise_df, today_str)
 
 # =========================================================
-# STYLING
+# THEME
 # =========================================================
-st.markdown(
-    """
-    <style>
-    :root {
-        --accent: #8a7055;
-        --pos: #5a9a6a; --neg: #b87070;
-        --border: 1px solid rgba(0,0,0,0.07);
-        --shadow: 0 1px 3px rgba(0,0,0,0.04);
-    }
-    @media (prefers-color-scheme: dark) {
-        :root {
-            --accent: #b08a65;
-            --border: 1px solid rgba(255,255,255,0.07);
-            --shadow: 0 1px 3px rgba(0,0,0,0.12);
-            --pos: #7ab88a;
-        }
-    }
-    [data-theme="dark"] {
-        --accent: #b08a65;
-        --border: 1px solid rgba(255,255,255,0.07);
-        --shadow: 0 1px 3px rgba(0,0,0,0.12);
-        --pos: #7ab88a;
-    }
-
-    .stDecoration { display: none !important; }
-    html, body, [class*="css"] { font-family: Georgia, 'Times New Roman', serif !important; }
-
-    .block-container {
-        max-width: 1200px;
-        padding-top: 4rem !important;
-        padding-bottom: 4rem !important;
-    }
-
-    .page-subtitle {
-        font-size: 1rem;
-        opacity: 0.60;
-        margin-top: -4px;
-        margin-bottom: 1.4rem;
-    }
-
-    .hero-banner {
-        border: var(--border);
-        border-radius: 18px;
-        padding: 22px 28px;
-        background: var(--secondary-background-color);
-        box-shadow: var(--shadow);
-        margin-bottom: 18px;
-    }
-
-    .hero-label {
-        font-size: 10px;
-        opacity: 0.55;
-        letter-spacing: 0.12em;
-        text-transform: uppercase;
-        font-weight: 400;
-        margin-bottom: 8px;
-    }
-
-    .hero-value {
-        font-size: 1.3rem;
-        font-weight: 500;
-        line-height: 1.5;
-    }
-
-    .metric-card {
-        border: var(--border);
-        border-radius: 18px;
-        padding: 22px;
-        background: var(--secondary-background-color);
-        box-shadow: var(--shadow);
-        min-height: 150px;
-    }
-
-    .metric-head {
-        display: flex;
-        justify-content: space-between;
-        align-items: flex-start;
-        gap: 12px;
-    }
-
-    .metric-label {
-        font-size: 10px;
-        opacity: 0.55;
-        margin-bottom: 8px;
-        text-transform: uppercase;
-        letter-spacing: 0.12em;
-        font-weight: 400;
-    }
-
-    .metric-value {
-        font-size: 2rem;
-        font-weight: 500;
-        line-height: 1.1;
-        margin-bottom: 6px;
-        letter-spacing: -0.02em;
-        color: var(--accent);
-    }
-
-    .metric-sub {
-        font-size: 13px;
-        opacity: 0.65;
-        line-height: 1.6;
-    }
-
-    .metric-icon {
-        font-size: 1.45rem;
-        opacity: 0.70;
-    }
-
-    .section-card {
-        border: var(--border);
-        border-radius: 18px;
-        padding: 24px 28px;
-        background: var(--secondary-background-color);
-        box-shadow: var(--shadow);
-        height: 100%;
-    }
-
-    .section-title {
-        font-size: 1rem;
-        font-weight: 500;
-        margin-bottom: 1rem;
-        letter-spacing: -0.01em;
-    }
-
-    .small-note {
-        font-size: 0.90rem;
-        opacity: 0.65;
-        line-height: 1.6;
-    }
-
-    .success-box {
-        padding: 12px 16px;
-        border-radius: 12px;
-        background: rgba(90,154,106,0.08);
-        border: 1px solid rgba(90,154,106,0.20);
-        margin-top: 10px;
-        margin-bottom: 8px;
-        font-weight: 400;
-    }
-
-    .warning-box {
-        padding: 12px 16px;
-        border-radius: 12px;
-        background: rgba(200,160,80,0.08);
-        border: 1px solid rgba(200,160,80,0.18);
-        margin-top: 10px;
-        margin-bottom: 8px;
-        font-weight: 400;
-    }
-
-    div.stButton > button {
-        border-radius: 12px !important;
-        border: 1px solid rgba(0,0,0,0.14) !important;
-        font-weight: 400 !important;
-        font-family: Georgia, serif !important;
-        background: var(--secondary-background-color) !important;
-        color: inherit !important;
-    }
-    div.stButton > button:hover {
-        border-color: var(--accent) !important;
-    }
-    </style>
-    """,
-    unsafe_allow_html=True,
-)
-
-if "dark_mode" not in st.session_state:
-    st.session_state["dark_mode"] = False
-_dark = st.session_state["dark_mode"]
-_bg    = "#0e1117" if _dark else "#f5f0e8"
-_sbg   = "#161b22" if _dark else "#ede8de"
-_color = "#fafafa" if _dark else "#3a3028"
-st.markdown(f"""<style>
-.stApp {{ background-color: {_bg} !important; color: {_color} !important; }}
-section[data-testid="stSidebar"] > div:first-child {{ background-color: {_sbg} !important; }}
-header[data-testid="stHeader"] {{ background-color: {_bg} !important; }}
-</style>""", unsafe_allow_html=True)
+inject_theme()
 
 # =========================================================
 # HEADER
 # =========================================================
-st.title("🏃 Exercise")
-st.markdown(
-    '<div class="page-subtitle">Track your runs, workout time, and total progress to date.</div>',
-    unsafe_allow_html=True,
-)
+st.markdown(page_header("Exercise", "Track your runs, workout time, and total progress to date."), unsafe_allow_html=True)
 
 if today_row is not None:
     today_status_text = get_status_badge(today_row.get("status", ""))
@@ -336,7 +157,7 @@ if today_row is not None:
     today_km = safe_float(today_row.get("km", 0))
     today_duration = safe_float(today_row.get("duration", 0))
     today_pace = safe_text(today_row.get("pace", "")) or calculate_pace(today_duration, today_km)
-    hero_text = f"{today_status_text} • {today_type} • {today_km:.2f} km • {today_duration:.0f} min • {today_pace}"
+    hero_text = f"{today_status_text} &bull; {today_type} &bull; {today_km:.2f} km &bull; {today_duration:.0f} min &bull; {today_pace}"
 else:
     hero_text = "No exercise logged for today yet — put one entry in and start stacking the days."
 
@@ -369,57 +190,22 @@ if not exercise_df.empty:
 m1, m2, m3 = st.columns(3, gap="large")
 
 with m1:
+    today_km_val = safe_float(today_row.get("km", 0)) if today_row is not None else 0
     st.markdown(
-        f"""
-        <div class="metric-card">
-            <div class="metric-head">
-                <div>
-                    <div class="metric-label">Today's Run</div>
-                    <div class="metric-value">
-                        {safe_float(today_row.get("km", 0)) if today_row is not None else 0:.2f} km
-                    </div>
-                    <div class="metric-sub">Distance logged for today's entry</div>
-                </div>
-                <div class="metric-icon">📍</div>
-            </div>
-        </div>
-        """,
+        metric_card("Today's Run", f"{today_km_val:.2f} km", "Distance logged for today's entry"),
         unsafe_allow_html=True,
     )
 
 with m2:
+    today_dur_val = safe_float(today_row.get("duration", 0)) if today_row is not None else 0
     st.markdown(
-        f"""
-        <div class="metric-card">
-            <div class="metric-head">
-                <div>
-                    <div class="metric-label">Today's Time</div>
-                    <div class="metric-value">
-                        {safe_float(today_row.get("duration", 0)) if today_row is not None else 0:.0f} min
-                    </div>
-                    <div class="metric-sub">Workout / run duration for today</div>
-                </div>
-                <div class="metric-icon">⏱️</div>
-            </div>
-        </div>
-        """,
+        metric_card("Today's Time", f"{today_dur_val:.0f} min", "Workout / run duration for today"),
         unsafe_allow_html=True,
     )
 
 with m3:
     st.markdown(
-        f"""
-        <div class="metric-card">
-            <div class="metric-head">
-                <div>
-                    <div class="metric-label">Total Run To Date</div>
-                    <div class="metric-value">{total_km:.2f} km</div>
-                    <div class="metric-sub">{total_runs} completed session(s) • {total_minutes:.0f} total min</div>
-                </div>
-                <div class="metric-icon">🔥</div>
-            </div>
-        </div>
-        """,
+        metric_card("Total Run To Date", f"{total_km:.2f} km", f"{total_runs} completed session(s) &bull; {total_minutes:.0f} total min"),
         unsafe_allow_html=True,
     )
 
@@ -429,8 +215,8 @@ with m3:
 left_col, right_col = st.columns([1.1, 0.9], gap="large")
 
 with left_col:
-    st.markdown('<div class="section-card">', unsafe_allow_html=True)
-    st.markdown('<div class="section-title">➕ Log / Update Today\'s Exercise</div>', unsafe_allow_html=True)
+    st.markdown('<div class="card">', unsafe_allow_html=True)
+    st.markdown('<div class="section-title">Log / Update Today\'s Exercise</div>', unsafe_allow_html=True)
 
     default_status = "done"
     default_type = "Run"
@@ -504,19 +290,20 @@ with left_col:
         st.rerun()
 
     st.markdown(
-        '<div class="small-note">One date = one exercise record. Saving again on the same date updates that entry instead of creating duplicates.</div>',
+        '<div class="c-muted" style="font-size:13px;margin-top:8px;">One date = one exercise record. Saving again on the same date updates that entry instead of creating duplicates.</div>',
         unsafe_allow_html=True,
     )
     st.markdown('</div>', unsafe_allow_html=True)
 
 with right_col:
-    st.markdown('<div class="section-card">', unsafe_allow_html=True)
-    st.markdown('<div class="section-title">📌 Today Summary</div>', unsafe_allow_html=True)
+    st.markdown('<div class="card">', unsafe_allow_html=True)
+    st.markdown('<div class="section-title">Today Summary</div>', unsafe_allow_html=True)
 
     if today_row is None:
         st.markdown('<div class="warning-box">No exercise logged for today yet.</div>', unsafe_allow_html=True)
     else:
-        st.write(f"**Status:** {get_status_badge(today_row.get('status', ''))}")
+        badge_text = get_status_badge(today_row.get('status', ''))
+        st.write(f"**Status:** {badge_text}")
         st.write(f"**Type:** {safe_text(today_row.get('type', '-')) or '-'}")
         st.write(f"**Distance:** {safe_float(today_row.get('km', 0)):.2f} km")
         st.write(f"**Time:** {safe_float(today_row.get('duration', 0)):.0f} min")
@@ -527,8 +314,8 @@ with right_col:
         st.write(f"**Pace:** {current_pace}")
         st.write(f"**Notes:** {safe_text(today_row.get('notes', '-')) or '-'}")
 
-    st.markdown("---")
-    st.markdown('<div class="section-title">🧠 Quick Insight</div>', unsafe_allow_html=True)
+    st.markdown('<div class="divider"></div>', unsafe_allow_html=True)
+    st.markdown('<div class="section-title">Quick Insight</div>', unsafe_allow_html=True)
 
     if total_km <= 0:
         st.write("Start with simple consistency first. One logged session begins the streak.")
@@ -545,8 +332,8 @@ with right_col:
 # HISTORY
 # =========================================================
 st.markdown("<div style='height:14px'></div>", unsafe_allow_html=True)
-st.markdown('<div class="section-card">', unsafe_allow_html=True)
-st.markdown('<div class="section-title">📚 Exercise History</div>', unsafe_allow_html=True)
+st.markdown('<div class="card">', unsafe_allow_html=True)
+st.markdown('<div class="section-title">Exercise History</div>', unsafe_allow_html=True)
 
 if exercise_df.empty:
     st.info("No exercise records yet.")
@@ -574,11 +361,12 @@ else:
     # Run trend chart (last 14 sessions with km > 0)
     run_chart_df = history_df[history_df["km"] > 0].sort_values("date").tail(14)
     if not run_chart_df.empty:
-        st.markdown("#### Distance Trend (last 14 sessions)")
+        st.markdown('<div class="section-title" style="margin-top:20px;">Distance Trend (last 14 sessions)</div>', unsafe_allow_html=True)
         chart_data = run_chart_df.set_index("date")[["km"]]
         st.line_chart(chart_data, height=180)
 
-    st.markdown("### Delete a record")
+    st.markdown('<div class="divider"></div>', unsafe_allow_html=True)
+    st.markdown('<div class="section-title">Delete a record</div>', unsafe_allow_html=True)
     date_options = history_df["date"].tolist()
     delete_date = st.selectbox("Select date to delete", date_options)
 
