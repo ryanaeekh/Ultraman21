@@ -4,6 +4,7 @@ import calendar
 
 import pandas as pd
 import streamlit as st
+from theme import inject_theme, page_header, detail_row, section_card, status_badge, ACCENT, POS, NEG
 
 st.set_page_config(page_title="Finance", page_icon="💰", layout="wide")
 
@@ -292,177 +293,9 @@ if "edit_monthly_index" not in st.session_state:
     st.session_state.edit_monthly_index = None
 
 # =========================================================
-# THEME-ADAPTIVE PREMIUM STYLING
+# INJECT THEME
 # =========================================================
-st.markdown(
-    """
-    <style>
-    :root {
-        --um-radius-lg: 18px;
-        --um-radius-md: 12px;
-        --border: 1px solid rgba(0,0,0,0.07);
-        --shadow: 0 1px 3px rgba(0,0,0,0.04);
-        --accent: #8a7055;
-        --pos: #5a9a6a; --neg: #b87070;
-    }
-    @media (prefers-color-scheme: dark) {
-        :root {
-            --accent: #b08a65;
-            --border: 1px solid rgba(255,255,255,0.07);
-            --shadow: 0 1px 3px rgba(0,0,0,0.12);
-            --pos: #7ab88a;
-        }
-    }
-    [data-theme="dark"] {
-        --accent: #b08a65;
-        --border: 1px solid rgba(255,255,255,0.07);
-        --shadow: 0 1px 3px rgba(0,0,0,0.12);
-        --pos: #7ab88a;
-    }
-
-    .stDecoration { display: none !important; }
-    html, body, [class*="css"] { font-family: Georgia, 'Times New Roman', serif !important; }
-
-    .block-container {
-        padding-top: 4rem !important;
-        padding-bottom: 4rem !important;
-    }
-
-    h1, h2, h3 {
-        margin-bottom: 0.35rem !important;
-        font-weight: 500 !important;
-    }
-
-    .page-subtitle {
-        font-size: 16px;
-        line-height: 1.7;
-        opacity: 0.65;
-        margin-bottom: 0.6rem;
-    }
-
-    .summary-row {
-        display: flex;
-        gap: 14px;
-        flex-wrap: wrap;
-        margin: 0.6rem 0 1.4rem 0;
-    }
-
-    .summary-card {
-        flex: 1 1 210px;
-        min-width: 210px;
-        border: var(--border);
-        border-radius: 18px;
-        padding: 18px 22px;
-        background: var(--secondary-background-color);
-        box-shadow: var(--shadow);
-    }
-
-    .summary-label {
-        font-size: 10px;
-        text-transform: uppercase;
-        letter-spacing: 0.12em;
-        font-weight: 400;
-        opacity: 0.55;
-        margin-bottom: 8px;
-    }
-
-    .summary-value {
-        font-size: 24px;
-        font-weight: 500;
-        line-height: 1.2;
-    }
-
-    .section-card {
-        border: var(--border);
-        border-radius: 18px;
-        padding: 24px 28px;
-        background: var(--secondary-background-color);
-        box-shadow: var(--shadow);
-        margin-bottom: 18px;
-    }
-
-    .tight-top { margin-top: -6px; }
-
-    .small-note {
-        font-size: 13px;
-        opacity: 0.65;
-        margin-top: -2px;
-        margin-bottom: 12px;
-    }
-
-    .record-card {
-        border: var(--border);
-        border-radius: 12px;
-        padding: 14px 18px;
-        background: var(--secondary-background-color);
-        margin-bottom: 10px;
-    }
-
-    .record-title {
-        font-size: 15px;
-        font-weight: 500;
-        margin-bottom: 4px;
-    }
-
-    .record-sub {
-        font-size: 13px;
-        opacity: 0.65;
-    }
-
-    .pill {
-        display: inline-block;
-        padding: 6px 12px;
-        border-radius: 999px;
-        background: var(--secondary-background-color);
-        border: var(--border);
-        font-size: 13px;
-        margin-right: 8px;
-        margin-bottom: 8px;
-    }
-
-    div[data-testid="stForm"] {
-        border: none !important;
-        padding: 0 !important;
-        background: transparent !important;
-    }
-
-    div[data-testid="stTextArea"] textarea,
-    div[data-testid="stTextInput"] input {
-        border-radius: 12px !important;
-        font-family: Georgia, serif !important;
-    }
-
-    div.stButton > button {
-        border-radius: 12px !important;
-        border: 1px solid rgba(0,0,0,0.14) !important;
-        padding: 0.45rem 0.95rem !important;
-        font-weight: 400 !important;
-        font-family: Georgia, serif !important;
-        background: var(--secondary-background-color) !important;
-        color: inherit !important;
-    }
-
-    div.stButton > button:hover {
-        border-color: var(--accent) !important;
-    }
-
-    div[data-testid="stSelectbox"] { margin-top: -6px; }
-    </style>
-    """,
-    unsafe_allow_html=True,
-)
-
-if "dark_mode" not in st.session_state:
-    st.session_state["dark_mode"] = False
-_dark = st.session_state["dark_mode"]
-_bg    = "#0e1117" if _dark else "#f5f0e8"
-_sbg   = "#161b22" if _dark else "#ede8de"
-_color = "#fafafa" if _dark else "#3a3028"
-st.markdown(f"""<style>
-.stApp {{ background-color: {_bg} !important; color: {_color} !important; }}
-section[data-testid="stSidebar"] > div:first-child {{ background-color: {_sbg} !important; }}
-header[data-testid="stHeader"] {{ background-color: {_bg} !important; }}
-</style>""", unsafe_allow_html=True)
+inject_theme()
 
 # =========================================================
 # LOAD DATA
@@ -489,19 +322,12 @@ if not driving_df.empty and "earnings" in driving_df.columns:
 # =========================================================
 # HEADER
 # =========================================================
-st.title("💰 Finance System")
-st.markdown(
-    '<div class="page-subtitle">Track income, daily expenses, and recurring monthly costs</div>',
-    unsafe_allow_html=True,
-)
-st.markdown("---")
+st.markdown(page_header("Finance", "Track income, daily expenses, and recurring monthly costs"), unsafe_allow_html=True)
 
 # =========================================================
 # SELECT DATE
 # =========================================================
-st.markdown('<div class="tight-top">', unsafe_allow_html=True)
-selected_date = st.date_input("📅 Select Finance Date", value=date.today())
-st.markdown("</div>", unsafe_allow_html=True)
+selected_date = st.date_input("Select Finance Date", value=date.today())
 selected_date_str = str(selected_date)
 
 # refresh summary based on selected date
@@ -510,8 +336,8 @@ summary = get_summary(finance_df, monthly_df, driving_df, selected_date_str)
 # =========================================================
 # TOP SUMMARY CARDS
 # =========================================================
-_net_color = "#6a9e7a" if summary["net_profit"] >= 0 else "#b87070"
-_mnet_color = "#6a9e7a" if summary["monthly_net"] >= 0 else "#b87070"
+_net_color = POS if summary["net_profit"] >= 0 else NEG
+_mnet_color = POS if summary["monthly_net"] >= 0 else NEG
 st.markdown(
     f"""
     <div class="summary-row">
@@ -548,14 +374,14 @@ if not finance_df.empty:
     monthly_var_spent = round(temp.loc[mask, "amount"].apply(safe_float).sum(), 2)
 
 if daily_spent > DAILY_BUDGET:
-    st.error(f"⚠️ Over daily budget! Spent ${daily_spent:.2f} / ${DAILY_BUDGET:.2f} limit")
+    st.markdown(f'<div class="error-box">Over daily budget! Spent ${daily_spent:.2f} / ${DAILY_BUDGET:.2f} limit</div>', unsafe_allow_html=True)
 elif daily_spent >= DAILY_BUDGET * 0.8:
-    st.warning(f"⚡ Approaching daily budget: ${daily_spent:.2f} / ${DAILY_BUDGET:.2f}")
+    st.markdown(f'<div class="warning-box">Approaching daily budget: ${daily_spent:.2f} / ${DAILY_BUDGET:.2f}</div>', unsafe_allow_html=True)
 
 if monthly_var_spent > MONTHLY_BUDGET:
-    st.error(f"⚠️ Over monthly budget! Spent ${monthly_var_spent:.2f} / ${MONTHLY_BUDGET:.2f} limit")
+    st.markdown(f'<div class="error-box">Over monthly budget! Spent ${monthly_var_spent:.2f} / ${MONTHLY_BUDGET:.2f} limit</div>', unsafe_allow_html=True)
 elif monthly_var_spent >= MONTHLY_BUDGET * 0.8:
-    st.warning(f"⚡ Approaching monthly budget: ${monthly_var_spent:.2f} / ${MONTHLY_BUDGET:.2f}")
+    st.markdown(f'<div class="warning-box">Approaching monthly budget: ${monthly_var_spent:.2f} / ${MONTHLY_BUDGET:.2f}</div>', unsafe_allow_html=True)
 
 # =========================================================
 # MAIN 2-COLUMN LAYOUT
@@ -563,18 +389,18 @@ elif monthly_var_spent >= MONTHLY_BUDGET * 0.8:
 left_col, right_col = st.columns([1.0, 1.0], gap="large")
 
 with left_col:
-    st.markdown('<div class="section-card">', unsafe_allow_html=True)
-    st.subheader("📝 Daily Finance Input")
+    st.markdown('<div class="card">', unsafe_allow_html=True)
+    st.markdown('<div class="section-title">Daily Finance Input</div>', unsafe_allow_html=True)
 
     auto_income = get_driving_income_for_date(driving_df, selected_date_str)
     if auto_income > 0:
         st.markdown(
-            f'<div class="small-note">✅ Driving income auto-detected for this date: <b>${auto_income:.2f}</b></div>',
+            f'<div class="c-muted" style="font-size:13px;margin-bottom:12px">Driving income auto-detected: <span class="c-pos" style="font-weight:600">${auto_income:.2f}</span></div>',
             unsafe_allow_html=True,
         )
     else:
         st.markdown(
-            '<div class="small-note">🚘 No driving income found for this date yet.</div>',
+            '<div class="c-muted" style="font-size:13px;margin-bottom:12px">No driving income found for this date yet.</div>',
             unsafe_allow_html=True,
         )
 
@@ -619,8 +445,8 @@ with left_col:
 
     st.markdown("</div>", unsafe_allow_html=True)
 
-    st.markdown('<div class="section-card">', unsafe_allow_html=True)
-    st.subheader("✏️ Daily Expenses")
+    st.markdown('<div class="card">', unsafe_allow_html=True)
+    st.markdown('<div class="section-title">Daily Expenses</div>', unsafe_allow_html=True)
 
     day_expenses_df = get_daily_expenses(finance_df, selected_date_str)
 
@@ -636,8 +462,7 @@ with left_col:
             st.markdown(
                 f"""
                 <div class="record-card">
-                    <div class="record-title">{display_index}. {clean_text(row["category"])}</div>
-                    <div class="record-sub">Amount: ${safe_float(row["amount"]):.2f}</div>
+                    {detail_row(f"{display_index}. {clean_text(row['category'])}", f"${safe_float(row['amount']):.2f}", "negative")}
                 </div>
                 """,
                 unsafe_allow_html=True,
@@ -698,8 +523,8 @@ with left_col:
 
     st.markdown("</div>", unsafe_allow_html=True)
 
-    st.markdown('<div class="section-card">', unsafe_allow_html=True)
-    st.subheader("🔁 Monthly Recurring Expense")
+    st.markdown('<div class="card">', unsafe_allow_html=True)
+    st.markdown('<div class="section-title">Monthly Recurring Expenses</div>', unsafe_allow_html=True)
 
     with st.form("monthly_expense_form"):
         monthly_name = st.text_input("Recurring Expense Name")
@@ -755,8 +580,7 @@ with left_col:
             st.markdown(
                 f"""
                 <div class="record-card">
-                    <div class="record-title">{display_index}. {clean_text(row["name"])}</div>
-                    <div class="record-sub">Amount: ${safe_float(row["amount"]):.2f}</div>
+                    {detail_row(f"{display_index}. {clean_text(row['name'])}", f"${safe_float(row['amount']):.2f}", "negative")}
                 </div>
                 """,
                 unsafe_allow_html=True,
@@ -808,50 +632,53 @@ with left_col:
     st.markdown("</div>", unsafe_allow_html=True)
 
 with right_col:
-    st.markdown('<div class="section-card">', unsafe_allow_html=True)
-    st.subheader("📊 Finance Dashboard")
+    st.markdown('<div class="card">', unsafe_allow_html=True)
+    st.markdown('<div class="section-title">Finance Dashboard</div>', unsafe_allow_html=True)
 
     st.markdown(
-        f'<div class="small-note"><b>Viewing Date:</b> {selected_date_str}</div>',
+        f'<div class="c-muted" style="font-size:13px;margin-bottom:14px">Viewing: {selected_date_str}</div>',
         unsafe_allow_html=True,
     )
 
     if summary["income"] > 0:
         st.markdown(
-            f'<div class="pill">Total Income: ${summary["income"]:.2f}</div>',
+            f'{status_badge(f"Total Income: ${summary[\"income\"]:.2f}", POS)}',
             unsafe_allow_html=True,
         )
     else:
         st.markdown(
-            '<div class="small-note">No income recorded for this date.</div>',
+            '<div class="c-muted" style="font-size:13px;margin-bottom:8px">No income recorded for this date.</div>',
             unsafe_allow_html=True,
         )
 
     st.markdown(
-        f'<div class="pill">Daily Variable Expenses: ${summary["variable_expenses"]:.2f}</div>',
+        f'{status_badge(f"Variable Expenses: ${summary[\"variable_expenses\"]:.2f}", NEG)}',
         unsafe_allow_html=True,
     )
     st.markdown(
-        f'<div class="pill">Daily Fixed Expense Share: ${summary["fixed_share"]:.2f}</div>',
+        f'{status_badge(f"Fixed Share: ${summary[\"fixed_share\"]:.2f}", NEG)}',
         unsafe_allow_html=True,
     )
     st.markdown(
-        f'<div class="pill">Total Expenses: ${summary["total_expenses"]:.2f}</div>',
+        f'{status_badge(f"Total Expenses: ${summary[\"total_expenses\"]:.2f}", NEG)}',
+        unsafe_allow_html=True,
+    )
+
+    _net_cls = "positive" if summary["net_profit"] >= 0 else "negative"
+    _mnet_cls = "positive" if summary["monthly_net"] >= 0 else "negative"
+    st.markdown(
+        f'{detail_row("Today Net", f"${summary[\"net_profit\"]:.2f}", _net_cls)}',
         unsafe_allow_html=True,
     )
     st.markdown(
-        f'<div class="pill">Today Net: ${summary["net_profit"]:.2f}</div>',
-        unsafe_allow_html=True,
-    )
-    st.markdown(
-        f'<div class="pill">Month Net (to date): ${summary["monthly_net"]:.2f}</div>',
+        f'{detail_row("Month Net (to date)", f"${summary[\"monthly_net\"]:.2f}", _mnet_cls)}',
         unsafe_allow_html=True,
     )
 
     st.markdown("</div>", unsafe_allow_html=True)
 
-    st.markdown('<div class="section-card">', unsafe_allow_html=True)
-    st.subheader("📁 Expense Breakdown")
+    st.markdown('<div class="card">', unsafe_allow_html=True)
+    st.markdown('<div class="section-title">Expense Breakdown</div>', unsafe_allow_html=True)
 
     breakdown_rows = []
     day_expenses_df = get_daily_expenses(finance_df, selected_date_str)
@@ -880,9 +707,10 @@ with right_col:
 
     st.markdown("</div>", unsafe_allow_html=True)
 
-st.markdown("---")
-st.subheader("⚙️ Manage Expense Categories")
-st.caption("Add or remove categories. Changes apply to the dropdown above after page reload.")
+st.markdown('<div class="divider"></div>', unsafe_allow_html=True)
+st.markdown('<div class="card">', unsafe_allow_html=True)
+st.markdown('<div class="section-title">Manage Expense Categories</div>', unsafe_allow_html=True)
+st.markdown('<div class="c-muted" style="font-size:13px;margin-bottom:12px">Add or remove categories. Changes apply after page reload.</div>', unsafe_allow_html=True)
 
 new_cat = st.text_input("Add new category")
 if st.button("Add Category") and new_cat.strip():
@@ -900,4 +728,6 @@ if st.button("Add Category") and new_cat.strip():
     else:
         st.warning("Category already exists")
 
-st.write("Current categories: " + ", ".join(EXPENSE_CATEGORIES))
+_cat_badges = " ".join([status_badge(c, ACCENT) for c in EXPENSE_CATEGORIES])
+st.markdown(f'<div style="margin-top:12px">{_cat_badges}</div>', unsafe_allow_html=True)
+st.markdown("</div>", unsafe_allow_html=True)
