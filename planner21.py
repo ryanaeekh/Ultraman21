@@ -480,8 +480,8 @@ with st.sidebar:
 
     page = st.radio(
         "Navigate",
-        ["Today", "Settings"],
-        index=["Today", "Settings"].index(st.session_state.page) if st.session_state.page in ["Today", "Settings"] else 0,
+        ["Today", "History", "Insights", "Settings"],
+        index=["Today", "History", "Insights", "Settings"].index(st.session_state.page) if st.session_state.page in ["Today", "History", "Insights", "Settings"] else 0,
         label_visibility="collapsed",
     )
     st.session_state.page = page
