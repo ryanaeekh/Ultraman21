@@ -22,7 +22,7 @@ PLANNER_COLS = [
     "date", "priority_1", "priority_2", "priority_3",
     "focus_done", "run_done", "income_done", "reflection", "score",
 ]
-SETTINGS_COLS = ["long_term_goals"]
+SETTINGS_COLS = ["long_term_goals", "daily_income_target", "hourly_rate_target"]
 
 # =========================================================
 # FILE SETUP
@@ -31,7 +31,7 @@ if not os.path.exists(PLANNER_FILE):
     pd.DataFrame(columns=PLANNER_COLS).to_csv(PLANNER_FILE, index=False)
 
 if not os.path.exists(SETTINGS_FILE):
-    pd.DataFrame([{"long_term_goals": ""}]).to_csv(SETTINGS_FILE, index=False)
+    pd.DataFrame([{"long_term_goals": "", "daily_income_target": 250, "hourly_rate_target": 30}]).to_csv(SETTINGS_FILE, index=False)
 
 
 def _ensure_columns(path, required_cols, default_row=None):
@@ -43,7 +43,7 @@ def _ensure_columns(path, required_cols, default_row=None):
 
 
 _ensure_columns(PLANNER_FILE, PLANNER_COLS)
-_ensure_columns(SETTINGS_FILE, SETTINGS_COLS, {"long_term_goals": ""})
+_ensure_columns(SETTINGS_FILE, SETTINGS_COLS, {"long_term_goals": "", "daily_income_target": 250, "hourly_rate_target": 30})
 
 today = str(date.today())
 
@@ -828,3 +828,23 @@ elif page == "Settings":
                 st.rerun()
             else:
                 st.error("Type DELETE to confirm.")
+
+        st.markdown("<div style='height:16px'></div>", unsafe_allow_html=True)
+        st.markdown('<div class="section-label">🎯 Targets</div>', unsafe_allow_html=True)
+        with st.form("targets_form"):
+            current_income_target = 250.0
+            current_rate_target = 30.0
+            if "daily_income_target" in settings_df.columns and not settings_df.empty:
+                try: current_income_target = float(settings_df.loc[0, "daily_income_target"])
+                except: pass
+            if "hourly_rate_target" in settings_df.columns and not settings_df.empty:
+                try: current_rate_target = float(settings_df.loc[0, "hourly_rate_target"])
+                except: pass
+            income_target = st.number_input("Daily Income Target ($)", min_value=0.0, value=current_income_target, step=10.0)
+            rate_target = st.number_input("Hourly Rate Target ($/hr)", min_value=0.0, value=current_rate_target, step=5.0)
+            if st.form_submit_button("💾 Save Targets", use_container_width=True):
+                settings_df.loc[0, "daily_income_target"] = income_target
+                settings_df.loc[0, "hourly_rate_target"] = rate_target
+                save_settings(settings_df)
+                st.success("Targets saved.")
+                st.rerun()

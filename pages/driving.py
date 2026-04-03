@@ -79,6 +79,19 @@ DRIVING_FILE = os.path.join(DATA_FOLDER, "driving.csv")
 
 os.makedirs(DATA_FOLDER, exist_ok=True)
 
+SETTINGS_FILE = os.path.join(DATA_FOLDER, "settings.csv")
+DAILY_TARGET = 250.0
+HOURLY_TARGET = 30.0
+if os.path.exists(SETTINGS_FILE):
+    try:
+        _settings = pd.read_csv(SETTINGS_FILE)
+        if "daily_income_target" in _settings.columns and not _settings.empty:
+            DAILY_TARGET = float(_settings.loc[0, "daily_income_target"])
+        if "hourly_rate_target" in _settings.columns and not _settings.empty:
+            HOURLY_TARGET = float(_settings.loc[0, "hourly_rate_target"])
+    except Exception:
+        pass
+
 required_columns = [
     "date",
     "day_type",
@@ -212,7 +225,7 @@ with col1:
                     st.error("Start and end time cannot be the same.")
                 else:
                     hourly_rate = float(earnings) / hours_driven if hours_driven > 0 else 0.0
-                    target_status = "Target Achieved" if float(earnings) >= 250 else "Below Target"
+                    target_status = "Target Achieved" if float(earnings) >= DAILY_TARGET else "Below Target"
 
                     new_row = pd.DataFrame([{
                         "date": selected_date,
@@ -259,12 +272,12 @@ with col2:
             if row["target_status"] == "Target Achieved":
                 st.success("✅ Target Achieved")
             else:
-                st.warning("⚠️ Below $250 Target")
+                st.warning(f"⚠️ Below ${DAILY_TARGET:.0f} Target")
 
-            if float(row["hourly_rate"]) >= 30:
-                st.success("💪 Good hourly rate")
+            if float(row["hourly_rate"]) >= HOURLY_TARGET:
+                st.success(f"💪 Good hourly rate (>= ${HOURLY_TARGET:.0f}/hr)")
             else:
-                st.warning("📉 Hourly rate below $30/hr")
+                st.warning(f"📉 Hourly rate below ${HOURLY_TARGET:.0f}/hr")
     else:
         st.info("No driving record saved for this date yet.")
 
