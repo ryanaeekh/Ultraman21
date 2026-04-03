@@ -7,6 +7,8 @@ import streamlit as st
 
 st.set_page_config(page_title="Dashboard", page_icon="📊", layout="wide")
 
+from theme import inject_theme, page_header, metric_card, detail_row as theme_detail_row, section_card as theme_section_card, status_badge, progress_bar, ACCENT, POS, NEG, TEXT2
+
 # =========================================================
 # PATHS
 # =========================================================
@@ -64,23 +66,13 @@ def get_days_in_month(date_obj):
 
 
 def detail_row(key, val, cls=""):
-    """Build one detail-row — pure string concatenation, zero f-string nesting."""
-    return (
-        '<div class="detail-row">'
-        '<div class="detail-key">' + key + '</div>'
-        '<div class="detail-value ' + cls + '">' + val + '</div>'
-        '</div>'
-    )
+    """Build one detail-row using theme classes."""
+    return theme_detail_row(key, val, cls)
 
 
 def section_card(title, inner_html, extra_style=""):
-    style_attr = ' style="' + extra_style + '"' if extra_style else ""
-    return (
-        '<div class="section-card"' + style_attr + '>'
-        '<div class="section-title">' + title + '</div>'
-        + inner_html +
-        '</div>'
-    )
+    """Build a section card using theme classes."""
+    return theme_section_card(title, inner_html)
 
 
 # =========================================================
@@ -206,7 +198,7 @@ def get_status_class(score):
 def get_net_class(value):
     if value > 0:   return "positive"
     elif value < 0: return "negative"
-    return "neutral"
+    return ""
 
 
 def get_today_rule(planner_row, income, expense):
@@ -250,7 +242,7 @@ def get_exercise_status(exercise_df, today_str):
     elif status in ("planned", "scheduled"):    label, percent = "Planned", 35
 
     parts  = [p for p in [etype, (km + " km") if km else "", (dur + " min") if dur else ""] if p]
-    detail = " • ".join(parts) if parts else (notes or "Exercise logged")
+    detail = " · ".join(parts) if parts else (notes or "Exercise logged")
     return label, "🏋️", percent, detail
 
 
@@ -414,100 +406,16 @@ month_name = today_obj.strftime("%B %Y")
 
 
 # =========================================================
-# STYLING
+# INJECT THEME
 # =========================================================
-st.markdown("""
-<style>
-/* ── TOKENS ── */
-:root {
-    --border: 1px solid rgba(0,0,0,0.07);
-    --shadow: 0 1px 3px rgba(0,0,0,0.04);
-    --radius-lg: 18px; --radius-md: 12px;
-    --accent: #8a7055;
-    --pos: #5a9a6a; --neg: #b87070;
-}
-@media (prefers-color-scheme: dark) {
-    :root {
-        --accent: #b08a65;
-        --border: 1px solid rgba(255,255,255,0.07);
-        --shadow: 0 1px 3px rgba(0,0,0,0.12);
-        --pos: #7ab88a;
-    }
-}
-[data-theme="dark"] {
-    --accent: #b08a65;
-    --border: 1px solid rgba(255,255,255,0.07);
-    --shadow: 0 1px 3px rgba(0,0,0,0.12);
-    --pos: #7ab88a;
-}
-
-.stDecoration { display: none !important; }
-html, body, [class*="css"] { font-family: Georgia, 'Times New Roman', serif !important; }
-
-.block-container { max-width:1200px; padding-top:4rem !important; padding-bottom:4rem !important; }
-.rule-banner { border:var(--border); border-radius:var(--radius-lg); padding:24px 28px; background:var(--secondary-background-color); box-shadow:var(--shadow); margin-bottom:20px; }
-.rule-label { font-size:10px; opacity:0.55; letter-spacing:0.12em; text-transform:uppercase; font-weight:400; margin-bottom:7px; }
-.rule-value { font-size:1.35rem; font-weight:400; line-height:1.6; }
-.metric-card { border:var(--border); border-radius:var(--radius-lg); padding:22px 22px 18px; background:var(--secondary-background-color); box-shadow:var(--shadow); min-height:158px; height:100%; }
-.metric-head { display:flex; justify-content:space-between; align-items:flex-start; gap:10px; }
-.metric-label { font-size:10px; opacity:0.55; margin-bottom:7px; text-transform:uppercase; letter-spacing:0.12em; font-weight:400; }
-.metric-value { font-size:2rem; font-weight:500; line-height:1.1; margin-bottom:5px; letter-spacing:-0.02em; }
-.metric-sub { font-size:13px; opacity:0.68; line-height:1.6; }
-.metric-icon { font-size:1.45rem; opacity:0.75; }
-.progress-shell { width:100%; height:3px; border-radius:999px; overflow:hidden; background:rgba(0,0,0,0.07); margin-top:14px; }
-.progress-bar { height:100%; border-radius:999px; background:var(--accent); }
-.section-card { border:var(--border); border-radius:var(--radius-lg); padding:24px 28px; background:var(--secondary-background-color); box-shadow:var(--shadow); height:100%; }
-.section-title { font-size:1rem; font-weight:500; margin-bottom:1rem; letter-spacing:-0.01em; }
-.status-chip { display:inline-block; padding:7px 14px; border-radius:999px; font-size:0.88rem; font-weight:400; margin-bottom:10px; border:var(--border); background:var(--secondary-background-color); }
-.status-chip.good { color:var(--pos); } .status-chip.mid { color:#c8a850; } .status-chip.warn { color:#c88050; } .status-chip.bad { color:var(--neg); }
-.detail-list { display:grid; gap:0; }
-.detail-row { display:flex; justify-content:space-between; align-items:center; gap:16px; padding:11px 0; border-bottom:1px solid rgba(0,0,0,0.05); font-size:0.93rem; }
-.detail-row:last-child { border-bottom:none; }
-.detail-key { opacity:0.65; } .detail-value { font-weight:500; text-align:right; }
-.insight-box { border:var(--border); border-radius:var(--radius-md); padding:14px 18px; background:var(--secondary-background-color); margin-bottom:10px; line-height:1.7; font-size:0.92rem; }
-.focus-box { border:var(--border); border-radius:var(--radius-md); padding:14px 18px; background:var(--secondary-background-color); margin-bottom:10px; line-height:1.7; }
-.focus-label { font-size:10px; text-transform:uppercase; letter-spacing:0.12em; opacity:0.55; font-weight:400; margin-bottom:5px; }
-.focus-value { font-size:0.95rem; font-weight:400; line-height:1.65; }
-.trend-row { display:flex; align-items:center; gap:8px; margin-bottom:6px; font-size:13px; }
-.trend-date { opacity:0.55; min-width:80px; }
-.trend-bar-wrap { flex:1; height:3px; border-radius:999px; background:rgba(0,0,0,0.07); overflow:hidden; }
-.trend-bar-fill { height:100%; border-radius:999px; background:var(--accent); }
-.trend-score { min-width:40px; text-align:right; font-weight:500; opacity:0.80; }
-.streak-pill { display:inline-flex; align-items:center; gap:6px; padding:5px 13px; border-radius:999px; border:var(--border); font-size:13px; font-weight:400; background:var(--secondary-background-color); margin-right:8px; margin-bottom:4px; }
-div[data-testid="stForm"] { border:none !important; padding:0 !important; background:transparent !important; }
-div[data-testid="stTextArea"] textarea, div[data-testid="stTextInput"] input {
-    border-radius:12px !important; font-family:Georgia,serif !important;
-}
-div.stButton > button {
-    border-radius:12px !important; border:1px solid rgba(0,0,0,0.14) !important;
-    padding:0.45rem 0.95rem !important; font-weight:400 !important;
-    font-family:Georgia,serif !important;
-    background:var(--secondary-background-color) !important; color:inherit !important;
-}
-div.stButton > button:hover { border-color:var(--accent) !important; }
-div[data-testid="stSelectbox"] { margin-top:-6px; }
-</style>
-""", unsafe_allow_html=True)
-
-if "dark_mode" not in st.session_state:
-    st.session_state["dark_mode"] = False
-_dark = st.session_state["dark_mode"]
-_bg    = "#0e1117" if _dark else "#f5f0e8"
-_sbg   = "#161b22" if _dark else "#ede8de"
-_color = "#fafafa" if _dark else "#3a3028"
-st.markdown(f"""<style>
-.stApp {{ background-color: {_bg} !important; color: {_color} !important; }}
-section[data-testid="stSidebar"] > div:first-child {{ background-color: {_sbg} !important; }}
-header[data-testid="stHeader"] {{ background-color: {_bg} !important; }}
-</style>""", unsafe_allow_html=True)
+inject_theme()
 
 # =========================================================
 # HEADER
 # =========================================================
 col_title, col_pills = st.columns([2, 1])
 with col_title:
-    st.title("📊 System Dashboard")
-    st.markdown('<div class="page-subtitle">Your daily command center — money, execution, exercise, and overall system control.</div>', unsafe_allow_html=True)
+    st.markdown(page_header("System Dashboard", "Daily overview"), unsafe_allow_html=True)
 with col_pills:
     st.markdown(
         '<div style="margin-top:12px">'
@@ -524,9 +432,9 @@ with col_pills:
 # RULE BANNER
 # =========================================================
 st.markdown(
-    '<div class="rule-banner">'
-    '<div class="rule-label">Today\'s Rule</div>'
-    '<div class="rule-value">🧠 ' + today_rule + '</div>'
+    '<div class="card accent-left-card">'
+    '<div class="metric-label">Today\'s Rule</div>'
+    '<div style="font-size:1.1rem;line-height:1.6;margin-top:6px">🧠 ' + today_rule + '</div>'
     '</div>',
     unsafe_allow_html=True,
 )
@@ -536,39 +444,29 @@ st.markdown(
 # =========================================================
 top1, top2, top3 = st.columns(3, gap="large")
 
+net_color = POS if today_net > 0 else NEG if today_net < 0 else ""
 with top1:
     st.markdown(
-        '<div class="metric-card"><div class="metric-head"><div>'
-        '<div class="metric-label">Today Net</div>'
-        '<div class="metric-value ' + get_net_class(today_net) + '">$' + f"{today_net:.2f}" + '</div>'
-        '<div class="metric-sub">Income $' + f"{today_income:.2f}" + ' · Spent $' + f"{today_total_expense:.2f}" + '</div>'
-        '</div><div class="metric-icon">💰</div></div>'
-        '<div class="small-note">Includes daily share of $' + f"{today_fixed_share:.2f}" + ' from fixed monthly expenses.</div>'
-        '</div>',
+        metric_card(
+            "Today Net",
+            "$" + f"{today_net:.2f}",
+            "Income $" + f"{today_income:.2f}" + " · Spent $" + f"{today_total_expense:.2f}",
+            color=net_color,
+        ),
         unsafe_allow_html=True,
     )
 
 with top2:
     st.markdown(
-        '<div class="metric-card"><div class="metric-head"><div>'
-        '<div class="metric-label">Exercise</div>'
-        '<div class="metric-value">' + exercise_label + '</div>'
-        '<div class="metric-sub">' + exercise_detail + '</div>'
-        '</div><div class="metric-icon">' + exercise_icon + '</div></div>'
-        '<div class="progress-shell"><div class="progress-bar" style="width:' + str(exercise_progress) + '%"></div></div>'
-        '</div>',
+        metric_card("Exercise", exercise_label, exercise_detail, color=ACCENT)
+        + progress_bar(exercise_progress, ACCENT),
         unsafe_allow_html=True,
     )
 
 with top3:
     st.markdown(
-        '<div class="metric-card"><div class="metric-head"><div>'
-        '<div class="metric-label">Daily Score</div>'
-        '<div class="metric-value">' + str(today_score) + '/100</div>'
-        '<div class="metric-sub">' + execution_status + '</div>'
-        '</div><div class="metric-icon">🎯</div></div>'
-        '<div class="progress-shell"><div class="progress-bar" style="width:' + str(score_progress) + '%"></div></div>'
-        '</div>',
+        metric_card("Daily Score", str(today_score) + "/100", execution_status, color=ACCENT)
+        + progress_bar(score_progress, ACCENT),
         unsafe_allow_html=True,
     )
 
@@ -577,6 +475,7 @@ with top3:
 # =========================================================
 st.markdown("<div style='height:14px'></div>", unsafe_allow_html=True)
 
+status_color = POS if status_class == "good" else NEG if status_class == "bad" else ACCENT
 exec_rows = (
     detail_row("Date", today) +
     detail_row("Exercise", exercise_label) +
@@ -585,12 +484,11 @@ exec_rows = (
     detail_row("Current Streak", "🔥 " + str(streak) + " days")
 )
 st.markdown(
-    '<div class="section-card" style="margin-bottom:18px">'
+    '<div class="card">'
     '<div class="section-title">⚡ Execution Status</div>'
-    '<div class="status-chip ' + status_class + '">' + execution_status + '</div>'
-    '<div class="progress-shell" style="margin-top:8px;margin-bottom:16px">'
-    '<div class="progress-bar" style="width:' + str(score_progress) + '%"></div></div>'
-    '<div class="detail-list">' + exec_rows + '</div>'
+    + status_badge(execution_status, status_color)
+    + progress_bar(score_progress, status_color)
+    + exec_rows +
     '</div>',
     unsafe_allow_html=True,
 )
@@ -610,9 +508,7 @@ with left_col:
         detail_row("Today Net",        "$" + f"{today_net:.2f}", get_net_class(today_net))
     )
     st.markdown(
-        section_card("💵 Today Financial Breakdown",
-                     '<div class="detail-list">' + fin_rows + '</div>',
-                     "margin-bottom:14px"),
+        section_card("💵 Today Financial Breakdown", fin_rows),
         unsafe_allow_html=True,
     )
 
@@ -632,8 +528,7 @@ with left_col:
     mon_rows += detail_row("Avg Score This Month", f"{monthly_avg_score}/100")
 
     st.markdown(
-        section_card("📈 Monthly Overview · " + month_name,
-                     '<div class="detail-list">' + mon_rows + '</div>'),
+        section_card("📈 Monthly Overview · " + month_name, mon_rows),
         unsafe_allow_html=True,
     )
 
@@ -645,21 +540,20 @@ with right_col:
         '<div class="insight-box">' + insight_3 + '</div>'
     )
     st.markdown(
-        section_card("🧠 System Insights", insights_html, "margin-bottom:14px"),
+        section_card("🧠 System Insights", insights_html),
         unsafe_allow_html=True,
     )
 
     # Mission21 Focus Panel
     focus_html = (
-        '<div class="focus-box"><div class="focus-label">Today\'s Rule</div>'
-        '<div class="focus-value">' + today_rule + '</div></div>'
-        '<div class="focus-box"><div class="focus-label">Strongest Lever</div>'
-        '<div class="focus-value">' + strongest_lever + '</div></div>'
-        '<div class="focus-box"><div class="focus-label">Recovery Action</div>'
-        '<div class="focus-value">' + recovery_action + '</div></div>'
+        '<div class="focus-box"><div class="metric-label">Today\'s Rule</div>'
+        '<div style="margin-top:6px">' + today_rule + '</div></div>'
+        '<div class="focus-box"><div class="metric-label">Strongest Lever</div>'
+        '<div style="margin-top:6px">' + strongest_lever + '</div></div>'
+        '<div class="focus-box"><div class="metric-label">Recovery Action</div>'
+        '<div style="margin-top:6px">' + recovery_action + '</div></div>'
     )
     st.markdown(
-        section_card("🎯 Mission21 Focus Panel", focus_html, "margin-bottom:14px"),
+        section_card("🎯 Mission21 Focus Panel", focus_html),
         unsafe_allow_html=True,
     )
-
