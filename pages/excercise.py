@@ -144,6 +144,12 @@ st.markdown(
             --pos: #7ab88a;
         }
     }
+    [data-theme="dark"] {
+        --accent: #b08a65;
+        --border: 1px solid rgba(255,255,255,0.07);
+        --shadow: 0 1px 3px rgba(0,0,0,0.12);
+        --pos: #7ab88a;
+    }
     html, body, [class*="css"] { font-family: Georgia, 'Times New Roman', serif !important; }
 
     .block-container {

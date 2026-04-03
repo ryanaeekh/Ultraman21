@@ -164,6 +164,13 @@ st.markdown("""
         --pos: #7ab88a;
     }
 }
+[data-theme="dark"] {
+    --accent: #b08a65;
+    --accent-soft: rgba(176,138,101,0.12);
+    --border: 1px solid rgba(255,255,255,0.07);
+    --shadow: 0 1px 3px rgba(0,0,0,0.12);
+    --pos: #7ab88a;
+}
 
 /* ── TYPOGRAPHY ── */
 html, body, [class*="css"] {
