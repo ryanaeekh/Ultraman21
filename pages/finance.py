@@ -13,11 +13,24 @@ st.set_page_config(page_title="Finance", page_icon="💰", layout="wide")
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 DATA_DIR = os.path.join(BASE_DIR, "data")
 
+SETTINGS_FILE = os.path.join(DATA_DIR, "settings.csv")
 FINANCE_FILE = os.path.join(DATA_DIR, "finance.csv")
 DRIVING_FILE = os.path.join(DATA_DIR, "driving.csv")
 MONTHLY_FILE = os.path.join(DATA_DIR, "monthly_expenses.csv")
 
 os.makedirs(DATA_DIR, exist_ok=True)
+
+DAILY_BUDGET = 50.0
+MONTHLY_BUDGET = 1500.0
+if os.path.exists(SETTINGS_FILE):
+    try:
+        _settings = pd.read_csv(SETTINGS_FILE)
+        if "daily_budget" in _settings.columns and not _settings.empty:
+            DAILY_BUDGET = float(_settings.loc[0, "daily_budget"])
+        if "monthly_budget" in _settings.columns and not _settings.empty:
+            MONTHLY_BUDGET = float(_settings.loc[0, "monthly_budget"])
+    except Exception:
+        pass
 
 # =========================================================
 # REQUIRED COLUMNS
@@ -494,6 +507,27 @@ st.markdown(
     """,
     unsafe_allow_html=True,
 )
+
+# Budget alerts
+daily_spent = summary["variable_expenses"]
+monthly_var_spent = 0.0
+if not finance_df.empty:
+    temp = finance_df.copy()
+    temp["date"] = pd.to_datetime(temp["date"], errors="coerce")
+    temp = temp.dropna(subset=["date"])
+    dt = pd.to_datetime(selected_date_str)
+    mask = (temp["date"].dt.year == dt.year) & (temp["date"].dt.month == dt.month)
+    monthly_var_spent = round(temp.loc[mask, "amount"].apply(safe_float).sum(), 2)
+
+if daily_spent > DAILY_BUDGET:
+    st.error(f"⚠️ Over daily budget! Spent ${daily_spent:.2f} / ${DAILY_BUDGET:.2f} limit")
+elif daily_spent >= DAILY_BUDGET * 0.8:
+    st.warning(f"⚡ Approaching daily budget: ${daily_spent:.2f} / ${DAILY_BUDGET:.2f}")
+
+if monthly_var_spent > MONTHLY_BUDGET:
+    st.error(f"⚠️ Over monthly budget! Spent ${monthly_var_spent:.2f} / ${MONTHLY_BUDGET:.2f} limit")
+elif monthly_var_spent >= MONTHLY_BUDGET * 0.8:
+    st.warning(f"⚡ Approaching monthly budget: ${monthly_var_spent:.2f} / ${MONTHLY_BUDGET:.2f}")
 
 # =========================================================
 # MAIN 2-COLUMN LAYOUT

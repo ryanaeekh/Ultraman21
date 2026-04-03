@@ -22,7 +22,7 @@ PLANNER_COLS = [
     "date", "priority_1", "priority_2", "priority_3",
     "focus_done", "run_done", "income_done", "reflection", "score",
 ]
-SETTINGS_COLS = ["long_term_goals", "daily_income_target", "hourly_rate_target"]
+SETTINGS_COLS = ["long_term_goals", "daily_income_target", "hourly_rate_target", "daily_budget", "monthly_budget"]
 
 # =========================================================
 # FILE SETUP
@@ -31,7 +31,7 @@ if not os.path.exists(PLANNER_FILE):
     pd.DataFrame(columns=PLANNER_COLS).to_csv(PLANNER_FILE, index=False)
 
 if not os.path.exists(SETTINGS_FILE):
-    pd.DataFrame([{"long_term_goals": "", "daily_income_target": 250, "hourly_rate_target": 30}]).to_csv(SETTINGS_FILE, index=False)
+    pd.DataFrame([{"long_term_goals": "", "daily_income_target": 250, "hourly_rate_target": 30, "daily_budget": 50, "monthly_budget": 1500}]).to_csv(SETTINGS_FILE, index=False)
 
 
 def _ensure_columns(path, required_cols, default_row=None):
@@ -43,7 +43,7 @@ def _ensure_columns(path, required_cols, default_row=None):
 
 
 _ensure_columns(PLANNER_FILE, PLANNER_COLS)
-_ensure_columns(SETTINGS_FILE, SETTINGS_COLS, {"long_term_goals": "", "daily_income_target": 250, "hourly_rate_target": 30})
+_ensure_columns(SETTINGS_FILE, SETTINGS_COLS, {"long_term_goals": "", "daily_income_target": 250, "hourly_rate_target": 30, "daily_budget": 50, "monthly_budget": 1500})
 
 today = str(date.today())
 
@@ -881,4 +881,24 @@ elif page == "Settings":
                 settings_df.loc[0, "hourly_rate_target"] = rate_target
                 save_settings(settings_df)
                 st.success("Targets saved.")
+                st.rerun()
+
+        st.markdown("<div style='height:16px'></div>", unsafe_allow_html=True)
+        st.markdown('<div class="section-label">💸 Budget Limits</div>', unsafe_allow_html=True)
+        with st.form("budget_form"):
+            current_daily_budget = 50.0
+            current_monthly_budget = 1500.0
+            if "daily_budget" in settings_df.columns and not settings_df.empty:
+                try: current_daily_budget = float(settings_df.loc[0, "daily_budget"])
+                except: pass
+            if "monthly_budget" in settings_df.columns and not settings_df.empty:
+                try: current_monthly_budget = float(settings_df.loc[0, "monthly_budget"])
+                except: pass
+            daily_budget = st.number_input("Daily Spending Limit ($)", min_value=0.0, value=current_daily_budget, step=5.0)
+            monthly_budget = st.number_input("Monthly Spending Limit ($)", min_value=0.0, value=current_monthly_budget, step=50.0)
+            if st.form_submit_button("💾 Save Budgets", use_container_width=True):
+                settings_df.loc[0, "daily_budget"] = daily_budget
+                settings_df.loc[0, "monthly_budget"] = monthly_budget
+                save_settings(settings_df)
+                st.success("Budgets saved.")
                 st.rerun()
