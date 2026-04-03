@@ -499,6 +499,29 @@ if page == "Today":
         unsafe_allow_html=True,
     )
 
+    # --- Score card ---
+    _focus = bool(today_row["focus_done"]) if today_row is not None else False
+    _run = bool(today_row["run_done"]) if today_row is not None else False
+    _income = bool(today_row["income_done"]) if today_row is not None else False
+    _pct = min(today_score, 100)
+
+    st.markdown(
+        f'<div class="score-card">'
+        f'<div class="score-label">Today\'s Score</div>'
+        f'<div><span class="score-value">{today_score}</span>'
+        f'<span class="score-denom">/100</span></div>'
+        f'<div class="score-status">{get_execution_label(today_score)}</div>'
+        f'<div class="progress-shell"><div class="progress-bar" style="width:{_pct}%"></div></div>'
+        f'<div class="exec-checks">'
+        f'<span class="exec-check {"done" if _focus else "miss"}">Priorities</span>'
+        f'<span class="exec-check {"done" if _run else "miss"}">Run</span>'
+        f'<span class="exec-check {"done" if _income else "miss"}">Income</span>'
+        f'</div>'
+        f'</div>',
+        unsafe_allow_html=True,
+    )
+
+    # --- Long-term goals ---
     if saved_goals:
         st.markdown(
             f'<div class="section-card">'
@@ -517,6 +540,59 @@ if page == "Today":
             unsafe_allow_html=True,
         )
 
+    # --- Daily entry form ---
+    _p1 = clean_text(today_row["priority_1"]) if today_row is not None else ""
+    _p2 = clean_text(today_row["priority_2"]) if today_row is not None else ""
+    _p3 = clean_text(today_row["priority_3"]) if today_row is not None else ""
+    _refl = clean_text(today_row["reflection"]) if today_row is not None else ""
+
+    st.markdown(
+        '<div class="section-card"><div class="section-title">📝 Daily Entry</div></div>',
+        unsafe_allow_html=True,
+    )
+
+    with st.form("today_form", clear_on_submit=False):
+        p1 = st.text_input("Priority 1", value=_p1)
+        p2 = st.text_input("Priority 2", value=_p2)
+        p3 = st.text_input("Priority 3", value=_p3)
+
+        col1, col2, col3 = st.columns(3)
+        with col1:
+            chk_focus = st.checkbox("✅ All Priorities", value=_focus)
+        with col2:
+            chk_run = st.checkbox("🏃 Run", value=_run)
+        with col3:
+            chk_income = st.checkbox("💰 Income Target", value=_income)
+
+        reflection = st.text_area("Reflection", value=_refl, height=120)
+
+        _preview = calculate_score(chk_focus, chk_run, chk_income)
+        st.caption(f"Auto-calculated score: **{_preview}**/100")
+
+        submitted = st.form_submit_button("💾 Save Today")
+
+    if submitted:
+        new_row = {
+            "date": today,
+            "priority_1": p1,
+            "priority_2": p2,
+            "priority_3": p3,
+            "focus_done": chk_focus,
+            "run_done": chk_run,
+            "income_done": chk_income,
+            "reflection": reflection,
+            "score": calculate_score(chk_focus, chk_run, chk_income),
+        }
+        if today_row is not None:
+            idx = planner_df[planner_df["date"] == today].index[0]
+            for k, v in new_row.items():
+                planner_df.at[idx, k] = v
+        else:
+            planner_df = pd.concat([planner_df, pd.DataFrame([new_row])], ignore_index=True)
+        save_planner(planner_df)
+        st.rerun()
+
+    # --- Focus quote ---
     st.markdown(
         '<div class="focus-quote-card">'
         '<div class="focus-quote-label">Focus</div>'
