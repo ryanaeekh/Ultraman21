@@ -120,7 +120,7 @@ today_score = int(today_row["score"]) if today_row is not None else 0
 # =========================================================
 # PAGE: TODAY
 # =========================================================
-st.markdown(page_header("Today", f"{today} \u2014 build the day deliberately"), unsafe_allow_html=True)
+st.markdown(page_header("Ryan", f"{today} \u2014 build the day deliberately"), unsafe_allow_html=True)
 
 # --- Score ring ---
 st.markdown(f'''<div style="text-align:center;margin:20px 0;">
