@@ -364,7 +364,7 @@ elif monthly_var_spent >= MONTHLY_BUDGET * 0.8:
 left_col, right_col = st.columns([1.0, 1.0], gap="large")
 
 with left_col:
-    st.markdown('<div class="card">', unsafe_allow_html=True)
+    st.markdown('<div class="divider"></div>', unsafe_allow_html=True)
     st.markdown('<div class="section-title">Daily Finance Input</div>', unsafe_allow_html=True)
 
     auto_income = get_driving_income_for_date(driving_df, selected_date_str)
@@ -380,14 +380,6 @@ with left_col:
         )
 
     with st.form("daily_finance_form"):
-        st.number_input(
-            "Daily Income",
-            min_value=0.0,
-            value=float(auto_income),
-            step=1.0,
-            disabled=True,
-        )
-
         category = st.selectbox(
             "Expense Category",
             EXPENSE_CATEGORIES,
@@ -418,9 +410,58 @@ with left_col:
             else:
                 st.warning("Enter an expense amount greater than 0.")
 
-    st.markdown("</div>", unsafe_allow_html=True)
 
-    st.markdown('<div class="card">', unsafe_allow_html=True)
+with right_col:
+    st.markdown('<div class="divider"></div>', unsafe_allow_html=True)
+    st.markdown('<div class="section-title">Finance Dashboard</div>', unsafe_allow_html=True)
+
+    st.markdown(
+        f'<div class="c-muted" style="font-size:13px;margin-bottom:14px">Viewing: {selected_date_str}</div>',
+        unsafe_allow_html=True,
+    )
+
+    if summary["income"] > 0:
+        st.markdown(
+            f'{status_badge(f"Total Income: ${summary["income"]:.2f}", POS)}',
+            unsafe_allow_html=True,
+        )
+    else:
+        st.markdown(
+            '<div class="c-muted" style="font-size:13px;margin-bottom:8px">No income recorded for this date.</div>',
+            unsafe_allow_html=True,
+        )
+
+    st.markdown(
+        f'{status_badge(f"Variable Expenses: ${summary["variable_expenses"]:.2f}", NEG)}',
+        unsafe_allow_html=True,
+    )
+    st.markdown(
+        f'{status_badge(f"Fixed Share: ${summary["fixed_share"]:.2f}", NEG)}',
+        unsafe_allow_html=True,
+    )
+    st.markdown(
+        f'{status_badge(f"Total Expenses: ${summary["total_expenses"]:.2f}", NEG)}',
+        unsafe_allow_html=True,
+    )
+
+    _net_cls = "positive" if summary["net_profit"] >= 0 else "negative"
+    _mnet_cls = "positive" if summary["monthly_net"] >= 0 else "negative"
+    st.markdown(
+        f'{detail_row("Today Net", f"${summary["net_profit"]:.2f}", _net_cls)}',
+        unsafe_allow_html=True,
+    )
+    st.markdown(
+        f'{detail_row("Month Net (to date)", f"${summary["monthly_net"]:.2f}", _mnet_cls)}',
+        unsafe_allow_html=True,
+    )
+
+# =========================================================
+# ROW 2: Daily Expenses + Expense Breakdown (aligned)
+# =========================================================
+left_col2, right_col2 = st.columns([1.0, 1.0], gap="large")
+
+with left_col2:
+    st.markdown('<div class="divider"></div>', unsafe_allow_html=True)
     st.markdown('<div class="section-title">Daily Expenses</div>', unsafe_allow_html=True)
 
     day_expenses_df = get_daily_expenses(finance_df, selected_date_str)
@@ -497,9 +538,8 @@ with left_col:
                         st.session_state.edit_daily_index = None
                         st.rerun()
 
-    st.markdown("</div>", unsafe_allow_html=True)
 
-    st.markdown('<div class="card">', unsafe_allow_html=True)
+    st.markdown('<div class="divider"></div>', unsafe_allow_html=True)
     st.markdown('<div class="section-title">Monthly Recurring Expenses</div>', unsafe_allow_html=True)
 
     with st.form("monthly_expense_form"):
@@ -606,62 +646,16 @@ with left_col:
                         st.session_state.edit_monthly_index = None
                         st.rerun()
 
-    st.markdown("</div>", unsafe_allow_html=True)
 
-with right_col:
-    st.markdown('<div class="card">', unsafe_allow_html=True)
-    st.markdown('<div class="section-title">Finance Dashboard</div>', unsafe_allow_html=True)
-
-    st.markdown(
-        f'<div class="c-muted" style="font-size:13px;margin-bottom:14px">Viewing: {selected_date_str}</div>',
-        unsafe_allow_html=True,
-    )
-
-    if summary["income"] > 0:
-        st.markdown(
-            f'{status_badge(f"Total Income: ${summary['income']:.2f}", POS)}',
-            unsafe_allow_html=True,
-        )
-    else:
-        st.markdown(
-            '<div class="c-muted" style="font-size:13px;margin-bottom:8px">No income recorded for this date.</div>',
-            unsafe_allow_html=True,
-        )
-
-    st.markdown(
-        f'{status_badge(f"Variable Expenses: ${summary['variable_expenses']:.2f}", NEG)}',
-        unsafe_allow_html=True,
-    )
-    st.markdown(
-        f'{status_badge(f"Fixed Share: ${summary['fixed_share']:.2f}", NEG)}',
-        unsafe_allow_html=True,
-    )
-    st.markdown(
-        f'{status_badge(f"Total Expenses: ${summary['total_expenses']:.2f}", NEG)}',
-        unsafe_allow_html=True,
-    )
-
-    _net_cls = "positive" if summary["net_profit"] >= 0 else "negative"
-    _mnet_cls = "positive" if summary["monthly_net"] >= 0 else "negative"
-    st.markdown(
-        f'{detail_row("Today Net", f"${summary['net_profit']:.2f}", _net_cls)}',
-        unsafe_allow_html=True,
-    )
-    st.markdown(
-        f'{detail_row("Month Net (to date)", f"${summary['monthly_net']:.2f}", _mnet_cls)}',
-        unsafe_allow_html=True,
-    )
-
-    st.markdown("</div>", unsafe_allow_html=True)
-
-    st.markdown('<div class="card">', unsafe_allow_html=True)
+with right_col2:
+    st.markdown('<div class="divider"></div>', unsafe_allow_html=True)
     st.markdown('<div class="section-title">Expense Breakdown</div>', unsafe_allow_html=True)
 
     breakdown_rows = []
-    day_expenses_df = get_daily_expenses(finance_df, selected_date_str)
+    day_expenses_df2 = get_daily_expenses(finance_df, selected_date_str)
 
-    if not day_expenses_df.empty:
-        grouped = day_expenses_df.groupby("category", as_index=False)["amount"].sum()
+    if not day_expenses_df2.empty:
+        grouped = day_expenses_df2.groupby("category", as_index=False)["amount"].sum()
 
         for _, row in grouped.iterrows():
             breakdown_rows.append({
@@ -682,10 +676,8 @@ with right_col:
     else:
         st.info("No finance or driving record saved for this date yet.")
 
-    st.markdown("</div>", unsafe_allow_html=True)
 
 st.markdown('<div class="divider"></div>', unsafe_allow_html=True)
-st.markdown('<div class="card">', unsafe_allow_html=True)
 st.markdown('<div class="section-title">Manage Expense Categories</div>', unsafe_allow_html=True)
 st.markdown('<div class="c-muted" style="font-size:13px;margin-bottom:12px">Add or remove categories. Changes apply after page reload.</div>', unsafe_allow_html=True)
 
@@ -707,4 +699,3 @@ if st.button("Add Category") and new_cat.strip():
 
 _cat_badges = " ".join([status_badge(c, ACCENT) for c in EXPENSE_CATEGORIES])
 st.markdown(f'<div style="margin-top:12px">{_cat_badges}</div>', unsafe_allow_html=True)
-st.markdown("</div>", unsafe_allow_html=True)

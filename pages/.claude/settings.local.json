@@ -13,7 +13,15 @@
       "Bash(curl -s -o /dev/null -w \"%{http_code}\" http://localhost:8501)",
       "Bash(curl -s -o /dev/null -w \"%{http_code}\" http://localhost:8502)",
       "Bash(curl -s -o /dev/null -w \"%{http_code}\" http://localhost:8503)",
-      "Bash(curl -s -o /dev/null -w \"%{http_code}\" http://localhost:8504)"
+      "Bash(curl -s -o /dev/null -w \"%{http_code}\" http://localhost:8504)",
+      "Bash(pip show:*)",
+      "Bash(pip install:*)",
+      "Skill(schedule)",
+      "Bash(ls -la *.py pages/*.py)",
+      "Bash(taskkill //F //IM streamlit.exe)",
+      "Bash(pkill -f streamlit)",
+      "Read(//c/Users/ryana/AppData/Local/Python/pythoncore-3.14-64/Lib/site-packages/streamlit/static/static/js/**)",
+      "Read(//c/Users/ryana/AppData/Local/Python/pythoncore-3.14-64/Lib/site-packages/streamlit/static/**)"
     ],
     "additionalDirectories": [
       "c:\\Users\\ryana\\OneDrive\\Desktop\\Ultraman21"

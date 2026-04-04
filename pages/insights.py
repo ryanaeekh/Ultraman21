@@ -6,7 +6,7 @@ from datetime import date, timedelta
 import pandas as pd
 import streamlit as st
 
-from theme import inject_theme, page_header, metric_card, progress_bar, ACCENT, POS
+from theme import inject_theme, nav_menu, page_header, metric_card, progress_bar, ACCENT, POS
 
 # ── Constants ────────────────────────────────────────────────────────
 DATA_FOLDER = "data"
@@ -83,6 +83,7 @@ def get_execution_label(score):
 # ── Page ─────────────────────────────────────────────────────────────
 
 inject_theme()
+nav_menu("Insights")
 
 st.markdown(page_header("Insights", "Performance analytics"), unsafe_allow_html=True)
 

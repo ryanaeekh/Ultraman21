@@ -4,11 +4,11 @@ from datetime import datetime
 import requests
 import streamlit as st
 from dotenv import load_dotenv
-from theme import inject_theme, page_header
+from theme import inject_theme, nav_menu, page_header
 
 load_dotenv()
 
-st.set_page_config(page_title="News", page_icon="📰", layout="wide")
+st.set_page_config(page_title="News", page_icon="📰", layout="wide", initial_sidebar_state="collapsed")
 
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 NEWS_API_KEY = os.getenv("NEWS_API_KEY", "")
@@ -17,6 +17,7 @@ NEWS_API_KEY = os.getenv("NEWS_API_KEY", "")
 # STYLING
 # =========================================================
 inject_theme()
+nav_menu("News")
 
 
 # =========================================================

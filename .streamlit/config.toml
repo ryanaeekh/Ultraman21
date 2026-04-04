@@ -1,3 +1,12 @@
 [theme]
-primaryColor = "#8a7055"
-font         = "serif"
+primaryColor = "#3d6b8e"
+backgroundColor = "#f4f1ec"
+secondaryBackgroundColor = "#ece8e1"
+textColor = "#1a1a1a"
+font = "sans serif"
+
+[ui]
+hideSidebarNav = true
+
+[client]
+showSidebarNavigation = false
