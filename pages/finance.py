@@ -260,16 +260,22 @@ with right_col:
     st.markdown('<div class="section-title">Finance Dashboard</div>', unsafe_allow_html=True)
     st.markdown(f'<div class="c-muted" style="font-size:13px;margin-bottom:14px">Viewing: {selected_date_str}</div>', unsafe_allow_html=True)
     if summary["income"] > 0:
-        st.markdown(f'{status_badge(f"Total Income: ${summary[\"income\"]:.2f}", POS)}', unsafe_allow_html=True)
+        income_text = f"Total Income: ${summary['income']:.2f}"
+        st.markdown(status_badge(income_text, POS), unsafe_allow_html=True)
     else:
         st.markdown('<div class="c-muted" style="font-size:13px;margin-bottom:8px">No income recorded for this date.</div>', unsafe_allow_html=True)
-    st.markdown(f'{status_badge(f"Variable Expenses: ${summary[\"variable_expenses\"]:.2f}", NEG)}', unsafe_allow_html=True)
-    st.markdown(f'{status_badge(f"Fixed Share: ${summary[\"fixed_share\"]:.2f}", NEG)}', unsafe_allow_html=True)
-    st.markdown(f'{status_badge(f"Total Expenses: ${summary[\"total_expenses\"]:.2f}", NEG)}', unsafe_allow_html=True)
+    var_text = f"Variable Expenses: ${summary['variable_expenses']:.2f}"
+    fixed_text = f"Fixed Share: ${summary['fixed_share']:.2f}"
+    total_text = f"Total Expenses: ${summary['total_expenses']:.2f}"
+    st.markdown(status_badge(var_text, NEG), unsafe_allow_html=True)
+    st.markdown(status_badge(fixed_text, NEG), unsafe_allow_html=True)
+    st.markdown(status_badge(total_text, NEG), unsafe_allow_html=True)
     _net_cls = "positive" if summary["net_profit"] >= 0 else "negative"
     _mnet_cls = "positive" if summary["monthly_net"] >= 0 else "negative"
-    st.markdown(f'{detail_row("Today Net", f"${summary[\"net_profit\"]:.2f}", _net_cls)}', unsafe_allow_html=True)
-    st.markdown(f'{detail_row("Month Net (to date)", f"${summary[\"monthly_net\"]:.2f}", _mnet_cls)}', unsafe_allow_html=True)
+    net_val = f"${summary['net_profit']:.2f}"
+    mnet_val = f"${summary['monthly_net']:.2f}"
+    st.markdown(detail_row("Today Net", net_val, _net_cls), unsafe_allow_html=True)
+    st.markdown(detail_row("Month Net (to date)", mnet_val, _mnet_cls), unsafe_allow_html=True)
 
 # =========================================================
 # ROW 2: Daily Expenses + Expense Breakdown
@@ -287,7 +293,9 @@ with left_col2:
         for i, row in day_expenses_df.iterrows():
             original_index = int(row["index"])
             display_index = i + 1
-            st.markdown(f'<div class="record-card">{detail_row(f"{display_index}. {clean_text(row[\"category\"])}", f"${safe_float(row[\"amount\"]):.2f}", "negative")}</div>', unsafe_allow_html=True)
+            label = f"{display_index}. {clean_text(row['category'])}"
+            amount = f"${safe_float(row['amount']):.2f}"
+            st.markdown(f'<div class="record-card">{detail_row(label, amount, "negative")}</div>', unsafe_allow_html=True)
             c1, c2, c3 = st.columns([1, 1, 5])
             with c1:
                 if st.button("Edit", key=f"edit_daily_{original_index}"):
@@ -354,7 +362,9 @@ with left_col2:
         for idx, row in monthly_df.reset_index().iterrows():
             original_index = int(row["index"])
             display_index = idx + 1
-            st.markdown(f'<div class="record-card">{detail_row(f"{display_index}. {clean_text(row[\"name\"])}", f"${safe_float(row[\"amount\"]):.2f}", "negative")}</div>', unsafe_allow_html=True)
+            label = f"{display_index}. {clean_text(row['name'])}"
+            amount = f"${safe_float(row['amount']):.2f}"
+            st.markdown(f'<div class="record-card">{detail_row(label, amount, "negative")}</div>', unsafe_allow_html=True)
             m1, m2, m3 = st.columns([1, 1, 5])
             with m1:
                 if st.button("Edit", key=f"edit_monthly_{original_index}"):
