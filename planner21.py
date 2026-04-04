@@ -7,12 +7,12 @@ from dotenv import load_dotenv
 
 load_dotenv()
 
-st.set_page_config(page_title="Mission 21", page_icon="\U0001f3af", layout="wide")
+st.set_page_config(page_title="Mission 21", page_icon="\U0001f3af", layout="wide", initial_sidebar_state="collapsed")
 
-from theme import inject_theme, inject_sidebar, page_header, metric_card, status_badge, progress_bar, ACCENT, POS, NEG
+from theme import inject_theme, nav_menu, page_header, metric_card, status_badge, progress_bar, ACCENT, POS, NEG
 
 inject_theme()
-inject_sidebar()
+nav_menu("Mission 21")
 
 # =========================================================
 # FILE PATHS
@@ -54,6 +54,16 @@ if not os.path.exists(PLANNER_FILE):
 
 if not os.path.exists(SETTINGS_FILE):
     pd.DataFrame([{"long_term_goals": "", "daily_income_target": 250, "hourly_rate_target": 30, "daily_budget": 50, "monthly_budget": 1500, "checklist_items": "Wake on time,Read 10 pages,Meditate", "expense_categories": "Food,Transport,Bills,Shopping,Health,Family,Other"}]).to_csv(SETTINGS_FILE, index=False)
+
+EXERCISE_FILE = os.path.join(DATA_FOLDER, "exercise.csv")
+EXERCISE_COLS = ["date", "status", "type", "duration", "km", "pace", "notes"]
+if not os.path.exists(EXERCISE_FILE):
+    pd.DataFrame(columns=EXERCISE_COLS).to_csv(EXERCISE_FILE, index=False)
+
+JOURNAL_FILE = os.path.join(DATA_FOLDER, "journal.csv")
+JOURNAL_COLS = ["date", "entry"]
+if not os.path.exists(JOURNAL_FILE):
+    pd.DataFrame(columns=JOURNAL_COLS).to_csv(JOURNAL_FILE, index=False)
 
 
 def _ensure_columns(path, required_cols, default_row=None):
@@ -252,27 +262,16 @@ _income = bool(today_row["income_done"]) if today_row is not None else False
 
 st.markdown('<div class="section-title">\U0001f4dd Daily Entry</div>', unsafe_allow_html=True)
 
-with st.form("today_form", clear_on_submit=False):
-    p1 = st.text_input("Priority 1", value=_p1)
-    p2 = st.text_input("Priority 2", value=_p2)
-    p3 = st.text_input("Priority 3", value=_p3)
 
-    col1, col2, col3 = st.columns(3)
-    with col1:
-        chk_focus = st.checkbox("\u2705 All Priorities", value=_focus)
-    with col2:
-        chk_run = st.checkbox("\U0001f3c3 Run", value=_run)
-    with col3:
-        chk_income = st.checkbox("\U0001f4b0 Income Target", value=_income)
-
-    reflection = st.text_area("Reflection", value=_refl, height=120)
-
-    _preview = calculate_score(chk_focus, chk_run, chk_income)
-    st.caption(f"Auto-calculated score: **{_preview}**/100")
-
-    submitted = st.form_submit_button("\U0001f4be Save Today")
-
-if submitted:
+def _auto_save():
+    """Save the daily entry from session state."""
+    p1 = st.session_state.get("entry_p1", "")
+    p2 = st.session_state.get("entry_p2", "")
+    p3 = st.session_state.get("entry_p3", "")
+    chk_focus = st.session_state.get("entry_focus", False)
+    chk_run = st.session_state.get("entry_run", False)
+    chk_income = st.session_state.get("entry_income", False)
+    refl = st.session_state.get("entry_refl", "")
     new_row = {
         "date": today,
         "priority_1": p1,
@@ -281,17 +280,36 @@ if submitted:
         "focus_done": chk_focus,
         "run_done": chk_run,
         "income_done": chk_income,
-        "reflection": reflection,
+        "reflection": refl,
         "score": calculate_score(chk_focus, chk_run, chk_income),
     }
-    if today_row is not None:
-        idx = planner_df[planner_df["date"] == today].index[0]
+    df = load_planner()
+    existing = df[df["date"] == today]
+    if not existing.empty:
+        idx = existing.index[0]
         for k, v in new_row.items():
-            planner_df.at[idx, k] = v
+            df.at[idx, k] = v
     else:
-        planner_df = pd.concat([planner_df, pd.DataFrame([new_row])], ignore_index=True)
-    save_planner(planner_df)
-    st.rerun()
+        df = pd.concat([df, pd.DataFrame([new_row])], ignore_index=True)
+    save_planner(df)
+
+
+p1 = st.text_input("Priority 1", value=_p1, key="entry_p1", on_change=_auto_save)
+p2 = st.text_input("Priority 2", value=_p2, key="entry_p2", on_change=_auto_save)
+p3 = st.text_input("Priority 3", value=_p3, key="entry_p3", on_change=_auto_save)
+
+col1, col2, col3 = st.columns(3)
+with col1:
+    chk_focus = st.checkbox("\u2705 All Priorities", value=_focus, key="entry_focus", on_change=_auto_save)
+with col2:
+    chk_run = st.checkbox("\U0001f3c3 Run", value=_run, key="entry_run", on_change=_auto_save)
+with col3:
+    chk_income = st.checkbox("\U0001f4b0 Income Target", value=_income, key="entry_income", on_change=_auto_save)
+
+reflection = st.text_area("Reflection", value=_refl, height=120, key="entry_refl", on_change=_auto_save)
+
+_preview = calculate_score(chk_focus, chk_run, chk_income)
+st.caption(f"Auto-calculated score: **{_preview}**/100")
 
 # --- Focus quote ---
 quote_text = (
