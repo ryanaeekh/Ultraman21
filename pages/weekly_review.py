@@ -1,95 +1,50 @@
-import os
 import calendar
 from datetime import date, timedelta
 
 import pandas as pd
 import streamlit as st
 from theme import inject_theme, nav_menu, page_header, metric_card, detail_row, section_card, ACCENT, POS, NEG
-from utils import safe_float, safe_bool
+from utils import safe_float, safe_bool, load_planner, load_driving, load_finance, load_monthly_expenses, load_exercise
 
 st.set_page_config(page_title="Weekly Review", page_icon="📅", layout="wide", initial_sidebar_state="collapsed")
-
-# =========================================================
-# PATHS
-# =========================================================
-BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-DATA_DIR = os.path.join(BASE_DIR, "data")
-
-PLANNER_FILE  = os.path.join(DATA_DIR, "planner.csv")
-DRIVING_FILE  = os.path.join(DATA_DIR, "driving.csv")
-FINANCE_FILE  = os.path.join(DATA_DIR, "finance.csv")
-MONTHLY_FILE  = os.path.join(DATA_DIR, "monthly_expenses.csv")
-EXERCISE_FILE = os.path.join(DATA_DIR, "exercise.csv")
-
-
-# =========================================================
-# SAFE HELPERS
-# =========================================================
-def safe_read_csv(path, columns=None):
-    if not os.path.exists(path):
-        return pd.DataFrame(columns=columns or [])
-    try:
-        df = pd.read_csv(path)
-        return pd.DataFrame(columns=columns or list(df.columns)) if df.empty else df
-    except Exception:
-        return pd.DataFrame(columns=columns or [])
 
 
 def get_days_in_month(date_obj):
     return calendar.monthrange(date_obj.year, date_obj.month)[1]
 
 
-# =========================================================
-# DATA LOADERS
-# =========================================================
 @st.cache_data(ttl=15)
-def load_planner():
-    df = safe_read_csv(PLANNER_FILE)
-    if df.empty:
-        return df
-    if "date" in df.columns:
+def _load_planner():
+    df = load_planner()
+    if not df.empty and "date" in df.columns:
         df["date"] = df["date"].astype(str)
-    for col in ["focus_done", "run_done", "income_done"]:
-        if col in df.columns:
-            df[col] = df[col].apply(safe_bool)
-    if "score" in df.columns:
-        df["score"] = pd.to_numeric(df["score"], errors="coerce").fillna(0).astype(int)
     return df
 
 
 @st.cache_data(ttl=15)
-def load_driving():
-    df = safe_read_csv(DRIVING_FILE)
-    if not df.empty:
-        if "date" in df.columns:
-            df["date"] = df["date"].astype(str)
-        if "earnings" in df.columns:
-            df["earnings"] = df["earnings"].apply(safe_float)
+def _load_driving():
+    df = load_driving()
+    if not df.empty and "date" in df.columns:
+        df["date"] = df["date"].astype(str)
     return df
 
 
 @st.cache_data(ttl=15)
-def load_finance():
-    df = safe_read_csv(FINANCE_FILE)
-    if not df.empty:
-        if "date" in df.columns:
-            df["date"] = df["date"].astype(str)
-        if "amount" in df.columns:
-            df["amount"] = df["amount"].apply(safe_float)
+def _load_finance():
+    df = load_finance()
+    if not df.empty and "date" in df.columns:
+        df["date"] = df["date"].astype(str)
     return df
 
 
 @st.cache_data(ttl=15)
-def load_monthly():
-    df = safe_read_csv(MONTHLY_FILE)
-    if not df.empty and "amount" in df.columns:
-        df["amount"] = df["amount"].apply(safe_float)
-    return df
+def _load_monthly():
+    return load_monthly_expenses()
 
 
 @st.cache_data(ttl=15)
-def load_exercise():
-    df = safe_read_csv(EXERCISE_FILE)
+def _load_exercise():
+    df = load_exercise()
     if not df.empty and "date" in df.columns:
         df["date"] = df["date"].astype(str)
     return df
@@ -102,36 +57,31 @@ today_obj = date.today()
 week_start = today_obj - timedelta(days=6)
 week_dates = [str(week_start + timedelta(days=i)) for i in range(7)]
 
-planner_df  = load_planner()
-driving_df  = load_driving()
-finance_df  = load_finance()
-monthly_df  = load_monthly()
-exercise_df = load_exercise()
+planner_df  = _load_planner()
+driving_df  = _load_driving()
+finance_df  = _load_finance()
+monthly_df  = _load_monthly()
+exercise_df = _load_exercise()
 
-# --- Income ---
 week_income = 0.0
 if not driving_df.empty and "date" in driving_df.columns and "earnings" in driving_df.columns:
     mask = driving_df["date"].isin(week_dates)
     week_income = round(driving_df.loc[mask, "earnings"].sum(), 2)
 
-# --- Variable expenses ---
 week_variable_exp = 0.0
 if not finance_df.empty and "date" in finance_df.columns and "amount" in finance_df.columns:
     mask = finance_df["date"].isin(week_dates)
     week_variable_exp = round(finance_df.loc[mask, "amount"].sum(), 2)
 
-# --- Fixed daily share * 7 ---
 daily_fixed_share = 0.0
 if not monthly_df.empty and "amount" in monthly_df.columns:
     total_fixed = monthly_df["amount"].apply(safe_float).sum()
     days_in_month = get_days_in_month(today_obj)
     daily_fixed_share = round(total_fixed / days_in_month, 2) if days_in_month > 0 else 0.0
 week_fixed = round(daily_fixed_share * 7, 2)
-
 week_total_exp = round(week_variable_exp + week_fixed, 2)
 week_net = round(week_income - week_total_exp, 2)
 
-# --- Avg score ---
 week_avg_score = 0.0
 if not planner_df.empty and "score" in planner_df.columns and "date" in planner_df.columns:
     mask = planner_df["date"].isin(week_dates)
@@ -139,16 +89,12 @@ if not planner_df.empty and "score" in planner_df.columns and "date" in planner_
     if not week_scores.empty:
         week_avg_score = round(week_scores["score"].mean(), 1)
 
-# --- Exercise count ---
 exercise_count = 0
 if not exercise_df.empty and "date" in exercise_df.columns and "status" in exercise_df.columns:
     mask = exercise_df["date"].isin(week_dates)
     week_ex = exercise_df.loc[mask]
-    exercise_count = int(week_ex["status"].apply(
-        lambda v: str(v).strip().lower() in ("done", "completed", "yes")
-    ).sum())
+    exercise_count = int(week_ex["status"].apply(lambda v: str(v).strip().lower() in ("done", "completed", "yes")).sum())
 
-# --- Best / worst day ---
 best_day = "N/A"
 worst_day = "N/A"
 if not planner_df.empty and "score" in planner_df.columns and "date" in planner_df.columns:
@@ -158,7 +104,6 @@ if not planner_df.empty and "score" in planner_df.columns and "date" in planner_
         best_day = week_plan.loc[week_plan["score"].idxmax(), "date"]
         worst_day = week_plan.loc[week_plan["score"].idxmin(), "date"]
 
-# --- Day-by-day data ---
 day_rows = []
 for d in week_dates:
     score = 0
@@ -166,22 +111,18 @@ for d in week_dates:
         rows = planner_df[planner_df["date"] == d]
         if not rows.empty:
             score = int(rows.iloc[0]["score"])
-
     income = 0.0
     if not driving_df.empty and "date" in driving_df.columns and "earnings" in driving_df.columns:
         rows = driving_df[driving_df["date"] == d]
         if not rows.empty:
             income = round(rows["earnings"].sum(), 2)
-
     expense = 0.0
     if not finance_df.empty and "date" in finance_df.columns and "amount" in finance_df.columns:
         rows = finance_df[finance_df["date"] == d]
         if not rows.empty:
             expense = round(rows["amount"].sum(), 2)
-
     day_net = round(income - expense - daily_fixed_share, 2)
     day_rows.append({"Date": d, "Score": score, "Income": income, "Expense": expense, "Net": day_net})
-
 
 # =========================================================
 # THEME + HEADER
@@ -193,9 +134,6 @@ start_str = week_start.strftime("%b %d")
 end_str = today_obj.strftime("%b %d, %Y")
 st.markdown(page_header("Weekly Review", f"{start_str} — {end_str}"), unsafe_allow_html=True)
 
-# =========================================================
-# TOP METRIC CARDS
-# =========================================================
 net_color = POS if week_net > 0 else (NEG if week_net < 0 else "")
 net_sign = "+" if week_net > 0 else ""
 score_color = POS if week_avg_score >= 70 else (NEG if week_avg_score < 50 else ACCENT)
@@ -212,9 +150,6 @@ with c4:
 
 st.markdown("<div style='height:20px'></div>", unsafe_allow_html=True)
 
-# =========================================================
-# TWO-COLUMN: FINANCIAL BREAKDOWN + EXECUTION SUMMARY
-# =========================================================
 col_fin, col_exec = st.columns(2)
 
 with col_fin:
@@ -227,7 +162,6 @@ with col_fin:
         ("Net Result", (net_sign + "$" + f"{week_net:,.2f}"), "positive" if week_net > 0 else ("negative" if week_net < 0 else "")),
     ]:
         rows_html += detail_row(key, val, cls)
-
     st.markdown(section_card("Financial Breakdown", rows_html), unsafe_allow_html=True)
 
 with col_exec:
@@ -241,14 +175,10 @@ with col_exec:
         ("Days Logged", str(len(planner_df[planner_df["date"].isin(week_dates)])) + " / 7" if not planner_df.empty and "date" in planner_df.columns else "0 / 7", ""),
     ]:
         exec_rows_html += detail_row(key, val, cls)
-
     st.markdown(section_card("Execution Summary", exec_rows_html), unsafe_allow_html=True)
 
 st.markdown("<div style='height:20px'></div>", unsafe_allow_html=True)
 
-# =========================================================
-# DAY-BY-DAY TABLE
-# =========================================================
 table_rows = ""
 for row in day_rows:
     net_val = row["Net"]
@@ -264,12 +194,10 @@ for row in day_rows:
         '<td class="' + net_td_cls + '">' + net_prefix + '$' + f'{net_val:,.2f}' + '</td>'
         '</tr>'
     )
-
 day_table_html = (
     '<table class="day-table">'
     '<thead><tr><th>Date</th><th>Score</th><th>Income</th><th>Expense</th><th>Net</th></tr></thead>'
     '<tbody>' + table_rows + '</tbody>'
     '</table>'
 )
-
 st.markdown(section_card("Day-by-Day Breakdown", day_table_html), unsafe_allow_html=True)

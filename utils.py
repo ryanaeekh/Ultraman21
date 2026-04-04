@@ -1,10 +1,18 @@
+"""Utility functions for Ultraman21.
+Data is stored in Google Sheets (via gsheets.py) instead of local CSV files.
+All other logic (helpers, loaders, calculations) remains the same.
+"""
+
 from pathlib import Path
 import pandas as pd
 import calendar
 from datetime import datetime
 
+from gsheets import load_sheet, save_sheet
+
+
 # =========================================================
-# BASE PATHS
+# FILE PATH CONSTANTS  (kept for compatibility — stems used as sheet names)
 # =========================================================
 BASE_DIR = Path(__file__).resolve().parent
 DATA_DIR = BASE_DIR / "data"
@@ -19,104 +27,72 @@ SETTINGS_FILE         = DATA_DIR / "settings.csv"
 
 
 # =========================================================
-# EXPECTED COLUMNS  (must match what each page actually writes)
+# EXPECTED COLUMNS
 # =========================================================
 PLANNER_COLUMNS = [
-    "date",
-    "priority_1",
-    "priority_2",
-    "priority_3",
-    "focus_done",
-    "run_done",
-    "income_done",
-    "reflection",
-    "score",
+    "date", "priority_1", "priority_2", "priority_3",
+    "focus_done", "run_done", "income_done", "reflection", "score",
 ]
 
 DRIVING_COLUMNS = [
-    "date",
-    "day_type",
-    "start_time",
-    "end_time",
-    "hours_driven",
-    "earnings",
-    "hourly_rate",
-    "target_status",
+    "date", "day_type", "start_time", "end_time",
+    "hours_driven", "earnings", "hourly_rate", "target_status",
 ]
 
-FINANCE_COLUMNS = [
-    "date",
-    "category",
-    "amount",
-]
+FINANCE_COLUMNS = ["date", "category", "amount"]
 
-MONTHLY_EXPENSES_COLUMNS = [
-    "name",
-    "amount",
-]
+MONTHLY_EXPENSES_COLUMNS = ["name", "amount"]
 
-EXERCISE_COLUMNS = [
-    "date",
-    "status",
-    "type",
-    "duration",
-    "km",
-    "pace",
-    "notes",
-]
+EXERCISE_COLUMNS = ["date", "status", "type", "duration", "km", "pace", "notes"]
 
-JOURNAL_COLUMNS = [
-    "date",
-    "entry",
-]
+JOURNAL_COLUMNS = ["date", "entry"]
 
 SETTINGS_COLUMNS = [
-    "long_term_goals",
-    "daily_income_target",
-    "hourly_rate_target",
-    "daily_budget",
-    "monthly_budget",
-    "checklist_items",
-    "expense_categories",
+    "long_term_goals", "daily_income_target", "hourly_rate_target",
+    "daily_budget", "monthly_budget", "checklist_items", "expense_categories",
 ]
 
 
 # =========================================================
-# FILE / CSV HELPERS
+# SHEET NAME HELPER
+# =========================================================
+def _sheet_name(file_path) -> str:
+    """Convert any file path (str or Path) to a Google Sheets worksheet name."""
+    return Path(file_path).stem
+
+
+# =========================================================
+# CORE CSV-COMPATIBLE API  (now backed by Google Sheets)
 # =========================================================
 def ensure_data_dir() -> None:
-    DATA_DIR.mkdir(parents=True, exist_ok=True)
+    """No-op — Google Sheets needs no local directory."""
+    pass
 
 
-def ensure_csv(file_path: Path, columns: list[str]) -> None:
-    ensure_data_dir()
-    if not file_path.exists():
-        pd.DataFrame(columns=columns).to_csv(file_path, index=False)
+def ensure_csv(file_path, columns: list) -> None:
+    """No-op — Google Sheets creates worksheets on demand."""
+    pass
 
 
-def load_csv(file_path: Path, columns: list[str]) -> pd.DataFrame:
-    ensure_csv(file_path, columns)
-    try:
-        df = pd.read_csv(file_path)
-    except Exception:
-        df = pd.DataFrame(columns=columns)
+def load_csv(file_path, columns: list) -> pd.DataFrame:
+    """Load data from the Google Sheet worksheet matching file_path's stem."""
+    return load_sheet(_sheet_name(file_path), columns)
 
+
+def save_csv(df: pd.DataFrame, file_path, columns: list) -> None:
+    """Save data to the Google Sheet worksheet matching file_path's stem."""
     for col in columns:
         if col not in df.columns:
             df[col] = ""
-
-    return df[columns]
-
-
-def save_csv(df: pd.DataFrame, file_path: Path, columns: list[str]) -> None:
-    ensure_csv(file_path, columns)
-    for col in columns:
-        if col not in df.columns:
-            df[col] = ""
-    df[columns].to_csv(file_path, index=False)
+    save_sheet(_sheet_name(file_path), df[columns], columns)
 
 
-def coerce_numeric(df: pd.DataFrame, columns: list[str], fill: float = 0.0) -> pd.DataFrame:
+def backup_csv(filepath) -> None:
+    """No-op — Google Sheets has built-in version history."""
+    pass
+
+
+def coerce_numeric(df: pd.DataFrame, columns: list, fill: float = 0.0) -> pd.DataFrame:
     """Convert columns to numeric, filling NaN with *fill*."""
     for col in columns:
         if col in df.columns:
@@ -125,29 +101,9 @@ def coerce_numeric(df: pd.DataFrame, columns: list[str], fill: float = 0.0) -> p
 
 
 # =========================================================
-# COMMON HELPERS  (used across pages)
+# COMMON HELPERS
 # =========================================================
-BACKUP_DIR = DATA_DIR / "backups"
-
-
-def backup_csv(filepath: str | Path) -> None:
-    """Create a timestamped backup before writing. Keeps last 20."""
-    filepath = Path(filepath)
-    if not filepath.exists():
-        return
-    BACKUP_DIR.mkdir(parents=True, exist_ok=True)
-    from datetime import datetime as dt_cls
-    import shutil
-    basename = filepath.stem
-    stamp = dt_cls.now().strftime("%Y%m%d_%H%M%S")
-    shutil.copy2(filepath, BACKUP_DIR / f"{basename}_{stamp}.csv")
-    backups = sorted(BACKUP_DIR.glob(f"{basename}_*.csv"))
-    for old in backups[:-20]:
-        old.unlink()
-
-
 def safe_float(value) -> float:
-    """Convert value to float, returning 0.0 on failure."""
     try:
         if pd.isna(value):
             return 0.0
@@ -157,12 +113,10 @@ def safe_float(value) -> float:
 
 
 def safe_bool(value) -> bool:
-    """Check if value represents a True boolean string."""
     return str(value).strip().lower() == "true"
 
 
 def clean_text(value) -> str:
-    """Strip whitespace and filter 'nan' strings to empty."""
     if pd.isna(value):
         return ""
     text = str(value).strip()
@@ -202,6 +156,45 @@ def load_exercise() -> pd.DataFrame:
     df = load_csv(EXERCISE_FILE, EXERCISE_COLUMNS)
     df = coerce_numeric(df, ["duration", "km"])
     return df
+
+
+def load_journal() -> pd.DataFrame:
+    return load_csv(JOURNAL_FILE, JOURNAL_COLUMNS)
+
+
+def load_settings() -> pd.DataFrame:
+    return load_csv(SETTINGS_FILE, SETTINGS_COLUMNS)
+
+
+# =========================================================
+# SPECIFIC SAVERS  (convenience wrappers)
+# =========================================================
+def save_planner_df(df: pd.DataFrame) -> None:
+    save_csv(df, PLANNER_FILE, PLANNER_COLUMNS)
+
+
+def save_driving_df(df: pd.DataFrame) -> None:
+    save_csv(df, DRIVING_FILE, DRIVING_COLUMNS)
+
+
+def save_finance_df(df: pd.DataFrame) -> None:
+    save_csv(df, FINANCE_FILE, FINANCE_COLUMNS)
+
+
+def save_monthly_expenses_df(df: pd.DataFrame) -> None:
+    save_csv(df, MONTHLY_EXPENSES_FILE, MONTHLY_EXPENSES_COLUMNS)
+
+
+def save_exercise_df(df: pd.DataFrame) -> None:
+    save_csv(df, EXERCISE_FILE, EXERCISE_COLUMNS)
+
+
+def save_journal_df(df: pd.DataFrame) -> None:
+    save_csv(df, JOURNAL_FILE, JOURNAL_COLUMNS)
+
+
+def save_settings_df(df: pd.DataFrame) -> None:
+    save_csv(df, SETTINGS_FILE, SETTINGS_COLUMNS)
 
 
 # =========================================================

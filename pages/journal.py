@@ -1,9 +1,8 @@
 import streamlit as st
 import pandas as pd
-import os
 from datetime import date
 from theme import inject_theme, nav_menu, page_header
-from utils import backup_csv
+from utils import load_journal, save_journal_df, JOURNAL_COLUMNS
 
 st.set_page_config(page_title="Journal", page_icon="📓", layout="wide", initial_sidebar_state="collapsed")
 
@@ -12,39 +11,38 @@ nav_menu("Journal")
 st.markdown('<style>.block-container{max-width:900px !important;}</style>', unsafe_allow_html=True)
 st.markdown(page_header("Journal", "Daily reflections"), unsafe_allow_html=True)
 
-# --- Data ---
-DATA_FOLDER = "data"
-JOURNAL_FILE = os.path.join(DATA_FOLDER, "journal.csv")
-os.makedirs(DATA_FOLDER, exist_ok=True)
 
-BACKUP_FOLDER = os.path.join(DATA_FOLDER, "backups")
-os.makedirs(BACKUP_FOLDER, exist_ok=True)
-
-def load_journal():
-    if os.path.exists(JOURNAL_FILE):
-        df = pd.read_csv(JOURNAL_FILE, dtype=str)
+@st.cache_data(ttl=15)
+def _load_journal():
+    df = load_journal()
+    if "entry" in df.columns:
         df["entry"] = df["entry"].fillna("")
-        return df
-    return pd.DataFrame(columns=["date", "entry"])
+    return df
+
+
+def _invalidate():
+    _load_journal.clear()
+
 
 def save_journal(df):
-    backup_csv(JOURNAL_FILE)
-    df.to_csv(JOURNAL_FILE, index=False)
+    save_journal_df(df)
+    _invalidate()
+
 
 today_str = date.today().strftime("%Y-%m-%d")
-df = load_journal()
+df = _load_journal()
 
 # --- Today's entry ---
 existing = df[df["date"] == today_str]
 prefill = existing.iloc[0]["entry"] if len(existing) > 0 else ""
 
 with st.form("journal_form", clear_on_submit=False):
-    entry = st.text_area("Today's entry", value=prefill, height=300,
-                         placeholder="Write freely...")
+    entry = st.text_area("Today's entry", value=prefill, height=300, placeholder="Write freely...")
     submitted = st.form_submit_button("Save")
 
 if submitted:
-    if len(existing) > 0:
+    df = _load_journal()
+    if len(df[df["date"] == today_str]) > 0:
         df.loc[df["date"] == today_str, "entry"] = entry
     else:
         new_row = pd.DataFrame([{"date": today_str, "entry": entry}])

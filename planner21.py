@@ -3,79 +3,17 @@ from datetime import date, timedelta
 
 import pandas as pd
 import streamlit as st
-from dotenv import load_dotenv
-
-load_dotenv()
 
 st.set_page_config(page_title="Mission 21", page_icon="\U0001f3af", layout="wide", initial_sidebar_state="collapsed")
 
 from theme import inject_theme, nav_menu, page_header, metric_card, status_badge, progress_bar, ACCENT, POS, NEG
+from utils import (
+    load_planner, load_settings, save_planner_df, save_settings_df,
+    PLANNER_COLUMNS, SETTINGS_COLUMNS, clean_text,
+)
 
 inject_theme()
 nav_menu("Mission 21")
-
-# =========================================================
-# FILE PATHS
-# =========================================================
-DATA_FOLDER = "data"
-PLANNER_FILE = os.path.join(DATA_FOLDER, "planner.csv")
-SETTINGS_FILE = os.path.join(DATA_FOLDER, "settings.csv")
-
-os.makedirs(DATA_FOLDER, exist_ok=True)
-
-BACKUP_FOLDER = os.path.join(DATA_FOLDER, "backups")
-os.makedirs(BACKUP_FOLDER, exist_ok=True)
-
-def backup_csv(filepath):
-    """Create a timestamped backup before writing."""
-    if os.path.exists(filepath):
-        from datetime import datetime as dt_cls
-        import shutil, glob
-        basename = os.path.basename(filepath).replace(".csv", "")
-        stamp = dt_cls.now().strftime("%Y%m%d_%H%M%S")
-        shutil.copy2(filepath, os.path.join(BACKUP_FOLDER, f"{basename}_{stamp}.csv"))
-        for old in sorted(glob.glob(os.path.join(BACKUP_FOLDER, f"{basename}_*.csv")))[:-20]:
-            os.remove(old)
-
-# =========================================================
-# REQUIRED COLUMNS
-# =========================================================
-PLANNER_COLS = [
-    "date", "priority_1", "priority_2", "priority_3",
-    "focus_done", "run_done", "income_done", "reflection", "score",
-]
-SETTINGS_COLS = ["long_term_goals", "daily_income_target", "hourly_rate_target", "daily_budget", "monthly_budget", "checklist_items", "expense_categories"]
-
-# =========================================================
-# FILE SETUP
-# =========================================================
-if not os.path.exists(PLANNER_FILE):
-    pd.DataFrame(columns=PLANNER_COLS).to_csv(PLANNER_FILE, index=False)
-
-if not os.path.exists(SETTINGS_FILE):
-    pd.DataFrame([{"long_term_goals": "", "daily_income_target": 250, "hourly_rate_target": 30, "daily_budget": 50, "monthly_budget": 1500, "checklist_items": "Wake on time,Read 10 pages,Meditate", "expense_categories": "Food,Transport,Bills,Shopping,Health,Family,Other"}]).to_csv(SETTINGS_FILE, index=False)
-
-EXERCISE_FILE = os.path.join(DATA_FOLDER, "exercise.csv")
-EXERCISE_COLS = ["date", "status", "type", "duration", "km", "pace", "notes"]
-if not os.path.exists(EXERCISE_FILE):
-    pd.DataFrame(columns=EXERCISE_COLS).to_csv(EXERCISE_FILE, index=False)
-
-JOURNAL_FILE = os.path.join(DATA_FOLDER, "journal.csv")
-JOURNAL_COLS = ["date", "entry"]
-if not os.path.exists(JOURNAL_FILE):
-    pd.DataFrame(columns=JOURNAL_COLS).to_csv(JOURNAL_FILE, index=False)
-
-
-def _ensure_columns(path, required_cols, default_row=None):
-    df = pd.read_csv(path)
-    if list(df.columns) != required_cols:
-        df = pd.DataFrame([default_row] if default_row else [], columns=required_cols)
-        df.to_csv(path, index=False)
-    return df
-
-
-_ensure_columns(PLANNER_FILE, PLANNER_COLS)
-_ensure_columns(SETTINGS_FILE, SETTINGS_COLS, {"long_term_goals": "", "daily_income_target": 250, "hourly_rate_target": 30, "daily_budget": 50, "monthly_budget": 1500, "checklist_items": "Wake on time,Read 10 pages,Meditate", "expense_categories": "Food,Transport,Bills,Shopping,Health,Family,Other"})
 
 today = str(date.today())
 
@@ -83,46 +21,31 @@ today = str(date.today())
 # DATA HELPERS  (cached -- invalidated after writes)
 # =========================================================
 @st.cache_data
-def load_planner():
-    df = pd.read_csv(PLANNER_FILE)
+def _load_planner():
+    df = load_planner()
     if "date" in df.columns:
         df["date"] = df["date"].astype(str)
-    for col in ["focus_done", "run_done", "income_done"]:
-        if col in df.columns:
-            df[col] = df[col].apply(lambda v: str(v).strip().lower() == "true")
-    for col in ["score"]:
-        if col in df.columns:
-            df[col] = pd.to_numeric(df[col], errors="coerce").fillna(0).astype(int)
     return df
 
 
 @st.cache_data
-def load_settings():
-    return pd.read_csv(SETTINGS_FILE)
+def _load_settings():
+    return load_settings()
 
 
 def invalidate_cache():
-    load_planner.clear()
-    load_settings.clear()
+    _load_planner.clear()
+    _load_settings.clear()
 
 
 def save_planner(df: pd.DataFrame):
-    backup_csv(PLANNER_FILE)
-    df.to_csv(PLANNER_FILE, index=False)
+    save_planner_df(df)
     invalidate_cache()
 
 
 def save_settings(df: pd.DataFrame):
-    backup_csv(SETTINGS_FILE)
-    df.to_csv(SETTINGS_FILE, index=False)
+    save_settings_df(df)
     invalidate_cache()
-
-
-def clean_text(value):
-    if pd.isna(value):
-        return ""
-    text = str(value).strip()
-    return "" if text.lower() == "nan" else text
 
 
 def get_row(df, date_str):
@@ -146,7 +69,6 @@ def get_execution_label(score):
 
 
 def compute_streak(df):
-    """Return current consecutive-day streak where score > 0."""
     if df.empty:
         return 0
     completed = set(df[df["score"] > 0]["date"].astype(str).tolist())
@@ -167,7 +89,6 @@ def compute_weekly_avg(df):
 
 
 def compute_habit_streak(df, habit_col):
-    """Return current consecutive-day streak where habit_col is True."""
     if df.empty or habit_col not in df.columns:
         return 0
     completed = set(df[df[habit_col] == True]["date"].astype(str).tolist())
@@ -181,8 +102,8 @@ def compute_habit_streak(df, habit_col):
 # =========================================================
 # LOAD DATA
 # =========================================================
-planner_df = load_planner()
-settings_df = load_settings()
+planner_df = _load_planner()
+settings_df = _load_settings()
 today_row = get_row(planner_df, today)
 
 saved_goals = ""
@@ -264,7 +185,6 @@ st.markdown('<div class="section-title">\U0001f4dd Daily Entry</div>', unsafe_al
 
 
 def _auto_save():
-    """Save the daily entry from session state."""
     p1 = st.session_state.get("entry_p1", "")
     p2 = st.session_state.get("entry_p2", "")
     p3 = st.session_state.get("entry_p3", "")
@@ -283,7 +203,7 @@ def _auto_save():
         "reflection": refl,
         "score": calculate_score(chk_focus, chk_run, chk_income),
     }
-    df = load_planner()
+    df = _load_planner()
     existing = df[df["date"] == today]
     if not existing.empty:
         idx = existing.index[0]

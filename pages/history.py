@@ -1,85 +1,49 @@
 """History page — browse and manage past daily planner entries."""
 
-import os
-
 import pandas as pd
 import streamlit as st
 
 from theme import inject_theme, nav_menu, page_header, status_badge, progress_bar, ACCENT, POS, NEG
-from utils import backup_csv, clean_text
+from utils import load_planner, save_planner_df, clean_text
 
-# ─── Constants ───────────────────────────────────────────────────────
-DATA_FOLDER = "data"
-PLANNER_FILE = os.path.join(DATA_FOLDER, "planner.csv")
-BACKUP_FOLDER = os.path.join(DATA_FOLDER, "backups")
-
-os.makedirs(DATA_FOLDER, exist_ok=True)
-os.makedirs(BACKUP_FOLDER, exist_ok=True)
+st.set_page_config(page_title="History", page_icon="📅", layout="wide", initial_sidebar_state="collapsed")
 
 PLANNER_COLS = [
     "date", "priority_1", "priority_2", "priority_3",
     "focus_done", "run_done", "income_done", "reflection", "score",
 ]
 
-# ─── File bootstrap ──────────────────────────────────────────────────
-if not os.path.exists(PLANNER_FILE):
-    pd.DataFrame(columns=PLANNER_COLS).to_csv(PLANNER_FILE, index=False)
 
-
-def _ensure_columns(path, required_cols, default_row=None):
-    df = pd.read_csv(path)
-    if list(df.columns) != required_cols:
-        df = pd.DataFrame([default_row] if default_row else [], columns=required_cols)
-        df.to_csv(path, index=False)
-    return df
-
-
-_ensure_columns(PLANNER_FILE, PLANNER_COLS)
-
-
-# ─── Data helpers ────────────────────────────────────────────────────
-@st.cache_data
-def load_planner():
-    df = pd.read_csv(PLANNER_FILE)
+@st.cache_data(ttl=15)
+def _load_planner():
+    df = load_planner()
     if "date" in df.columns:
         df["date"] = df["date"].astype(str)
-    for col in ["focus_done", "run_done", "income_done"]:
-        if col in df.columns:
-            df[col] = df[col].apply(lambda v: str(v).strip().lower() == "true")
-    for col in ["score"]:
-        if col in df.columns:
-            df[col] = pd.to_numeric(df[col], errors="coerce").fillna(0).astype(int)
     return df
+
+
+def _invalidate():
+    _load_planner.clear()
 
 
 def save_planner(df: pd.DataFrame):
-    backup_csv(PLANNER_FILE)
-    df.to_csv(PLANNER_FILE, index=False)
-    invalidate_cache()
-
-
-def invalidate_cache():
-    load_planner.clear()
+    save_planner_df(df)
+    _invalidate()
 
 
 def get_execution_label(score):
-    if score == 100:
-        return "Fully Completed"
-    elif score >= 70:
-        return "Strong Progress"
-    elif score >= 40:
-        return "In Progress"
-    else:
-        return "Not Started"
+    if score == 100:    return "Fully Completed"
+    elif score >= 70:   return "Strong Progress"
+    elif score >= 40:   return "In Progress"
+    else:               return "Not Started"
 
 
-# ─── Page content ────────────────────────────────────────────────────
 inject_theme()
 nav_menu("History")
 
 st.markdown(page_header("History", "Your daily scores"), unsafe_allow_html=True)
 
-planner_df = load_planner()
+planner_df = _load_planner()
 
 if planner_df.empty:
     st.info("No history yet. Start logging your days.")
@@ -119,25 +83,19 @@ else:
 
             card_html = (
                 f'<div class="hist-card">'
-                # Header row: date + score
                 f'<div style="display:flex;justify-content:space-between;align-items:center;">'
                 f'  <span style="font-family:var(--font-display);font-size:16px;font-weight:600;">{row["date"]}</span>'
                 f'  <span style="font-size:22px;font-weight:700;color:{bar_color}">{score}<span style="font-size:13px;opacity:.5">/100</span></span>'
                 f'</div>'
-                # Progress bar
                 f'{progress_bar(score, bar_color)}'
-                # Status badge
                 f'<div style="margin:8px 0 14px;">{status_badge(label, label_color)}</div>'
-                # Two-column grid: priorities + execution
                 f'<div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;">'
-                # Priorities column
                 f'  <div>'
                 f'    <div style="font-size:11px;text-transform:uppercase;letter-spacing:0.08em;color:var(--text2);margin-bottom:8px;">Priorities</div>'
                 f'    <div style="font-size:13px;color:var(--text);margin-bottom:4px;">1 &middot; {p1 or "&mdash;"}</div>'
                 f'    <div style="font-size:13px;color:var(--text);margin-bottom:4px;">2 &middot; {p2 or "&mdash;"}</div>'
                 f'    <div style="font-size:13px;color:var(--text);">3 &middot; {p3 or "&mdash;"}</div>'
                 f'  </div>'
-                # Execution column
                 f'  <div>'
                 f'    <div style="font-size:11px;text-transform:uppercase;letter-spacing:0.08em;color:var(--text2);margin-bottom:8px;">Execution</div>'
                 f'    <div class="exec-pills">'
@@ -147,7 +105,6 @@ else:
                 f'    </div>'
                 f'  </div>'
                 f'</div>'
-                # Reflection
                 f'{reflection_html}'
                 f'</div>'
             )
