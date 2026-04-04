@@ -2,12 +2,12 @@
 
 import os
 import shutil
-import glob
 
 import pandas as pd
 import streamlit as st
 
-from theme import inject_theme, page_header, ACCENT
+from theme import inject_theme, nav_menu, page_header, ACCENT
+from utils import backup_csv, clean_text
 
 # ─── Constants ───────────────────────────────────────────────────────
 DATA_FOLDER = "data"
@@ -46,17 +46,6 @@ if not os.path.exists(SETTINGS_FILE):
 
 
 # ─── Helpers ─────────────────────────────────────────────────────────
-def backup_csv(filepath):
-    """Create a timestamped backup before writing."""
-    if os.path.exists(filepath):
-        from datetime import datetime as dt_cls
-        basename = os.path.basename(filepath).replace(".csv", "")
-        stamp = dt_cls.now().strftime("%Y%m%d_%H%M%S")
-        shutil.copy2(filepath, os.path.join(BACKUP_FOLDER, f"{basename}_{stamp}.csv"))
-        for old in sorted(glob.glob(os.path.join(BACKUP_FOLDER, f"{basename}_*.csv")))[:-20]:
-            os.remove(old)
-
-
 @st.cache_data
 def load_settings():
     return pd.read_csv(SETTINGS_FILE)
@@ -78,13 +67,6 @@ def save_settings(df: pd.DataFrame):
     invalidate_cache()
 
 
-def clean_text(value):
-    if pd.isna(value):
-        return ""
-    text = str(value).strip()
-    return "" if text.lower() == "nan" else text
-
-
 def _safe_float(df, col, default):
     """Safely read a float value from the first row of a settings DataFrame."""
     if col in df.columns and not df.empty:
@@ -97,6 +79,7 @@ def _safe_float(df, col, default):
 
 # ─── Page ────────────────────────────────────────────────────────────
 inject_theme()
+nav_menu("Settings")
 
 st.markdown(page_header("Settings", "Goals, targets, data export, and reset"), unsafe_allow_html=True)
 

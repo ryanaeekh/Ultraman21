@@ -5,9 +5,10 @@ from datetime import date, timedelta
 import pandas as pd
 import streamlit as st
 
-st.set_page_config(page_title="Dashboard", page_icon="📊", layout="wide")
+st.set_page_config(page_title="Dashboard", page_icon="📊", layout="wide", initial_sidebar_state="collapsed")
 
-from theme import inject_theme, page_header, metric_card, detail_row as theme_detail_row, section_card as theme_section_card, status_badge, progress_bar, ACCENT, POS, NEG, TEXT2
+from theme import inject_theme, nav_menu, page_header, metric_card, detail_row as theme_detail_row, section_card as theme_section_card, status_badge, progress_bar, ACCENT, POS, NEG, TEXT2
+from utils import safe_float, safe_bool, clean_text
 
 # =========================================================
 # PATHS
@@ -33,24 +34,6 @@ def safe_read_csv(path, columns=None):
         return pd.DataFrame(columns=columns or list(df.columns)) if df.empty else df
     except Exception:
         return pd.DataFrame(columns=columns or [])
-
-
-def safe_float(value):
-    try:
-        return 0.0 if pd.isna(value) else float(value)
-    except Exception:
-        return 0.0
-
-
-def safe_bool(value):
-    return str(value).strip().lower() == "true"
-
-
-def clean_text(value):
-    if pd.isna(value):
-        return ""
-    text = str(value).strip()
-    return "" if text.lower() == "nan" else text
 
 
 def parse_date_column(df, col="date"):
@@ -409,24 +392,12 @@ month_name = today_obj.strftime("%B %Y")
 # INJECT THEME
 # =========================================================
 inject_theme()
+nav_menu("Dashboard")
 
 # =========================================================
 # HEADER
 # =========================================================
-col_title, col_pills = st.columns([2, 1])
-with col_title:
-    st.markdown(page_header("System Dashboard", "Daily overview"), unsafe_allow_html=True)
-with col_pills:
-    st.markdown(
-        '<div style="margin-top:12px">'
-        '<span class="streak-pill">🔥 ' + str(streak) + '-day streak</span>'
-        '<span class="streak-pill">📅 7d avg: ' + str(weekly_avg) + '/100</span>'
-        '</div>',
-        unsafe_allow_html=True,
-    )
-    if st.button("🔄 Refresh", use_container_width=True):
-        st.cache_data.clear()
-        st.rerun()
+st.markdown(page_header("System Dashboard", "Daily overview"), unsafe_allow_html=True)
 
 # =========================================================
 # RULE BANNER

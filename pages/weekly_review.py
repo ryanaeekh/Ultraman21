@@ -4,9 +4,10 @@ from datetime import date, timedelta
 
 import pandas as pd
 import streamlit as st
-from theme import inject_theme, page_header, metric_card, detail_row, section_card, ACCENT, POS, NEG
+from theme import inject_theme, nav_menu, page_header, metric_card, detail_row, section_card, ACCENT, POS, NEG
+from utils import safe_float, safe_bool
 
-st.set_page_config(page_title="Weekly Review", page_icon="📅", layout="wide")
+st.set_page_config(page_title="Weekly Review", page_icon="📅", layout="wide", initial_sidebar_state="collapsed")
 
 # =========================================================
 # PATHS
@@ -32,17 +33,6 @@ def safe_read_csv(path, columns=None):
         return pd.DataFrame(columns=columns or list(df.columns)) if df.empty else df
     except Exception:
         return pd.DataFrame(columns=columns or [])
-
-
-def safe_float(value):
-    try:
-        return 0.0 if pd.isna(value) else float(value)
-    except Exception:
-        return 0.0
-
-
-def safe_bool(value):
-    return str(value).strip().lower() == "true"
 
 
 def get_days_in_month(date_obj):
@@ -197,6 +187,7 @@ for d in week_dates:
 # THEME + HEADER
 # =========================================================
 inject_theme()
+nav_menu("Weekly Review")
 
 start_str = week_start.strftime("%b %d")
 end_str = today_obj.strftime("%b %d, %Y")

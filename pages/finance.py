@@ -4,9 +4,10 @@ import calendar
 
 import pandas as pd
 import streamlit as st
-from theme import inject_theme, page_header, detail_row, section_card, status_badge, ACCENT, POS, NEG
+from theme import inject_theme, nav_menu, page_header, detail_row, section_card, status_badge, ACCENT, POS, NEG
+from utils import clean_text, safe_float, backup_csv
 
-st.set_page_config(page_title="Finance", page_icon="💰", layout="wide")
+st.set_page_config(page_title="Finance", page_icon="💰", layout="wide", initial_sidebar_state="collapsed")
 
 # =========================================================
 # PATHS
@@ -23,17 +24,6 @@ os.makedirs(DATA_DIR, exist_ok=True)
 
 BACKUP_FOLDER = os.path.join(DATA_DIR, "backups")
 os.makedirs(BACKUP_FOLDER, exist_ok=True)
-
-def backup_csv(filepath):
-    """Create a timestamped backup before writing."""
-    if os.path.exists(filepath):
-        from datetime import datetime as dt_cls
-        import shutil, glob
-        basename = os.path.basename(filepath).replace(".csv", "")
-        stamp = dt_cls.now().strftime("%Y%m%d_%H%M%S")
-        shutil.copy2(filepath, os.path.join(BACKUP_FOLDER, f"{basename}_{stamp}.csv"))
-        for old in sorted(glob.glob(os.path.join(BACKUP_FOLDER, f"{basename}_*.csv")))[:-20]:
-            os.remove(old)
 
 DAILY_BUDGET = 50.0
 MONTHLY_BUDGET = 1500.0
@@ -101,22 +91,6 @@ if list(monthly_df.columns) != monthly_required_columns:
 # =========================================================
 # HELPERS
 # =========================================================
-def clean_text(value):
-    if pd.isna(value):
-        return ""
-    text = str(value).strip()
-    return "" if text.lower() == "nan" else text
-
-
-def safe_float(value):
-    try:
-        if pd.isna(value):
-            return 0.0
-        return float(value)
-    except Exception:
-        return 0.0
-
-
 def save_finance(df):
     backup_csv(FINANCE_FILE)
     df.to_csv(FINANCE_FILE, index=False)
@@ -296,6 +270,7 @@ if "edit_monthly_index" not in st.session_state:
 # INJECT THEME
 # =========================================================
 inject_theme()
+nav_menu("Finance")
 
 # =========================================================
 # LOAD DATA
@@ -478,6 +453,7 @@ with left_col:
                 if st.button("Delete", key=f"delete_daily_{original_index}"):
                     finance_df = finance_df.drop(index=original_index).reset_index(drop=True)
                     save_finance(finance_df)
+                    st.session_state.edit_daily_index = None
                     st.success("Daily expense deleted.")
                     st.rerun()
 
@@ -596,6 +572,7 @@ with left_col:
                 if st.button("Delete", key=f"delete_monthly_{original_index}"):
                     monthly_df = monthly_df.drop(index=original_index).reset_index(drop=True)
                     save_monthly(monthly_df)
+                    st.session_state.edit_monthly_index = None
                     st.success("Monthly expense deleted.")
                     st.rerun()
 
@@ -642,7 +619,7 @@ with right_col:
 
     if summary["income"] > 0:
         st.markdown(
-            f'{status_badge(f"Total Income: ${summary[\"income\"]:.2f}", POS)}',
+            f'{status_badge(f"Total Income: ${summary['income']:.2f}", POS)}',
             unsafe_allow_html=True,
         )
     else:
@@ -652,26 +629,26 @@ with right_col:
         )
 
     st.markdown(
-        f'{status_badge(f"Variable Expenses: ${summary[\"variable_expenses\"]:.2f}", NEG)}',
+        f'{status_badge(f"Variable Expenses: ${summary['variable_expenses']:.2f}", NEG)}',
         unsafe_allow_html=True,
     )
     st.markdown(
-        f'{status_badge(f"Fixed Share: ${summary[\"fixed_share\"]:.2f}", NEG)}',
+        f'{status_badge(f"Fixed Share: ${summary['fixed_share']:.2f}", NEG)}',
         unsafe_allow_html=True,
     )
     st.markdown(
-        f'{status_badge(f"Total Expenses: ${summary[\"total_expenses\"]:.2f}", NEG)}',
+        f'{status_badge(f"Total Expenses: ${summary['total_expenses']:.2f}", NEG)}',
         unsafe_allow_html=True,
     )
 
     _net_cls = "positive" if summary["net_profit"] >= 0 else "negative"
     _mnet_cls = "positive" if summary["monthly_net"] >= 0 else "negative"
     st.markdown(
-        f'{detail_row("Today Net", f"${summary[\"net_profit\"]:.2f}", _net_cls)}',
+        f'{detail_row("Today Net", f"${summary['net_profit']:.2f}", _net_cls)}',
         unsafe_allow_html=True,
     )
     st.markdown(
-        f'{detail_row("Month Net (to date)", f"${summary[\"monthly_net\"]:.2f}", _mnet_cls)}',
+        f'{detail_row("Month Net (to date)", f"${summary['monthly_net']:.2f}", _mnet_cls)}',
         unsafe_allow_html=True,
     )
 

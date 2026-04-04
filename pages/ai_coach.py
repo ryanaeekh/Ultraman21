@@ -7,7 +7,8 @@ import pandas as pd
 import streamlit as st
 from dotenv import load_dotenv
 
-from theme import inject_theme, page_header, ACCENT
+from theme import inject_theme, nav_menu, page_header, ACCENT
+from utils import clean_text as _clean_text
 
 load_dotenv()
 
@@ -37,13 +38,6 @@ def _load_settings():
     if not os.path.exists(SETTINGS_FILE):
         return pd.DataFrame()
     return pd.read_csv(SETTINGS_FILE)
-
-
-def _clean_text(value):
-    if pd.isna(value):
-        return ""
-    text = str(value).strip()
-    return "" if text.lower() == "nan" else text
 
 
 # ── Build data context for AI ─────────────────────────────
@@ -148,6 +142,7 @@ SYSTEM_PROMPT = (
 # ── Page ──────────────────────────────────────────────────
 
 inject_theme()
+nav_menu("AI Coach")
 
 st.markdown(
     page_header("AI Coach", "Your personal productivity assistant — powered by Claude"),

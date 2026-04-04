@@ -5,7 +5,8 @@ import os
 import pandas as pd
 import streamlit as st
 
-from theme import inject_theme, page_header, status_badge, progress_bar, ACCENT, POS, NEG
+from theme import inject_theme, nav_menu, page_header, status_badge, progress_bar, ACCENT, POS, NEG
+from utils import backup_csv, clean_text
 
 # ─── Constants ───────────────────────────────────────────────────────
 DATA_FOLDER = "data"
@@ -37,18 +38,6 @@ _ensure_columns(PLANNER_FILE, PLANNER_COLS)
 
 
 # ─── Data helpers ────────────────────────────────────────────────────
-def backup_csv(filepath):
-    """Create a timestamped backup before writing."""
-    if os.path.exists(filepath):
-        from datetime import datetime as dt_cls
-        import shutil, glob
-        basename = os.path.basename(filepath).replace(".csv", "")
-        stamp = dt_cls.now().strftime("%Y%m%d_%H%M%S")
-        shutil.copy2(filepath, os.path.join(BACKUP_FOLDER, f"{basename}_{stamp}.csv"))
-        for old in sorted(glob.glob(os.path.join(BACKUP_FOLDER, f"{basename}_*.csv")))[:-20]:
-            os.remove(old)
-
-
 @st.cache_data
 def load_planner():
     df = pd.read_csv(PLANNER_FILE)
@@ -73,13 +62,6 @@ def invalidate_cache():
     load_planner.clear()
 
 
-def clean_text(value):
-    if pd.isna(value):
-        return ""
-    text = str(value).strip()
-    return "" if text.lower() == "nan" else text
-
-
 def get_execution_label(score):
     if score == 100:
         return "Fully Completed"
@@ -93,6 +75,7 @@ def get_execution_label(score):
 
 # ─── Page content ────────────────────────────────────────────────────
 inject_theme()
+nav_menu("History")
 
 st.markdown(page_header("History", "Your daily scores"), unsafe_allow_html=True)
 

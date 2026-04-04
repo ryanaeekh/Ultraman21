@@ -2,11 +2,13 @@ import streamlit as st
 import pandas as pd
 import os
 from datetime import datetime, date, time as dtime
-from theme import inject_theme, page_header, metric_card, section_card, detail_row, status_badge, ACCENT, POS, NEG
+from theme import inject_theme, nav_menu, page_header, metric_card, section_card, detail_row, status_badge, ACCENT, POS, NEG
+from utils import backup_csv
 
-st.set_page_config(page_title="Driving", page_icon="🚗", layout="wide")
+st.set_page_config(page_title="Driving", page_icon="🚗", layout="wide", initial_sidebar_state="collapsed")
 
 inject_theme()
+nav_menu("Driving")
 
 st.markdown(page_header("Driving", "Income tracking"), unsafe_allow_html=True)
 
@@ -17,17 +19,6 @@ os.makedirs(DATA_FOLDER, exist_ok=True)
 
 BACKUP_FOLDER = os.path.join(DATA_FOLDER, "backups")
 os.makedirs(BACKUP_FOLDER, exist_ok=True)
-
-def backup_csv(filepath):
-    """Create a timestamped backup before writing."""
-    if os.path.exists(filepath):
-        from datetime import datetime as dt_cls
-        import shutil, glob
-        basename = os.path.basename(filepath).replace(".csv", "")
-        stamp = dt_cls.now().strftime("%Y%m%d_%H%M%S")
-        shutil.copy2(filepath, os.path.join(BACKUP_FOLDER, f"{basename}_{stamp}.csv"))
-        for old in sorted(glob.glob(os.path.join(BACKUP_FOLDER, f"{basename}_*.csv")))[:-20]:
-            os.remove(old)
 
 SETTINGS_FILE = os.path.join(DATA_FOLDER, "settings.csv")
 DAILY_TARGET = 250.0

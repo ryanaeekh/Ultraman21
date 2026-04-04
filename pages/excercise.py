@@ -4,9 +4,10 @@ from datetime import date
 import pandas as pd
 import streamlit as st
 
-from theme import inject_theme, page_header, metric_card, section_card, status_badge as theme_badge, progress_bar, ACCENT, POS
+from theme import inject_theme, nav_menu, page_header, metric_card, section_card, status_badge as theme_badge, progress_bar, ACCENT, POS
+from utils import safe_float, clean_text as safe_text, backup_csv
 
-st.set_page_config(page_title="Exercise", page_icon="🏃", layout="wide")
+st.set_page_config(page_title="Exercise", page_icon="🏃", layout="wide", initial_sidebar_state="collapsed")
 
 # =========================================================
 # PATHS
@@ -20,17 +21,6 @@ if not os.path.exists(DATA_DIR):
 
 BACKUP_FOLDER = os.path.join(DATA_DIR, "backups")
 os.makedirs(BACKUP_FOLDER, exist_ok=True)
-
-def backup_csv(filepath):
-    """Create a timestamped backup before writing."""
-    if os.path.exists(filepath):
-        from datetime import datetime as dt_cls
-        import shutil, glob
-        basename = os.path.basename(filepath).replace(".csv", "")
-        stamp = dt_cls.now().strftime("%Y%m%d_%H%M%S")
-        shutil.copy2(filepath, os.path.join(BACKUP_FOLDER, f"{basename}_{stamp}.csv"))
-        for old in sorted(glob.glob(os.path.join(BACKUP_FOLDER, f"{basename}_*.csv")))[:-20]:
-            os.remove(old)
 
 EXERCISE_COLUMNS = [
     "date",
@@ -62,22 +52,6 @@ def ensure_columns(df, columns):
         if col not in df.columns:
             df[col] = ""
     return df[columns]
-
-
-def safe_float(value):
-    try:
-        if pd.isna(value) or str(value).strip() == "":
-            return 0.0
-        return float(value)
-    except Exception:
-        return 0.0
-
-
-def safe_text(value):
-    if pd.isna(value):
-        return ""
-    text = str(value).strip()
-    return "" if text.lower() == "nan" else text
 
 
 def save_exercise_df(df):
@@ -145,6 +119,7 @@ today_row = get_today_row(exercise_df, today_str)
 # THEME
 # =========================================================
 inject_theme()
+nav_menu("Exercise")
 
 # =========================================================
 # HEADER
