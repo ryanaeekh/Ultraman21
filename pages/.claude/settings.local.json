@@ -21,7 +21,9 @@
       "Bash(taskkill //F //IM streamlit.exe)",
       "Bash(pkill -f streamlit)",
       "Read(//c/Users/ryana/AppData/Local/Python/pythoncore-3.14-64/Lib/site-packages/streamlit/static/static/js/**)",
-      "Read(//c/Users/ryana/AppData/Local/Python/pythoncore-3.14-64/Lib/site-packages/streamlit/static/**)"
+      "Read(//c/Users/ryana/AppData/Local/Python/pythoncore-3.14-64/Lib/site-packages/streamlit/static/**)",
+      "Bash(git push:*)",
+      "Bash(git pull:*)"
     ],
     "additionalDirectories": [
       "c:\\Users\\ryana\\OneDrive\\Desktop\\Ultraman21"

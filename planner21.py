@@ -23,7 +23,7 @@ today = str(date.today())
 # =========================================================
 # DATA HELPERS  (cached -- invalidated after writes)
 # =========================================================
-@st.cache_data
+@st.cache_data(ttl=15)
 def _load_planner():
     df = load_planner()
     if "date" in df.columns:
@@ -31,7 +31,7 @@ def _load_planner():
     return df
 
 
-@st.cache_data
+@st.cache_data(ttl=15)
 def _load_settings():
     return load_settings()
 
