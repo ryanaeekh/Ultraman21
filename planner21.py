@@ -175,65 +175,6 @@ if checklist_raw:
                 done_count += 1
         st.caption(f"{done_count}/{len(items)} completed")
 
-# --- Daily entry form ---
-_p1 = clean_text(today_row["priority_1"]) if today_row is not None else ""
-_p2 = clean_text(today_row["priority_2"]) if today_row is not None else ""
-_p3 = clean_text(today_row["priority_3"]) if today_row is not None else ""
-_refl = clean_text(today_row["reflection"]) if today_row is not None else ""
-_focus = bool(today_row["focus_done"]) if today_row is not None else False
-_run = bool(today_row["run_done"]) if today_row is not None else False
-_income = bool(today_row["income_done"]) if today_row is not None else False
-
-st.markdown('<div class="section-title">\U0001f4dd Daily Entry</div>', unsafe_allow_html=True)
-
-
-def _auto_save():
-    p1 = st.session_state.get("entry_p1", "")
-    p2 = st.session_state.get("entry_p2", "")
-    p3 = st.session_state.get("entry_p3", "")
-    chk_focus = st.session_state.get("entry_focus", False)
-    chk_run = st.session_state.get("entry_run", False)
-    chk_income = st.session_state.get("entry_income", False)
-    refl = st.session_state.get("entry_refl", "")
-    new_row = {
-        "date": today,
-        "priority_1": p1,
-        "priority_2": p2,
-        "priority_3": p3,
-        "focus_done": chk_focus,
-        "run_done": chk_run,
-        "income_done": chk_income,
-        "reflection": refl,
-        "score": calculate_score(chk_focus, chk_run, chk_income),
-    }
-    df = _load_planner()
-    existing = df[df["date"] == today]
-    if not existing.empty:
-        idx = existing.index[0]
-        for k, v in new_row.items():
-            df.at[idx, k] = v
-    else:
-        df = pd.concat([df, pd.DataFrame([new_row])], ignore_index=True)
-    save_planner(df)
-
-
-p1 = st.text_input("Priority 1", value=_p1, key="entry_p1", on_change=_auto_save)
-p2 = st.text_input("Priority 2", value=_p2, key="entry_p2", on_change=_auto_save)
-p3 = st.text_input("Priority 3", value=_p3, key="entry_p3", on_change=_auto_save)
-
-col1, col2, col3 = st.columns(3)
-with col1:
-    chk_focus = st.checkbox("\u2705 All Priorities", value=_focus, key="entry_focus", on_change=_auto_save)
-with col2:
-    chk_run = st.checkbox("\U0001f3c3 Run", value=_run, key="entry_run", on_change=_auto_save)
-with col3:
-    chk_income = st.checkbox("\U0001f4b0 Income Target", value=_income, key="entry_income", on_change=_auto_save)
-
-reflection = st.text_area("Reflection", value=_refl, height=120, key="entry_refl", on_change=_auto_save)
-
-_preview = calculate_score(chk_focus, chk_run, chk_income)
-st.caption(f"Auto-calculated score: **{_preview}**/100")
-
 # --- Focus quote ---
 quote_text = (
     'Because you might as well be dead.<br>'
