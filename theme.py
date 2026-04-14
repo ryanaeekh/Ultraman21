@@ -716,7 +716,6 @@ _PAGES = {
     "News": "pages/news.py",
     "History": "pages/history.py",
     "Insights": "pages/insights.py",
-    "AI Coach": "pages/ai_coach.py",
     "Settings": "pages/settings.py",
 }
 
