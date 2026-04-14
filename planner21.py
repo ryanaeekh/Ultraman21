@@ -122,13 +122,8 @@ today_score = int(today_row["score"]) if today_row is not None else 0
 # =========================================================
 st.markdown(page_header("Ryan", f"{today} \u2014 build the day deliberately"), unsafe_allow_html=True)
 
-# --- Score ring ---
-st.markdown(f'''<div style="text-align:center;margin:20px 0;">
-    <div class="score-ring" style="--pct:{today_score};">
-        <span class="score-ring-value">{today_score}</span>
-    </div>
-    <div class="metric-sub">{get_execution_label(today_score)}</div>
-</div>''', unsafe_allow_html=True)
+# --- Focus heading ---
+st.markdown('<h1 style="text-align:center;margin:20px 0;letter-spacing:0.15em;">FOCUS</h1>', unsafe_allow_html=True)
 
 # --- Execution pills ---
 row = get_row(planner_df, today)
