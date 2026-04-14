@@ -155,26 +155,6 @@ else:
     <div style="opacity:0.5;font-size:14px;line-height:1.6;color:var(--text2);">No goals set yet \u2014 go to Settings to add them.</div>
 </div>''', unsafe_allow_html=True)
 
-# --- Morning checklist ---
-checklist_raw = ""
-if not settings_df.empty and "checklist_items" in settings_df.columns:
-    checklist_raw = str(settings_df.loc[0, "checklist_items"]).strip()
-    if checklist_raw.lower() == "nan":
-        checklist_raw = ""
-if checklist_raw:
-    items = [i.strip() for i in checklist_raw.split(",") if i.strip()]
-    if items:
-        st.markdown('<div class="section-title">\u2611\ufe0f Morning Checklist</div>', unsafe_allow_html=True)
-        done_count = 0
-        for item in items:
-            key = f"checklist_{item}"
-            if key not in st.session_state:
-                st.session_state[key] = False
-            checked = st.checkbox(item, value=st.session_state[key], key=key)
-            if checked:
-                done_count += 1
-        st.caption(f"{done_count}/{len(items)} completed")
-
 # --- Focus quote ---
 quote_text = (
     'Because you might as well be dead.<br>'
