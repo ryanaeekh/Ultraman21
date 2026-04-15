@@ -326,7 +326,7 @@ month_name = today_obj.strftime("%B %Y")
 inject_theme()
 nav_menu("Dashboard")
 
-st.markdown(page_header("System Dashboard", "Daily overview"), unsafe_allow_html=True)
+st.markdown(page_header("Dashboard", "Daily overview"), unsafe_allow_html=True)
 
 st.markdown(
     '<div class="card accent-left-card">'
