@@ -42,14 +42,14 @@ ex_count = int(len(ex_week[ex_week["status"].astype(str).str.lower() == "done"])
 # ── Top metrics ───────────────────────────────────────────
 g1 = st.columns(2)
 with g1[0]:
-    st.markdown(metric_card("Week Income", f"\u00a3{week_income:,.2f}", color="var(--accent-2)"), unsafe_allow_html=True)
+    st.markdown(metric_card("Week Income", f"${week_income:,.2f}", color="var(--accent-2)"), unsafe_allow_html=True)
 with g1[1]:
-    st.markdown(metric_card("Week Expenses", f"\u00a3{week_exp:,.2f}", color="var(--neg)"), unsafe_allow_html=True)
+    st.markdown(metric_card("Week Expenses", f"${week_exp:,.2f}", color="var(--neg)"), unsafe_allow_html=True)
 
 g2 = st.columns(2)
 with g2[0]:
     net_color = "var(--accent-2)" if week_net >= 0 else "var(--neg)"
-    st.markdown(metric_card("Net", f"\u00a3{week_net:,.2f}", color=net_color), unsafe_allow_html=True)
+    st.markdown(metric_card("Net", f"${week_net:,.2f}", color=net_color), unsafe_allow_html=True)
 with g2[1]:
     st.markdown(metric_card("Exercise", f"{ex_count}", sub="sessions done", color="var(--accent-2)"), unsafe_allow_html=True)
 

@@ -45,7 +45,7 @@ if st.button("Save Income", use_container_width=True, key="save_inc"):
     if inc_amount > 0:
         new_row = pd.DataFrame([{"date": str(inc_date), "category": "Income", "amount": float(inc_amount)}])
         save_finance_df(pd.concat([finance_df, new_row], ignore_index=True))
-        st.success(f"Income saved: \u00a3{inc_amount:,.2f}")
+        st.success(f"Income saved: ${inc_amount:,.2f}")
         st.rerun()
     else:
         st.warning("Enter an amount greater than zero.")
@@ -63,7 +63,7 @@ if st.button("Save Expense", use_container_width=True, key="save_exp"):
     if exp_amount > 0:
         new_row = pd.DataFrame([{"date": str(exp_date), "category": exp_cat, "amount": float(exp_amount)}])
         save_finance_df(pd.concat([finance_df, new_row], ignore_index=True))
-        st.success(f"Expense saved: {exp_cat} \u2014 \u00a3{exp_amount:,.2f}")
+        st.success(f"Expense saved: {exp_cat} \u2014 ${exp_amount:,.2f}")
         st.rerun()
     else:
         st.warning("Enter an amount greater than zero.")
@@ -82,12 +82,12 @@ today_net = today_income - today_expense
 
 cols = st.columns(3)
 with cols[0]:
-    st.markdown(metric_card("Income", f"\u00a3{today_income:,.2f}", color="var(--accent-2)"), unsafe_allow_html=True)
+    st.markdown(metric_card("Income", f"${today_income:,.2f}", color="var(--accent-2)"), unsafe_allow_html=True)
 with cols[1]:
-    st.markdown(metric_card("Expenses", f"\u00a3{today_expense:,.2f}", color="var(--neg)"), unsafe_allow_html=True)
+    st.markdown(metric_card("Expenses", f"${today_expense:,.2f}", color="var(--neg)"), unsafe_allow_html=True)
 with cols[2]:
     net_color = "var(--accent-2)" if today_net >= 0 else "var(--neg)"
-    st.markdown(metric_card("Net", f"\u00a3{today_net:,.2f}", color=net_color), unsafe_allow_html=True)
+    st.markdown(metric_card("Net", f"${today_net:,.2f}", color=net_color), unsafe_allow_html=True)
 
 # ============================================================
 # SECTION 4 — MONTHLY RECURRING
@@ -101,7 +101,7 @@ if st.button("Add Fixed Expense", use_container_width=True, key="add_fx"):
     if name and fx_amount > 0:
         new_row = pd.DataFrame([{"name": name, "amount": float(fx_amount)}])
         save_monthly_expenses_df(pd.concat([monthly_df, new_row], ignore_index=True))
-        st.success(f"Added {name}: \u00a3{fx_amount:,.2f}")
+        st.success(f"Added {name}: ${fx_amount:,.2f}")
         st.rerun()
     else:
         st.warning("Provide a name and an amount.")
@@ -113,7 +113,7 @@ if not monthly_df.empty:
         with row_cols[0]:
             st.markdown(
                 f'<div class="list-row"><span>{r["name"]}</span>'
-                f'<span class="amount">\u00a3{float(r["amount"]):,.2f}</span></div>',
+                f'<span class="amount">${float(r["amount"]):,.2f}</span></div>',
                 unsafe_allow_html=True,
             )
         with row_cols[1]:
@@ -141,13 +141,13 @@ month_label = today.strftime("%B %Y")
 
 g1 = st.columns(2)
 with g1[0]:
-    st.markdown(metric_card("Income", f"\u00a3{month_income:,.2f}", sub=month_label, color="var(--accent-2)"), unsafe_allow_html=True)
+    st.markdown(metric_card("Income", f"${month_income:,.2f}", sub=month_label, color="var(--accent-2)"), unsafe_allow_html=True)
 with g1[1]:
-    st.markdown(metric_card("Variable Expenses", f"\u00a3{month_daily_exp:,.2f}", sub="Logged this month", color="var(--neg)"), unsafe_allow_html=True)
+    st.markdown(metric_card("Variable Expenses", f"${month_daily_exp:,.2f}", sub="Logged this month", color="var(--neg)"), unsafe_allow_html=True)
 
 g2 = st.columns(2)
 with g2[0]:
-    st.markdown(metric_card("Fixed (Recurring)", f"\u00a3{month_fixed:,.2f}", sub=f"\u00a3{month_fixed/days:,.2f}/day", color="var(--neg)"), unsafe_allow_html=True)
+    st.markdown(metric_card("Fixed (Recurring)", f"${month_fixed:,.2f}", sub=f"${month_fixed/days:,.2f}/day", color="var(--neg)"), unsafe_allow_html=True)
 with g2[1]:
     net_color = "var(--accent-2)" if month_net >= 0 else "var(--neg)"
-    st.markdown(metric_card("Net", f"\u00a3{month_net:,.2f}", sub=month_label, color=net_color), unsafe_allow_html=True)
+    st.markdown(metric_card("Net", f"${month_net:,.2f}", sub=month_label, color=net_color), unsafe_allow_html=True)
