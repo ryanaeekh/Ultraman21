@@ -3,38 +3,38 @@
 import streamlit as st
 
 # ── Design Token Constants ──────────────────────────────────────────
-ACCENT = "#3d6b8e"
-POS = "#4a8c6a"
-NEG = "#c4625a"
-BG = "#f4f1ec"
-BG2 = "#ece8e1"
-CARD_BG = "#ffffff"
-TEXT = "#1a1a1a"
-TEXT2 = "#8a847c"
-BORDER = "rgba(26,26,26,0.08)"
+ACCENT = "#7F9DB1"
+POS = "#7F9DB1"
+NEG = "#B4D6E3"
+BG = "#0D3B66"
+BG2 = "#0a3258"
+CARD_BG = "#0a3258"
+TEXT = "#B4D6E3"
+TEXT2 = "#7F9DB1"
+BORDER = "#7F9DB1"
 
 # ── CSS Strings ─────────────────────────────────────────────────────
 _CSS = """<style>
 @import url('https://fonts.googleapis.com/css2?family=Zen+Kaku+Gothic+New:wght@400;500;700;900&family=Outfit:wght@300;400;500;600;700&display=swap');
 
 :root {
-    --bg:          #f4f1ec;
-    --bg2:         #ece8e1;
-    --card-bg:     #ffffff;
-    --card-hover:  #faf9f7;
-    --accent:      #3d6b8e;
-    --accent-soft: rgba(61,107,142,0.08);
-    --accent-glow: 0 4px 20px rgba(61,107,142,0.12);
-    --pos:         #4a8c6a;
-    --neg:         #c4625a;
-    --text:        #1a1a1a;
-    --text2:       #8a847c;
-    --text3:       #b5afa6;
-    --border:      rgba(26,26,26,0.08);
-    --border-strong: rgba(26,26,26,0.14);
-    --shadow-sm:   0 1px 3px rgba(26,26,26,0.04), 0 1px 2px rgba(26,26,26,0.06);
-    --shadow-md:   0 4px 12px rgba(26,26,26,0.06), 0 2px 4px rgba(26,26,26,0.04);
-    --shadow-lg:   0 8px 30px rgba(26,26,26,0.08), 0 2px 8px rgba(26,26,26,0.04);
+    --bg:          #0D3B66;
+    --bg2:         #0a3258;
+    --card-bg:     #0a3258;
+    --card-hover:  #114276;
+    --accent:      #7F9DB1;
+    --accent-soft: rgba(127,157,177,0.12);
+    --accent-glow: 0 4px 20px rgba(127,157,177,0.18);
+    --pos:         #7F9DB1;
+    --neg:         #B4D6E3;
+    --text:        #B4D6E3;
+    --text2:       #7F9DB1;
+    --text3:       #7F9DB1;
+    --border:      #7F9DB1;
+    --border-strong: #B4D6E3;
+    --shadow-sm:   0 1px 3px rgba(0,0,0,0.2), 0 1px 2px rgba(0,0,0,0.25);
+    --shadow-md:   0 4px 12px rgba(0,0,0,0.25), 0 2px 4px rgba(0,0,0,0.2);
+    --shadow-lg:   0 8px 30px rgba(0,0,0,0.3), 0 2px 8px rgba(0,0,0,0.2);
     --radius-lg:   14px;
     --radius-md:   8px;
     --font-display:'Zen Kaku Gothic New', sans-serif;
@@ -52,8 +52,8 @@ html, body, .stApp {
     content: '';
     position: fixed; inset: 0; z-index: -1;
     background:
-        radial-gradient(ellipse at 20% 0%, rgba(61,107,142,0.04) 0%, transparent 60%),
-        radial-gradient(ellipse at 80% 100%, rgba(196,98,90,0.03) 0%, transparent 50%),
+        radial-gradient(ellipse at 20% 0%, rgba(127,157,177,0.08) 0%, transparent 60%),
+        radial-gradient(ellipse at 80% 100%, rgba(180,214,227,0.06) 0%, transparent 50%),
         var(--bg);
 }
 
@@ -153,8 +153,8 @@ h1, h2, h3, .page-title, .section-title {
 /* ─── Buttons ────────────────────────────────────── */
 div.stButton > button {
     font-family: var(--font-body) !important;
-    background: #f5e6b8 !important;
-    color: #5a4a2a !important;
+    background: #7F9DB1 !important;
+    color: #0D3B66 !important;
     border: none !important;
     border-radius: 10px !important;
     padding: 6px 12px !important;
@@ -162,18 +162,18 @@ div.stButton > button {
     font-size: 15px !important;
     letter-spacing: 0.02em !important;
     transition: all 0.25s ease !important;
-    box-shadow: 0 2px 8px rgba(90,74,42,0.1) !important;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.25) !important;
     cursor: pointer !important;
 }
 div.stButton > button:hover {
-    background: #edd89c !important;
-    color: #5a4a2a !important;
-    box-shadow: 0 4px 16px rgba(90,74,42,0.18) !important;
+    background: #B4D6E3 !important;
+    color: #0D3B66 !important;
+    box-shadow: 0 4px 16px rgba(0,0,0,0.3) !important;
     transform: translateY(-1px);
 }
 div.stButton > button:active {
     transform: translateY(0);
-    box-shadow: 0 1px 4px rgba(26,26,26,0.12) !important;
+    box-shadow: 0 1px 4px rgba(0,0,0,0.25) !important;
 }
 
 /* ─── Forms & Inputs ─────────────────────────────── */
@@ -201,7 +201,7 @@ div[data-testid="stSelectbox"] > div > div {
 }
 input:focus, textarea:focus {
     border-bottom-color: var(--accent) !important;
-    background: #ffffff !important;
+    background: #114276 !important;
     box-shadow: none !important;
     outline: none !important;
 }
@@ -267,31 +267,31 @@ div[data-testid="stMarkdownContainer"] li {
 /* ─── Form Submit ────────────────────────────────── */
 div[data-testid="stFormSubmitButton"] button {
     font-family: var(--font-body) !important;
-    background: #f5e6b8 !important;
-    color: #5a4a2a !important;
+    background: #7F9DB1 !important;
+    color: #0D3B66 !important;
     border: none !important;
     border-radius: 10px !important;
     padding: 6px 12px !important;
     font-weight: 600 !important;
     font-size: 15px !important;
     letter-spacing: 0.02em !important;
-    box-shadow: 0 2px 8px rgba(90,74,42,0.1) !important;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.25) !important;
     transition: all 0.25s ease !important;
     cursor: pointer !important;
 }
 div[data-testid="stFormSubmitButton"] button:hover {
-    background: #edd89c !important;
-    box-shadow: 0 4px 16px rgba(90,74,42,0.18) !important;
+    background: #B4D6E3 !important;
+    box-shadow: 0 4px 16px rgba(0,0,0,0.3) !important;
     transform: translateY(-1px);
 }
 div[data-testid="stFormSubmitButton"] button:active {
     transform: translateY(0);
-    box-shadow: 0 1px 4px rgba(26,26,26,0.12) !important;
+    box-shadow: 0 1px 4px rgba(0,0,0,0.25) !important;
 }
 
 /* ─── Popover / Dropdown ─────────────────────────── */
 [data-baseweb="popover"] {
-    background: #ffffff !important;
+    background: #0a3258 !important;
     border: 1px solid var(--border-strong) !important;
     box-shadow: var(--shadow-lg) !important;
     border-radius: var(--radius-md) !important;
@@ -425,7 +425,7 @@ header[data-testid="stHeader"] > *:not([data-testid="stToolbar"]):not([data-test
 }
 .st-key-nav_menu_container .stSelectbox [data-baseweb="select"] > div:hover {
     border-color: var(--accent) !important;
-    box-shadow: 0 4px 20px rgba(61,107,142,0.12) !important;
+    box-shadow: 0 4px 20px rgba(127,157,177,0.2) !important;
 }
 .st-key-nav_menu_container .stSelectbox [data-baseweb="select"] > div > div,
 .st-key-nav_menu_container .stSelectbox [data-baseweb="select"] span {
@@ -468,7 +468,7 @@ div[data-testid="stExpander"] summary {
     text-transform: uppercase; letter-spacing: 0.04em;
 }
 .exec-pill.done {
-    color: var(--pos); background: rgba(74,140,106,0.1);
+    color: var(--pos); background: rgba(127,157,177,0.15);
 }
 .exec-pill.pending {
     color: var(--text3); background: var(--bg2);
@@ -680,24 +680,24 @@ div[data-testid="stChatInput"] textarea {
 /* ─── Scrollbar ──────────────────────────────────── */
 ::-webkit-scrollbar { width: 6px; }
 ::-webkit-scrollbar-track { background: transparent; }
-::-webkit-scrollbar-thumb { background: rgba(26,26,26,0.12); border-radius: 3px; }
-::-webkit-scrollbar-thumb:hover { background: rgba(26,26,26,0.22); }
+::-webkit-scrollbar-thumb { background: rgba(127,157,177,0.3); border-radius: 3px; }
+::-webkit-scrollbar-thumb:hover { background: rgba(127,157,177,0.5); }
 
 /* ─── Status Boxes ───────────────────────────────── */
 .success-box {
-    background: rgba(74,140,106,0.06);
+    background: rgba(127,157,177,0.1);
     border-left: 3px solid var(--pos);
     border-radius: var(--radius-md);
     padding: 12px 16px; color: var(--pos); margin: 10px 0; font-size: 14px;
 }
 .warning-box {
-    background: rgba(200,150,50,0.06);
-    border-left: 3px solid #c89632;
+    background: rgba(180,214,227,0.1);
+    border-left: 3px solid var(--neg);
     border-radius: var(--radius-md);
-    padding: 12px 16px; color: #a07828; margin: 10px 0; font-size: 14px;
+    padding: 12px 16px; color: var(--neg); margin: 10px 0; font-size: 14px;
 }
 .error-box {
-    background: rgba(196,98,90,0.06);
+    background: rgba(180,214,227,0.1);
     border-left: 3px solid var(--neg);
     border-radius: var(--radius-md);
     padding: 12px 16px; color: var(--neg); margin: 10px 0; font-size: 14px;
