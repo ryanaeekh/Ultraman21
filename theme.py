@@ -808,7 +808,7 @@ def page_header(title: str, subtitle: str = "") -> str:
     """Return HTML string for page title + subtitle + divider."""
     sub_html = f'<div class="page-subtitle">{subtitle}</div>' if subtitle else ""
     return (
-        f'<div class="page-title" style="color:#000000;">{title}</div>'
+        f'<div class="page-title" style="color:#000000 !important;">{title}</div>'
         f'{sub_html}'
         f'<div class="divider"></div>'
     )
