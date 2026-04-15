@@ -3,42 +3,48 @@
 import streamlit as st
 
 # ── Design Token Constants ──────────────────────────────────────────
-ACCENT = "#4F7C82"
-POS = "#4F7C82"
-NEG = "#c97a8a"
-BG = "#0B2E33"
-BG2 = "#0e3a40"
-CARD_BG = "#0e3a40"
-TEXT = "#B8E3E9"
-TEXT2 = "#7fbcc4"
-BORDER = "#4F7C82"
+ACCENT = "#00E5C0"
+POS = "#00E5C0"
+NEG = "#FF6B4A"
+BG = "#0F172A"
+BG2 = "#131c32"
+CARD_BG = "#1A1F2B"
+TEXT = "#FFFFFF"
+TEXT2 = "#9aa4b8"
+BORDER = "#2E3440"
 
 # ── CSS Strings ─────────────────────────────────────────────────────
 _CSS = """<style>
-@import url('https://fonts.googleapis.com/css2?family=Zen+Kaku+Gothic+New:wght@400;500;700;900&family=Outfit:wght@300;400;500;600;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=Space+Grotesk:wght@400;500;600;700&display=swap');
 
 :root {
-    --bg:          #0B2E33;
-    --bg2:         #0e3a40;
+    --bg:          #0F172A;
+    --bg2:         #131c32;
     --card-bg:     #1A1F2B;
     --card-hover:  #232a3a;
-    --accent:      #4F7C82;
-    --accent-soft: rgba(79,124,130,0.15);
-    --accent-glow: 0 4px 20px rgba(79,124,130,0.25);
-    --pos:         #4F7C82;
-    --neg:         #c97a8a;
-    --text:        #B8E3E9;
-    --text2:       #7fbcc4;
-    --text3:       #7fbcc4;
+    --accent:      #00E5C0;
+    --accent-2:    #14F5D4;
+    --coral:       #FF6B4A;
+    --coral-soft:  rgba(255,107,74,0.12);
+    --accent-soft: rgba(0,229,192,0.10);
+    --accent-glow: 0 0 32px rgba(0,229,192,0.35);
+    --pos:         #00E5C0;
+    --neg:         #FF6B4A;
+    --text:        #FFFFFF;
+    --text2:       #9aa4b8;
+    --text3:       #64708a;
     --border:      #2E3440;
-    --border-strong: #4F7C82;
-    --shadow-sm:   0 4px 16px rgba(0,0,0,0.3);
-    --shadow-md:   0 8px 30px rgba(0,0,0,0.3);
-    --shadow-lg:   0 8px 30px rgba(0,0,0,0.3), 0 0 40px rgba(79,124,130,0.15);
-    --radius-lg:   14px;
-    --radius-md:   8px;
-    --font-display:'Zen Kaku Gothic New', sans-serif;
-    --font-body:   'Outfit', sans-serif;
+    --border-strong: rgba(0,229,192,0.4);
+    --shadow-sm:   0 4px 16px rgba(0,0,0,0.25);
+    --shadow-md:   0 8px 30px rgba(0,0,0,0.35);
+    --shadow-lg:   0 16px 48px rgba(0,0,0,0.45), 0 0 60px rgba(0,229,192,0.08);
+    --gradient-hero: linear-gradient(135deg, #00E5C0 0%, #14F5D4 50%, #FF8A65 100%);
+    --gradient-bg:   radial-gradient(ellipse at 15% -10%, rgba(0,229,192,0.10) 0%, transparent 55%),
+                     radial-gradient(ellipse at 90% 110%, rgba(255,107,74,0.08) 0%, transparent 50%);
+    --radius-lg:   20px;
+    --radius-md:   12px;
+    --font-display:'Space Grotesk', 'Inter', sans-serif;
+    --font-body:   'Inter', sans-serif;
 }
 
 /* ─── Foundation ─────────────────────────────────── */
@@ -52,8 +58,7 @@ html, body, .stApp {
     content: '';
     position: fixed; inset: 0; z-index: -1;
     background:
-        radial-gradient(ellipse at 20% 0%, rgba(79,124,130,0.12) 0%, transparent 60%),
-        radial-gradient(ellipse at 80% 100%, rgba(201,122,138,0.06) 0%, transparent 50%),
+        var(--gradient-bg),
         var(--bg);
 }
 
@@ -63,43 +68,56 @@ html, body, .stApp {
 }
 
 /* ─── Typography ─────────────────────────────────── */
-h1, h2, h3, .page-title, .section-title {
+h1, h2, h3 {
     font-family: var(--font-display) !important;
     color: var(--text) !important;
+    letter-spacing: -0.01em;
+}
+.hero-header {
+    padding: 8px 0 4px;
+    margin-bottom: 8px;
 }
 .page-title {
-    font-size: 26px; font-weight: 900;
-    letter-spacing: 0.01em; margin-bottom: 4px;
-    color: var(--text) !important;
+    font-size: 44px; font-weight: 800;
+    letter-spacing: -0.02em; margin-bottom: 8px; line-height: 1.05;
+    background: var(--gradient-hero);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
 }
 .page-subtitle {
-    font-size: 13px; color: var(--text2);
-    font-weight: 400; margin-bottom: 8px;
+    font-size: 15px; color: var(--text2);
+    font-weight: 400; margin-bottom: 12px; letter-spacing: 0.01em;
 }
 .section-title {
-    font-size: 16px; font-weight: 700;
-    margin-bottom: 14px; letter-spacing: 0.01em;
+    font-family: var(--font-display) !important;
+    font-size: 14px; font-weight: 600;
+    margin-bottom: 16px; letter-spacing: 0.12em;
+    text-transform: uppercase;
     color: var(--accent) !important;
 }
 .divider {
-    height: 2px;
-    background: linear-gradient(90deg, var(--accent), transparent 60%);
-    margin: 14px 0 24px; opacity: 0.3;
+    height: 1px;
+    background: linear-gradient(90deg, rgba(0,229,192,0.5), transparent 80%);
+    margin: 18px 0 32px; opacity: 0.6;
 }
 
 /* ─── Cards ──────────────────────────────────────── */
 .card {
-    background: var(--card-bg);
+    background: linear-gradient(145deg, rgba(26,31,43,0.85), rgba(19,28,50,0.75));
+    backdrop-filter: blur(18px);
+    -webkit-backdrop-filter: blur(18px);
     border: 1px solid var(--border);
     border-radius: var(--radius-lg);
     padding: 32px;
     margin-bottom: 20px;
     box-shadow: 0 8px 30px rgba(0,0,0,0.3);
-    transition: box-shadow 0.3s ease, border-color 0.3s ease;
+    transition: transform 0.35s cubic-bezier(.2,.8,.2,1), box-shadow 0.35s ease, border-color 0.35s ease;
 }
 .card:hover {
-    box-shadow: 0 8px 30px rgba(0,0,0,0.3), 0 0 24px rgba(79,124,130,0.25);
-    border-color: var(--accent);
+    transform: translateY(-2px);
+    box-shadow: 0 16px 48px rgba(0,0,0,0.4), 0 0 32px rgba(0,229,192,0.18);
+    border-color: var(--border-strong);
 }
 
 /* ─── Metric Cards ───────────────────────────────── */
@@ -153,8 +171,8 @@ h1, h2, h3, .page-title, .section-title {
 /* ─── Buttons ────────────────────────────────────── */
 div.stButton > button {
     font-family: var(--font-body) !important;
-    background: #4F7C82 !important;
-    color: #B8E3E9 !important;
+    background: linear-gradient(135deg, #00E5C0 0%, #14F5D4 100%) !important;
+    color: #0F172A !important;
     border: none !important;
     border-radius: 10px !important;
     padding: 6px 12px !important;
@@ -162,13 +180,13 @@ div.stButton > button {
     font-size: 15px !important;
     letter-spacing: 0.02em !important;
     transition: all 0.25s ease !important;
-    box-shadow: 0 2px 8px rgba(0,0,0,0.25) !important;
+    box-shadow: 0 6px 20px rgba(0,229,192,0.25), 0 2px 8px rgba(0,0,0,0.3) !important;
     cursor: pointer !important;
 }
 div.stButton > button:hover {
-    background: #c97a8a !important;
-    color: #0B2E33 !important;
-    box-shadow: 0 4px 16px rgba(0,0,0,0.3) !important;
+    background: linear-gradient(135deg, #FF8A65 0%, #FF6B4A 100%) !important;
+    color: #0F172A !important;
+    box-shadow: 0 10px 30px rgba(0,229,192,0.35), 0 4px 16px rgba(0,0,0,0.35) !important;
     transform: translateY(-1px);
 }
 div.stButton > button:active {
@@ -267,21 +285,21 @@ div[data-testid="stMarkdownContainer"] li {
 /* ─── Form Submit ────────────────────────────────── */
 div[data-testid="stFormSubmitButton"] button {
     font-family: var(--font-body) !important;
-    background: #4F7C82 !important;
-    color: #B8E3E9 !important;
+    background: linear-gradient(135deg, #00E5C0 0%, #14F5D4 100%) !important;
+    color: #0F172A !important;
     border: none !important;
     border-radius: 10px !important;
     padding: 6px 12px !important;
     font-weight: 600 !important;
     font-size: 15px !important;
     letter-spacing: 0.02em !important;
-    box-shadow: 0 2px 8px rgba(0,0,0,0.25) !important;
+    box-shadow: 0 6px 20px rgba(0,229,192,0.25), 0 2px 8px rgba(0,0,0,0.3) !important;
     transition: all 0.25s ease !important;
     cursor: pointer !important;
 }
 div[data-testid="stFormSubmitButton"] button:hover {
     background: #B4D6E3 !important;
-    box-shadow: 0 4px 16px rgba(0,0,0,0.3) !important;
+    box-shadow: 0 10px 30px rgba(0,229,192,0.35), 0 4px 16px rgba(0,0,0,0.35) !important;
     transform: translateY(-1px);
 }
 div[data-testid="stFormSubmitButton"] button:active {
@@ -499,7 +517,16 @@ div[data-testid="stExpander"] summary {
 }
 
 /* ─── Utility Classes ────────────────────────────── */
-.accent-left-card { border-left: 3px solid var(--accent) !important; }
+.accent-left-card {
+    border-left: 3px solid transparent !important;
+    border-image: linear-gradient(180deg, #00E5C0, #14F5D4, #FF8A65) 1 !important;
+    position: relative;
+}
+.accent-left-card::before {
+    content: ''; position: absolute; inset: 0;
+    border-radius: inherit; pointer-events: none;
+    background: linear-gradient(135deg, rgba(0,229,192,0.06), transparent 60%);
+}
 
 .c-pos { color: var(--pos) !important; }
 .c-neg { color: var(--neg) !important; }
@@ -805,10 +832,12 @@ def progress_bar(pct: float, color: str = "") -> str:
 
 
 def page_header(title: str, subtitle: str = "") -> str:
-    """Return HTML string for page title + subtitle + divider."""
+    """Return HTML string for hero title + subtitle + divider."""
     sub_html = f'<div class="page-subtitle">{subtitle}</div>' if subtitle else ""
     return (
+        f'<div class="hero-header">'
         f'<div class="page-title">{title}</div>'
         f'{sub_html}'
         f'<div class="divider"></div>'
+        f'</div>'
     )
