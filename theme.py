@@ -6,7 +6,7 @@ import streamlit as st
 ACCENT = "#4F7C82"
 POS = "#4F7C82"
 NEG = "#c97a8a"
-BG = "#0B2E33"
+BG = "#0A1628"
 BG2 = "#0e3a40"
 CARD_BG = "#0e3a40"
 TEXT = "#B8E3E9"
@@ -18,7 +18,7 @@ _CSS = """<style>
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=Space+Grotesk:wght@400;500;600;700&display=swap');
 
 :root {
-    --bg:          #0B2E33;
+    --bg:          #0A1628;
     --bg2:         #0e3a40;
     --card-bg:     #0e3a40;
     --card-hover:  #125057;
