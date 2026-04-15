@@ -132,7 +132,7 @@ run = row.get("run_done", False) if row is not None else False
 income = row.get("income_done", False) if row is not None else False
 
 pills_html = '<div class="exec-pills">'
-for label, done in [("Priorities", focus), ("Run", run), ("Income", income)]:
+for label, done in [("Priorities", focus), ("ATTENTION", run), ("SYSTEM", income)]:
     cls = "done" if done else "pending"
     pills_html += f'<span class="exec-pill {cls}">{label}</span>'
 pills_html += '</div>'
