@@ -3,35 +3,35 @@
 import streamlit as st
 
 # ── Design Token Constants ──────────────────────────────────────────
-ACCENT = "#1C2340"
-POS = "#1C2340"
+ACCENT = "#4F7C82"
+POS = "#4F7C82"
 NEG = "#c97a8a"
-BG = "#50223C"
-BG2 = "#3d1a2e"
-CARD_BG = "#3d1a2e"
-TEXT = "#f0DAC5"
-TEXT2 = "#c9a898"
-BORDER = "#6b3050"
+BG = "#0B2E33"
+BG2 = "#0e3a40"
+CARD_BG = "#0e3a40"
+TEXT = "#B8E3E9"
+TEXT2 = "#7fbcc4"
+BORDER = "#4F7C82"
 
 # ── CSS Strings ─────────────────────────────────────────────────────
 _CSS = """<style>
 @import url('https://fonts.googleapis.com/css2?family=Zen+Kaku+Gothic+New:wght@400;500;700;900&family=Outfit:wght@300;400;500;600;700&display=swap');
 
 :root {
-    --bg:          #50223C;
-    --bg2:         #3d1a2e;
-    --card-bg:     #3d1a2e;
-    --card-hover:  #5c2845;
-    --accent:      #1C2340;
-    --accent-soft: rgba(28,35,64,0.15);
-    --accent-glow: 0 4px 20px rgba(28,35,64,0.25);
-    --pos:         #1C2340;
+    --bg:          #0B2E33;
+    --bg2:         #0e3a40;
+    --card-bg:     #0e3a40;
+    --card-hover:  #135058;
+    --accent:      #4F7C82;
+    --accent-soft: rgba(79,124,130,0.15);
+    --accent-glow: 0 4px 20px rgba(79,124,130,0.25);
+    --pos:         #4F7C82;
     --neg:         #c97a8a;
-    --text:        #f0DAC5;
-    --text2:       #c9a898;
-    --text3:       #c9a898;
-    --border:      #6b3050;
-    --border-strong: #f0DAC5;
+    --text:        #B8E3E9;
+    --text2:       #7fbcc4;
+    --text3:       #7fbcc4;
+    --border:      #4F7C82;
+    --border-strong: #B8E3E9;
     --shadow-sm:   0 1px 3px rgba(0,0,0,0.3), 0 1px 2px rgba(0,0,0,0.3);
     --shadow-md:   0 4px 12px rgba(0,0,0,0.3), 0 2px 4px rgba(0,0,0,0.3);
     --shadow-lg:   0 8px 30px rgba(0,0,0,0.3), 0 2px 8px rgba(0,0,0,0.3);
@@ -52,7 +52,7 @@ html, body, .stApp {
     content: '';
     position: fixed; inset: 0; z-index: -1;
     background:
-        radial-gradient(ellipse at 20% 0%, rgba(28,35,64,0.1) 0%, transparent 60%),
+        radial-gradient(ellipse at 20% 0%, rgba(79,124,130,0.12) 0%, transparent 60%),
         radial-gradient(ellipse at 80% 100%, rgba(201,122,138,0.06) 0%, transparent 50%),
         var(--bg);
 }
@@ -153,8 +153,8 @@ h1, h2, h3, .page-title, .section-title {
 /* ─── Buttons ────────────────────────────────────── */
 div.stButton > button {
     font-family: var(--font-body) !important;
-    background: #1C2340 !important;
-    color: #f0DAC5 !important;
+    background: #4F7C82 !important;
+    color: #B8E3E9 !important;
     border: none !important;
     border-radius: 10px !important;
     padding: 6px 12px !important;
@@ -167,7 +167,7 @@ div.stButton > button {
 }
 div.stButton > button:hover {
     background: #c97a8a !important;
-    color: #50223C !important;
+    color: #0B2E33 !important;
     box-shadow: 0 4px 16px rgba(0,0,0,0.3) !important;
     transform: translateY(-1px);
 }
@@ -201,7 +201,7 @@ div[data-testid="stSelectbox"] > div > div {
 }
 input:focus, textarea:focus {
     border-bottom-color: var(--accent) !important;
-    background: #5c2845 !important;
+    background: #135058 !important;
     box-shadow: none !important;
     outline: none !important;
 }
@@ -267,8 +267,8 @@ div[data-testid="stMarkdownContainer"] li {
 /* ─── Form Submit ────────────────────────────────── */
 div[data-testid="stFormSubmitButton"] button {
     font-family: var(--font-body) !important;
-    background: #1C2340 !important;
-    color: #f0DAC5 !important;
+    background: #4F7C82 !important;
+    color: #B8E3E9 !important;
     border: none !important;
     border-radius: 10px !important;
     padding: 6px 12px !important;
@@ -291,7 +291,7 @@ div[data-testid="stFormSubmitButton"] button:active {
 
 /* ─── Popover / Dropdown ─────────────────────────── */
 [data-baseweb="popover"] {
-    background: #3d1a2e !important;
+    background: #0e3a40 !important;
     border: 1px solid var(--border-strong) !important;
     box-shadow: var(--shadow-lg) !important;
     border-radius: var(--radius-md) !important;
@@ -425,7 +425,7 @@ header[data-testid="stHeader"] > *:not([data-testid="stToolbar"]):not([data-test
 }
 .st-key-nav_menu_container .stSelectbox [data-baseweb="select"] > div:hover {
     border-color: var(--accent) !important;
-    box-shadow: 0 4px 20px rgba(28,35,64,0.3) !important;
+    box-shadow: 0 4px 20px rgba(79,124,130,0.3) !important;
 }
 .st-key-nav_menu_container .stSelectbox [data-baseweb="select"] > div > div,
 .st-key-nav_menu_container .stSelectbox [data-baseweb="select"] span {
@@ -468,7 +468,7 @@ div[data-testid="stExpander"] summary {
     text-transform: uppercase; letter-spacing: 0.04em;
 }
 .exec-pill.done {
-    color: var(--pos); background: rgba(28,35,64,0.2);
+    color: var(--pos); background: rgba(79,124,130,0.2);
 }
 .exec-pill.pending {
     color: var(--text3); background: var(--bg2);
@@ -680,12 +680,12 @@ div[data-testid="stChatInput"] textarea {
 /* ─── Scrollbar ──────────────────────────────────── */
 ::-webkit-scrollbar { width: 6px; }
 ::-webkit-scrollbar-track { background: transparent; }
-::-webkit-scrollbar-thumb { background: rgba(28,35,64,0.4); border-radius: 3px; }
-::-webkit-scrollbar-thumb:hover { background: rgba(28,35,64,0.6); }
+::-webkit-scrollbar-thumb { background: rgba(79,124,130,0.4); border-radius: 3px; }
+::-webkit-scrollbar-thumb:hover { background: rgba(79,124,130,0.6); }
 
 /* ─── Status Boxes ───────────────────────────────── */
 .success-box {
-    background: rgba(28,35,64,0.15);
+    background: rgba(79,124,130,0.15);
     border-left: 3px solid var(--pos);
     border-radius: var(--radius-md);
     padding: 12px 16px; color: var(--pos); margin: 10px 0; font-size: 14px;
