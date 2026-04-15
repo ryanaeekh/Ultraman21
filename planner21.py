@@ -140,12 +140,12 @@ st.markdown(pills_html, unsafe_allow_html=True)
 
 # --- Long-term goals ---
 if saved_goals:
-    st.markdown(f'''<div class="card accent-left-card" style="margin-top:20px;">
+    st.markdown(f'''<div class="card accent-left-card" style="margin-top:20px;text-align:center;">
     <div class="section-title">\U0001f3af Long Term Goals</div>
     <div style="white-space:pre-wrap;font-size:15px;line-height:1.85;color:var(--text);opacity:0.90;">{saved_goals}</div>
 </div>''', unsafe_allow_html=True)
 else:
-    st.markdown('''<div class="card" style="margin-top:20px;">
+    st.markdown('''<div class="card" style="margin-top:20px;text-align:center;">
     <div class="section-title">\U0001f3af Long Term Goals</div>
     <div style="opacity:0.5;font-size:14px;line-height:1.6;color:var(--text2);">No goals set yet \u2014 go to Settings to add them.</div>
 </div>''', unsafe_allow_html=True)
