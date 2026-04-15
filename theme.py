@@ -20,8 +20,8 @@ _CSS = """<style>
 :root {
     --bg:          #0B2E33;
     --bg2:         #0e3a40;
-    --card-bg:     #0e3a40;
-    --card-hover:  #135058;
+    --card-bg:     #1A1F2B;
+    --card-hover:  #232a3a;
     --accent:      #4F7C82;
     --accent-soft: rgba(79,124,130,0.15);
     --accent-glow: 0 4px 20px rgba(79,124,130,0.25);
@@ -30,11 +30,11 @@ _CSS = """<style>
     --text:        #B8E3E9;
     --text2:       #7fbcc4;
     --text3:       #7fbcc4;
-    --border:      #4F7C82;
-    --border-strong: #B8E3E9;
-    --shadow-sm:   0 1px 3px rgba(0,0,0,0.3), 0 1px 2px rgba(0,0,0,0.3);
-    --shadow-md:   0 4px 12px rgba(0,0,0,0.3), 0 2px 4px rgba(0,0,0,0.3);
-    --shadow-lg:   0 8px 30px rgba(0,0,0,0.3), 0 2px 8px rgba(0,0,0,0.3);
+    --border:      #2E3440;
+    --border-strong: #4F7C82;
+    --shadow-sm:   0 4px 16px rgba(0,0,0,0.3);
+    --shadow-md:   0 8px 30px rgba(0,0,0,0.3);
+    --shadow-lg:   0 8px 30px rgba(0,0,0,0.3), 0 0 40px rgba(79,124,130,0.15);
     --radius-lg:   14px;
     --radius-md:   8px;
     --font-display:'Zen Kaku Gothic New', sans-serif;
@@ -79,7 +79,7 @@ h1, h2, h3, .page-title, .section-title {
 .section-title {
     font-size: 16px; font-weight: 700;
     margin-bottom: 14px; letter-spacing: 0.01em;
-    color: var(--text) !important;
+    color: var(--accent) !important;
 }
 .divider {
     height: 2px;
@@ -92,14 +92,14 @@ h1, h2, h3, .page-title, .section-title {
     background: var(--card-bg);
     border: 1px solid var(--border);
     border-radius: var(--radius-lg);
-    padding: 24px;
-    margin-bottom: 16px;
-    box-shadow: var(--shadow-sm);
+    padding: 32px;
+    margin-bottom: 20px;
+    box-shadow: 0 8px 30px rgba(0,0,0,0.3);
     transition: box-shadow 0.3s ease, border-color 0.3s ease;
 }
 .card:hover {
-    box-shadow: var(--shadow-md);
-    border-color: var(--border-strong);
+    box-shadow: 0 8px 30px rgba(0,0,0,0.3), 0 0 24px rgba(79,124,130,0.25);
+    border-color: var(--accent);
 }
 
 /* ─── Metric Cards ───────────────────────────────── */
