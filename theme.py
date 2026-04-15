@@ -63,14 +63,21 @@ html, body, .stApp {
 }
 
 /* ─── Typography ─────────────────────────────────── */
-h1, h2, h3, .page-title, .section-title {
+h1, h2, h3, .section-title {
     font-family: var(--font-display) !important;
     color: var(--text) !important;
 }
 .page-title {
+    font-family: var(--font-display) !important;
+    color: #000000 !important;
+}
+.page-title {
     font-size: 26px; font-weight: 900;
     letter-spacing: 0.01em; margin-bottom: 4px;
-    color: var(--text) !important;
+    color: #000000 !important;
+}
+h1.page-title, .page-title * {
+    color: #000000 !important;
 }
 .page-subtitle {
     font-size: 13px; color: var(--text2);
