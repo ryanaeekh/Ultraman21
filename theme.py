@@ -3,47 +3,44 @@
 import streamlit as st
 
 # ── Design Token Constants ──────────────────────────────────────────
-ACCENT = "#00F5D4"
-POS = "#10E9B8"
-NEG = "#FF6B5E"
-BG = "#0A1329"
-BG2 = "#111b33"
-CARD_BG = "#1A2339"
-TEXT = "#F1F5F9"
-TEXT2 = "#94A3B8"
-BORDER = "rgba(0,245,212,0.12)"
+ACCENT = "#4F7C82"
+POS = "#4F7C82"
+NEG = "#c97a8a"
+BG = "#0B2E33"
+BG2 = "#0e3a40"
+CARD_BG = "#0e3a40"
+TEXT = "#B8E3E9"
+TEXT2 = "#7fbcc4"
+BORDER = "#4F7C82"
 
 # ── CSS Strings ─────────────────────────────────────────────────────
 _CSS = """<style>
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=Space+Grotesk:wght@400;500;600;700&display=swap');
 
 :root {
-    --bg:          #0A1329;
-    --bg2:         #111b33;
-    --card-bg:     #1A2339;
-    --card-hover:  #1f2a45;
-    --accent:      #00F5D4;
-    --accent-2:    #14E9C8;
-    --coral:       #FF6B5E;
-    --coral-soft:  rgba(255,107,94,0.12);
-    --accent-soft: rgba(0,245,212,0.10);
-    --accent-glow: 0 0 40px rgba(0,245,212,0.35);
-    --pos:         #10E9B8;
-    --neg:         #FF6B5E;
-    --text:        #F1F5F9;
-    --text2:       #94A3B8;
-    --text3:       #5a6a85;
-    --border:      rgba(0,245,212,0.12);
-    --border-strong: rgba(0,245,212,0.45);
-    --shadow-sm:   0 4px 18px rgba(0,0,0,0.3);
-    --shadow-md:   0 10px 36px rgba(0,0,0,0.4);
-    --shadow-lg:   0 20px 60px rgba(0,0,0,0.5), 0 0 60px rgba(0,245,212,0.08);
-    --gradient-hero: linear-gradient(135deg, #00F5D4 0%, #14E9C8 55%, #FF8A65 100%);
-    --gradient-border: linear-gradient(135deg, #00F5D4, #FF6B5E);
-    --gradient-bg:   radial-gradient(ellipse at 12% -10%, rgba(0,245,212,0.10) 0%, transparent 55%),
-                     radial-gradient(ellipse at 88% 110%, rgba(255,107,94,0.07) 0%, transparent 50%);
+    --bg:          #0B2E33;
+    --bg2:         #0e3a40;
+    --card-bg:     #0e3a40;
+    --card-hover:  #125057;
+    --accent:      #4F7C82;
+    --accent-2:    #7fbcc4;
+    --accent-soft: rgba(79,124,130,0.14);
+    --accent-glow: 0 0 28px rgba(79,124,130,0.35);
+    --pos:         #4F7C82;
+    --neg:         #c97a8a;
+    --text:        #B8E3E9;
+    --text2:       #7fbcc4;
+    --text3:       #5a8a90;
+    --border:      rgba(79,124,130,0.35);
+    --border-strong: #7fbcc4;
+    --shadow-sm:   0 2px 12px rgba(0,0,0,0.3);
+    --shadow-md:   0 8px 30px rgba(0,0,0,0.3);
+    --shadow-lg:   0 16px 48px rgba(0,0,0,0.4), 0 0 40px rgba(79,124,130,0.1);
+    --gradient-hero: linear-gradient(135deg, #7fbcc4 0%, #B8E3E9 100%);
+    --gradient-bg:   radial-gradient(ellipse at 12% -10%, rgba(79,124,130,0.12) 0%, transparent 55%),
+                     radial-gradient(ellipse at 88% 110%, rgba(184,227,233,0.04) 0%, transparent 50%);
     --radius-lg:   20px;
-    --radius-md:   12px;
+    --radius-md:   14px;
     --font-display:'Space Grotesk', 'Inter', sans-serif;
     --font-body:   'Inter', sans-serif;
 }
@@ -80,17 +77,17 @@ h1, h2, h3 {
 }
 .hero-header .page-subtitle { margin-top: 14px; }
 .page-title {
-    font-size: 52px; font-weight: 800;
-    letter-spacing: -0.025em; margin-bottom: 10px; line-height: 1.02;
+    font-size: 44px; font-weight: 700;
+    letter-spacing: -0.02em; margin-bottom: 8px; line-height: 1.05;
     color: var(--text) !important;
     position: relative; display: inline-block;
 }
 .page-title::after {
     content: ''; position: absolute;
-    left: 0; bottom: -6px; width: 56px; height: 4px;
+    left: 0; bottom: -6px; width: 48px; height: 3px;
     border-radius: 2px;
-    background: linear-gradient(90deg, #00F5D4, #FF6B5E);
-    box-shadow: 0 0 18px rgba(0,245,212,0.45);
+    background: linear-gradient(90deg, #4F7C82, #B8E3E9);
+    box-shadow: 0 0 14px rgba(79,124,130,0.45);
 }
 .page-subtitle {
     font-size: 15px; color: var(--text2);
@@ -501,28 +498,151 @@ div[data-testid="stExpander"] summary {
     color: var(--text3); background: var(--bg2);
 }
 
+/* ─── Date Pill ──────────────────────────────────── */
+.date-pill {
+    display: inline-flex; align-items: center; gap: 8px;
+    padding: 6px 14px; border-radius: 999px;
+    background: var(--accent-soft);
+    border: 1px solid var(--border);
+    color: var(--text2); font-family: var(--font-body);
+    font-size: 13px; font-weight: 500;
+    letter-spacing: 0.03em;
+}
+.date-pill::before {
+    content: ''; width: 6px; height: 6px; border-radius: 50%;
+    background: var(--accent);
+    box-shadow: 0 0 8px var(--accent);
+}
+
+/* ─── Quote Block ────────────────────────────────── */
+.quote-block {
+    font-family: var(--font-display);
+    font-style: italic;
+    font-size: 15px; line-height: 1.8;
+    color: var(--text); opacity: 0.92;
+    text-align: center;
+    padding: 12px 8px;
+}
+.quote-block::before {
+    content: '"'; display: block;
+    font-size: 56px; line-height: 0.4;
+    color: var(--accent); opacity: 0.55;
+    margin-bottom: 20px;
+}
+.quote-author {
+    display: block; margin-top: 18px;
+    font-family: var(--font-body);
+    font-style: normal; font-size: 12px;
+    letter-spacing: 0.16em; text-transform: uppercase;
+    color: var(--text2); opacity: 0.7;
+}
+
+/* ─── Segmented Pills ────────────────────────────── */
+.seg-row { display: flex; gap: 10px; flex-wrap: wrap; margin: 4px 0 16px; }
+.seg-pill {
+    flex: 1; min-width: 0; min-height: 56px;
+    display: flex; align-items: center; justify-content: center;
+    padding: 14px 18px; border-radius: var(--radius-md);
+    background: var(--accent-soft);
+    border: 1px solid var(--border);
+    color: var(--text2); font-family: var(--font-display);
+    font-size: 13px; font-weight: 600;
+    letter-spacing: 0.1em; text-transform: uppercase;
+    cursor: pointer; user-select: none;
+    transition: all 0.25s ease;
+}
+.seg-pill:hover { color: var(--text); border-color: var(--border-strong); }
+.seg-pill.active {
+    background: linear-gradient(135deg, #4F7C82, #7fbcc4);
+    color: #0B2E33; border-color: transparent;
+    box-shadow: var(--accent-glow);
+}
+
+/* ─── Type Card Row ──────────────────────────────── */
+.type-row {
+    display: flex; gap: 10px; overflow-x: auto;
+    padding: 4px 0 12px; margin-bottom: 14px;
+    scrollbar-width: none;
+}
+.type-row::-webkit-scrollbar { display: none; }
+.type-card {
+    flex: 0 0 auto; min-width: 96px; min-height: 72px;
+    padding: 14px 18px; border-radius: var(--radius-md);
+    background: rgba(184,227,233,0.04);
+    border: 1px solid var(--border);
+    display: flex; flex-direction: column; align-items: center; gap: 4px;
+    color: var(--text2); font-family: var(--font-display);
+    font-size: 12px; font-weight: 600;
+    letter-spacing: 0.08em; text-transform: uppercase;
+    transition: all 0.25s ease;
+}
+.type-card .emoji { font-size: 20px; }
+.type-card:hover { border-color: var(--border-strong); color: var(--text); }
+.type-card.active {
+    background: linear-gradient(135deg, #4F7C82, #7fbcc4);
+    color: #0B2E33; border-color: transparent;
+    box-shadow: var(--accent-glow);
+}
+
+/* ─── Pace / Hero Badge ──────────────────────────── */
+.glow-badge {
+    display: inline-block;
+    padding: 10px 22px; border-radius: 999px;
+    background: rgba(79,124,130,0.12);
+    border: 1px solid var(--border-strong);
+    color: var(--accent-2);
+    font-family: var(--font-display);
+    font-size: 13px; font-weight: 700;
+    letter-spacing: 0.08em; text-transform: uppercase;
+    box-shadow: 0 0 20px rgba(79,124,130,0.25);
+}
+
+/* ─── List Row (fixed expenses, settings tags) ───── */
+.list-row {
+    display: flex; justify-content: space-between; align-items: center;
+    padding: 14px 18px; margin-bottom: 8px;
+    background: rgba(184,227,233,0.03);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-md);
+    color: var(--text);
+    transition: all 0.2s ease;
+}
+.list-row:hover { border-color: var(--border-strong); background: var(--accent-soft); }
+.list-row .amount { color: var(--accent-2); font-weight: 700; }
+
 /* ─── Score Ring ─────────────────────────────────── */
+@keyframes ringPulse {
+    0%   { box-shadow: 0 0 0 rgba(79,124,130,0.0), var(--shadow-md); }
+    50%  { box-shadow: 0 0 40px rgba(79,124,130,0.35), var(--shadow-md); }
+    100% { box-shadow: 0 0 0 rgba(79,124,130,0.0), var(--shadow-md); }
+}
 .score-ring {
-    width: 140px; height: 140px;
-    border-radius: 50%; margin: 0 auto 12px;
+    width: 180px; height: 180px;
+    border-radius: 50%; margin: 20px auto 18px;
     display: flex; align-items: center; justify-content: center;
     background: conic-gradient(
+        var(--accent-2) 0deg,
         var(--accent) calc(var(--pct) * 3.6deg),
-        var(--bg2) 0deg
+        rgba(184,227,233,0.08) 0deg
     );
     position: relative;
-    box-shadow: var(--shadow-md);
+    animation: ringPulse 3.6s ease-in-out infinite;
 }
 .score-ring::after {
     content: ''; position: absolute;
-    width: 120px; height: 120px; border-radius: 50%;
-    background: var(--card-bg);
+    width: 156px; height: 156px; border-radius: 50%;
+    background: radial-gradient(circle at 30% 20%, #125057 0%, #0B2E33 100%);
+    box-shadow: inset 0 2px 14px rgba(0,0,0,0.4);
 }
 .score-ring-value {
     position: relative; z-index: 1;
-    font-family: var(--font-body);
-    font-size: 42px; font-weight: 700;
-    color: var(--text);
+    font-family: var(--font-display);
+    font-size: 54px; font-weight: 700;
+    letter-spacing: -0.02em;
+    background: linear-gradient(135deg, #B8E3E9, #7fbcc4);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
 }
 
 /* ─── Utility Classes ────────────────────────────── */
@@ -747,15 +867,12 @@ div[data-testid="stChatInput"] textarea {
 # ── Page Registry ──────────────────────────────────────────────────
 _PAGES = {
     "Mission 21": "planner21.py",
-    "Dashboard": "pages/dashboard.py",
     "Finance": "pages/finance.py",
-    "Driving": "pages/driving.py",
-    "Exercise": "pages/excercise.py",
-    "Weekly Review": "pages/weekly_review.py",
+    "Exercise": "pages/exercise.py",
     "Journal": "pages/journal.py",
-    "News": "pages/news.py",
-    "History": "pages/history.py",
     "Insights": "pages/insights.py",
+    "Weekly Review": "pages/weekly_review.py",
+    "News": "pages/news.py",
     "Settings": "pages/settings.py",
 }
 

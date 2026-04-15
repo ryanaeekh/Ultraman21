@@ -1,131 +1,94 @@
-"""Insights / Analytics page — performance trends and habit tracking."""
+import sys, os
+sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 from datetime import date, timedelta
 
 import pandas as pd
 import streamlit as st
 
-from theme import inject_theme, nav_menu, page_header, metric_card, progress_bar, ACCENT, POS
+st.set_page_config(page_title="Insights", page_icon="\U0001f4c8", layout="wide", initial_sidebar_state="collapsed")
+
+from theme import inject_theme, nav_menu, page_header, metric_card
 from utils import load_planner
-
-st.set_page_config(page_title="Insights", page_icon="📊", layout="wide", initial_sidebar_state="collapsed")
-
-
-@st.cache_data(ttl=15)
-def _load_planner():
-    df = load_planner()
-    if "date" in df.columns:
-        df["date"] = df["date"].astype(str)
-    return df
-
-
-def compute_streak(df):
-    if df.empty:
-        return 0
-    completed = set(df[df["score"] > 0]["date"].astype(str).tolist())
-    streak = 0
-    check = date.today()
-    while str(check) in completed:
-        streak += 1
-        check -= timedelta(days=1)
-    return streak
-
-
-def compute_habit_streak(df, habit_col):
-    if df.empty or habit_col not in df.columns:
-        return 0
-    completed = set(df[df[habit_col] == True]["date"].astype(str).tolist())
-    streak, check = 0, date.today()
-    while str(check) in completed:
-        streak += 1
-        check -= timedelta(days=1)
-    return streak
-
-
-def get_execution_label(score):
-    if score == 100:    return "Fully Completed"
-    elif score >= 70:   return "Strong Progress"
-    elif score >= 40:   return "In Progress"
-    else:               return "Not Started"
-
 
 inject_theme()
 nav_menu("Insights")
 
-st.markdown(page_header("Insights", "Performance analytics"), unsafe_allow_html=True)
+st.markdown(page_header("Insights", "Patterns, not pressure"), unsafe_allow_html=True)
 
-planner_df = _load_planner()
+planner_df = load_planner()
 
-if len(planner_df) < 2:
-    st.info("Log at least 2 days to see insights.")
-else:
-    total_days   = len(planner_df)
-    perfect_days = len(planner_df[planner_df["score"] == 100])
-    all_time_avg = round(planner_df["score"].mean())
-    streak       = compute_streak(planner_df)
+if planner_df.empty:
+    st.markdown('<div class="card" style="text-align:center;opacity:0.7;">No planner data yet.</div>', unsafe_allow_html=True)
+    st.stop()
 
-    focus_rate  = round(planner_df["focus_done"].sum() / total_days * 100)
-    run_rate    = round(planner_df["run_done"].sum()   / total_days * 100)
-    income_rate = round(planner_df["income_done"].sum()/ total_days * 100)
+planner_df = planner_df.copy()
+planner_df["date_parsed"] = pd.to_datetime(planner_df["date"], errors="coerce")
+planner_df = planner_df.dropna(subset=["date_parsed"]).sort_values("date_parsed")
 
-    focus_streak  = compute_habit_streak(planner_df, "focus_done")
-    run_streak    = compute_habit_streak(planner_df, "run_done")
-    income_streak = compute_habit_streak(planner_df, "income_done")
+# ── Metrics ───────────────────────────────────────────────
+days_logged = int(planner_df["score"].gt(0).sum())
+perfect_days = int(planner_df["score"].eq(100).sum())
 
-    c1, c2, c3, c4 = st.columns(4)
-    with c1:
-        st.markdown(metric_card("Days Logged", str(total_days)), unsafe_allow_html=True)
-    with c2:
-        st.markdown(metric_card("Perfect Days", str(perfect_days)), unsafe_allow_html=True)
-    with c3:
-        st.markdown(metric_card("All-Time Avg", f'{all_time_avg}<span style="font-size:1rem;opacity:.45">/100</span>'), unsafe_allow_html=True)
-    with c4:
-        st.markdown(metric_card("Current Streak", str(streak), sub="consecutive days"), unsafe_allow_html=True)
+completed = set(planner_df[planner_df["score"] > 0]["date"].astype(str).tolist())
+streak, check = 0, date.today()
+while str(check) in completed:
+    streak += 1
+    check -= timedelta(days=1)
 
-    st.markdown('<div class="section-label">Score over time</div>', unsafe_allow_html=True)
-    chart_df = planner_df.sort_values("date")[["date", "score"]].set_index("date")
-    st.area_chart(chart_df, height=220)
+cols = st.columns(3)
+with cols[0]:
+    st.markdown(metric_card("Days Logged", f"{days_logged}", color="var(--accent-2)"), unsafe_allow_html=True)
+with cols[1]:
+    st.markdown(metric_card("Perfect Days", f"{perfect_days}", sub="100 / 100", color="var(--accent-2)"), unsafe_allow_html=True)
+with cols[2]:
+    st.markdown(metric_card("Current Streak", f"\U0001f525 {streak}", sub="consecutive days", color="var(--accent-2)"), unsafe_allow_html=True)
 
-    st.markdown("<div style='height:8px'></div>", unsafe_allow_html=True)
-    st.markdown('<div class="section-label">Habit completion rates</div>', unsafe_allow_html=True)
-    hc1, hc2, hc3 = st.columns(3, gap="medium")
-    for col, name, pct in [(hc1, "All Priorities", focus_rate), (hc2, "Run", run_rate), (hc3, "Income Target", income_rate)]:
-        with col:
-            st.markdown(
-                f'<div class="card"><div class="metric-label">{name}</div>'
-                f'<div class="metric-value" style="color:{POS}">{pct}%</div>'
-                f'{progress_bar(pct, POS)}'
-                f'<div style="font-size:12px;opacity:.5;margin-top:7px">{pct}% of days</div></div>',
-                unsafe_allow_html=True,
-            )
+# ── Score Trend ───────────────────────────────────────────
+st.markdown('<div class="section-title">\U0001f4c9 Score Trend</div>', unsafe_allow_html=True)
+recent = planner_df.tail(30).copy()
+chart_df = recent[["date_parsed", "score"]].rename(columns={"date_parsed": "Date", "score": "Score"}).set_index("Date")
 
-    st.markdown("<div style='height:8px'></div>", unsafe_allow_html=True)
-    st.markdown('<div class="section-label">Current habit streaks</div>', unsafe_allow_html=True)
-    hs1, hs2, hs3 = st.columns(3, gap="medium")
-    for col, name, streak_val in [(hs1, "Priorities", focus_streak), (hs2, "Run", run_streak), (hs3, "Income", income_streak)]:
-        with col:
-            st.markdown(metric_card(f"{name} Streak", str(streak_val), sub="consecutive days"), unsafe_allow_html=True)
+import altair as alt
+chart_data = chart_df.reset_index()
+area = alt.Chart(chart_data).mark_area(
+    line={"color": "#7fbcc4", "strokeWidth": 2},
+    color=alt.Gradient(
+        gradient="linear",
+        stops=[
+            alt.GradientStop(color="rgba(79,124,130,0.45)", offset=0),
+            alt.GradientStop(color="rgba(79,124,130,0.02)", offset=1),
+        ],
+        x1=1, x2=1, y1=1, y2=0,
+    ),
+).encode(
+    x=alt.X("Date:T", axis=alt.Axis(labelColor="#7fbcc4", tickColor="#4F7C82", grid=False)),
+    y=alt.Y("Score:Q", scale=alt.Scale(domain=[0, 100]), axis=alt.Axis(labelColor="#7fbcc4", tickColor="#4F7C82", gridColor="rgba(79,124,130,0.15)")),
+).properties(height=260, background="transparent")
+points = alt.Chart(chart_data).mark_point(filled=True, size=70, color="#B8E3E9", stroke="#7fbcc4").encode(
+    x="Date:T", y="Score:Q"
+)
+st.altair_chart(area + points, use_container_width=True)
 
-    st.markdown("<div style='height:8px'></div>", unsafe_allow_html=True)
-    st.markdown('<div class="section-label">Last 7 days</div>', unsafe_allow_html=True)
-    week_ago = str(date.today() - timedelta(days=6))
-    week_df  = planner_df[planner_df["date"] >= week_ago].sort_values("date")
+# ── Habit Completion Rates ────────────────────────────────
+st.markdown('<div class="section-title">\U0001f3af Habit Completion</div>', unsafe_allow_html=True)
+total = len(planner_df)
+priorities_pct = round(100 * planner_df["focus_done"].sum() / total) if total else 0
+attention_pct = round(100 * planner_df["run_done"].sum() / total) if total else 0
+system_pct = round(100 * planner_df["income_done"].sum() / total) if total else 0
 
-    if week_df.empty:
-        st.info("No entries in the last 7 days.")
-    else:
-        rows_html = ""
-        for _, row in week_df.iterrows():
-            score = int(row["score"])
-            label = get_execution_label(score)
-            score_color = POS if score >= 70 else (ACCENT if score >= 40 else "var(--text2)")
-            rows_html += (
-                f'<tr><td>{row["date"]}</td>'
-                f'<td><div class="progress-track" style="width:100%">'
-                f'<div class="progress-fill" style="width:{score}%;background:{score_color}"></div></div></td>'
-                f'<td style="font-weight:600">{score}/100</td><td>{label}</td></tr>'
-            )
-        st.markdown(
-            f'<table class="day-table"><thead><tr><th>Date</th><th>Progress</th><th>Score</th><th>Status</th></tr></thead><tbody>{rows_html}</tbody></table>',
-            unsafe_allow_html=True,
-        )
+def habit_row(label, pct):
+    return (
+        f'<div class="card" style="padding:20px 22px;margin-bottom:12px;">'
+        f'<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;">'
+        f'<span style="font-family:var(--font-display);font-size:13px;letter-spacing:0.12em;text-transform:uppercase;color:var(--text2);">{label}</span>'
+        f'<span class="glow-badge" style="padding:4px 12px;font-size:12px;">{pct}%</span>'
+        f'</div>'
+        f'<div style="height:8px;border-radius:4px;background:rgba(184,227,233,0.08);overflow:hidden;">'
+        f'<div style="height:100%;width:{pct}%;background:linear-gradient(90deg,#4F7C82,#B8E3E9);box-shadow:0 0 12px rgba(79,124,130,0.45);"></div>'
+        f'</div></div>'
+    )
+
+st.markdown(habit_row("Priorities", priorities_pct), unsafe_allow_html=True)
+st.markdown(habit_row("Attention", attention_pct), unsafe_allow_html=True)
+st.markdown(habit_row("System", system_pct), unsafe_allow_html=True)

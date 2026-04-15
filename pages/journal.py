@@ -1,66 +1,64 @@
-import streamlit as st
-import pandas as pd
-from datetime import date
-from theme import inject_theme, nav_menu, page_header
-from utils import load_journal, save_journal_df, JOURNAL_COLUMNS
+import sys, os
+sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
-st.set_page_config(page_title="Journal", page_icon="📓", layout="wide", initial_sidebar_state="collapsed")
+from datetime import date
+
+import pandas as pd
+import streamlit as st
+
+st.set_page_config(page_title="Journal", page_icon="\U0001f4d3", layout="wide", initial_sidebar_state="collapsed")
+
+from theme import inject_theme, nav_menu, page_header
+from utils import load_journal, save_journal_df, clean_text
 
 inject_theme()
 nav_menu("Journal")
-st.markdown('<style>.block-container{max-width:900px !important;}</style>', unsafe_allow_html=True)
-st.markdown(page_header("Journal", "Daily reflections"), unsafe_allow_html=True)
 
+today = date.today()
+today_str = str(today)
+pretty = today.strftime("%A, %d %B %Y")
 
-@st.cache_data(ttl=15)
-def _load_journal():
-    df = load_journal()
-    if "entry" in df.columns:
-        df["entry"] = df["entry"].fillna("")
-    return df
+st.markdown(page_header(pretty, "A quiet place to think"), unsafe_allow_html=True)
 
+journal_df = load_journal()
 
-def _invalidate():
-    _load_journal.clear()
+existing = ""
+if not journal_df.empty:
+    match = journal_df[journal_df["date"].astype(str) == today_str]
+    if not match.empty:
+        existing = clean_text(match.iloc[0]["entry"])
 
+entry = st.text_area("Entry", value=existing, height=320, key="journal_entry",
+                     placeholder="Write freely. No judgement. Just presence.")
 
-def save_journal(df):
-    save_journal_df(df)
-    _invalidate()
-
-
-today_str = date.today().strftime("%Y-%m-%d")
-df = _load_journal()
-
-# --- Today's entry ---
-existing = df[df["date"] == today_str]
-prefill = existing.iloc[0]["entry"] if len(existing) > 0 else ""
-
-with st.form("journal_form", clear_on_submit=False):
-    entry = st.text_area("Today's entry", value=prefill, height=300, placeholder="Write freely...")
-    submitted = st.form_submit_button("Save")
-
-if submitted:
-    df = _load_journal()
-    if len(df[df["date"] == today_str]) > 0:
-        df.loc[df["date"] == today_str, "entry"] = entry
-    else:
-        new_row = pd.DataFrame([{"date": today_str, "entry": entry}])
-        df = pd.concat([df, new_row], ignore_index=True)
-    save_journal(df)
+if st.button("Save Entry", use_container_width=True, key="save_journal"):
+    trimmed = entry.strip()
+    updated = journal_df.copy()
+    updated = updated[updated["date"].astype(str) != today_str]
+    if trimmed:
+        new_row = pd.DataFrame([{"date": today_str, "entry": trimmed}])
+        updated = pd.concat([updated, new_row], ignore_index=True)
+    with st.spinner("Saving..."):
+        save_journal_df(updated)
     st.success("Entry saved.")
     st.rerun()
 
-# --- Past entries ---
-past = df[df["date"] != today_str].copy()
-if len(past) > 0:
-    st.markdown('<div class="section-title">Past Entries</div>', unsafe_allow_html=True)
-    past = past.sort_values("date", ascending=False)
-    for _, row in past.iterrows():
-        st.markdown(
-            f'<div class="j-card">'
-            f'<div class="j-date">{row["date"]}</div>'
-            f'<div class="j-text">{row["entry"]}</div>'
-            f'</div>',
-            unsafe_allow_html=True
-        )
+# Past entries
+st.markdown('<div class="section-title">\U0001f4da Past Entries</div>', unsafe_allow_html=True)
+
+if journal_df.empty:
+    st.markdown('<div class="list-row" style="justify-content:center;opacity:0.7;">No entries yet.</div>', unsafe_allow_html=True)
+else:
+    past = journal_df.copy()
+    past["date_parsed"] = pd.to_datetime(past["date"], errors="coerce")
+    past = past.dropna(subset=["date_parsed"]).sort_values("date_parsed", ascending=False)
+    past = past[past["date"].astype(str) != today_str]
+    for _, r in past.iterrows():
+        label = r["date_parsed"].strftime("%A, %d %B %Y")
+        body = clean_text(r["entry"])
+        preview = (body[:120] + "\u2026") if len(body) > 120 else body
+        with st.expander(f"{label}  \u2014  {preview}"):
+            st.markdown(
+                f'<div style="white-space:pre-wrap;font-size:15px;line-height:1.85;color:var(--text);opacity:0.92;">{body}</div>',
+                unsafe_allow_html=True,
+            )
