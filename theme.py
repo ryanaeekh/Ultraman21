@@ -3,44 +3,45 @@
 import streamlit as st
 
 # ── Design Token Constants ──────────────────────────────────────────
-ACCENT = "#00E5C0"
-POS = "#00E5C0"
-NEG = "#FF6B4A"
-BG = "#0F172A"
-BG2 = "#131c32"
-CARD_BG = "#1A1F2B"
-TEXT = "#FFFFFF"
-TEXT2 = "#9aa4b8"
-BORDER = "#2E3440"
+ACCENT = "#00F5D4"
+POS = "#10E9B8"
+NEG = "#FF6B5E"
+BG = "#0A1329"
+BG2 = "#111b33"
+CARD_BG = "#1A2339"
+TEXT = "#F1F5F9"
+TEXT2 = "#94A3B8"
+BORDER = "rgba(0,245,212,0.12)"
 
 # ── CSS Strings ─────────────────────────────────────────────────────
 _CSS = """<style>
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=Space+Grotesk:wght@400;500;600;700&display=swap');
 
 :root {
-    --bg:          #0F172A;
-    --bg2:         #131c32;
-    --card-bg:     #1A1F2B;
-    --card-hover:  #232a3a;
-    --accent:      #00E5C0;
-    --accent-2:    #14F5D4;
-    --coral:       #FF6B4A;
-    --coral-soft:  rgba(255,107,74,0.12);
-    --accent-soft: rgba(0,229,192,0.10);
-    --accent-glow: 0 0 32px rgba(0,229,192,0.35);
-    --pos:         #00E5C0;
-    --neg:         #FF6B4A;
-    --text:        #FFFFFF;
-    --text2:       #9aa4b8;
-    --text3:       #64708a;
-    --border:      #2E3440;
-    --border-strong: rgba(0,229,192,0.4);
-    --shadow-sm:   0 4px 16px rgba(0,0,0,0.25);
-    --shadow-md:   0 8px 30px rgba(0,0,0,0.35);
-    --shadow-lg:   0 16px 48px rgba(0,0,0,0.45), 0 0 60px rgba(0,229,192,0.08);
-    --gradient-hero: linear-gradient(135deg, #00E5C0 0%, #14F5D4 50%, #FF8A65 100%);
-    --gradient-bg:   radial-gradient(ellipse at 15% -10%, rgba(0,229,192,0.10) 0%, transparent 55%),
-                     radial-gradient(ellipse at 90% 110%, rgba(255,107,74,0.08) 0%, transparent 50%);
+    --bg:          #0A1329;
+    --bg2:         #111b33;
+    --card-bg:     #1A2339;
+    --card-hover:  #1f2a45;
+    --accent:      #00F5D4;
+    --accent-2:    #14E9C8;
+    --coral:       #FF6B5E;
+    --coral-soft:  rgba(255,107,94,0.12);
+    --accent-soft: rgba(0,245,212,0.10);
+    --accent-glow: 0 0 40px rgba(0,245,212,0.35);
+    --pos:         #10E9B8;
+    --neg:         #FF6B5E;
+    --text:        #F1F5F9;
+    --text2:       #94A3B8;
+    --text3:       #5a6a85;
+    --border:      rgba(0,245,212,0.12);
+    --border-strong: rgba(0,245,212,0.45);
+    --shadow-sm:   0 4px 18px rgba(0,0,0,0.3);
+    --shadow-md:   0 10px 36px rgba(0,0,0,0.4);
+    --shadow-lg:   0 20px 60px rgba(0,0,0,0.5), 0 0 60px rgba(0,245,212,0.08);
+    --gradient-hero: linear-gradient(135deg, #00F5D4 0%, #14E9C8 55%, #FF8A65 100%);
+    --gradient-border: linear-gradient(135deg, #00F5D4, #FF6B5E);
+    --gradient-bg:   radial-gradient(ellipse at 12% -10%, rgba(0,245,212,0.10) 0%, transparent 55%),
+                     radial-gradient(ellipse at 88% 110%, rgba(255,107,94,0.07) 0%, transparent 50%);
     --radius-lg:   20px;
     --radius-md:   12px;
     --font-display:'Space Grotesk', 'Inter', sans-serif;
@@ -74,16 +75,22 @@ h1, h2, h3 {
     letter-spacing: -0.01em;
 }
 .hero-header {
-    padding: 8px 0 4px;
-    margin-bottom: 8px;
+    padding: 20px 0 16px;
+    margin-bottom: 20px;
 }
+.hero-header .page-subtitle { margin-top: 14px; }
 .page-title {
-    font-size: 44px; font-weight: 800;
-    letter-spacing: -0.02em; margin-bottom: 8px; line-height: 1.05;
-    background: var(--gradient-hero);
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-    background-clip: text;
+    font-size: 52px; font-weight: 800;
+    letter-spacing: -0.025em; margin-bottom: 10px; line-height: 1.02;
+    color: var(--text) !important;
+    position: relative; display: inline-block;
+}
+.page-title::after {
+    content: ''; position: absolute;
+    left: 0; bottom: -6px; width: 56px; height: 4px;
+    border-radius: 2px;
+    background: linear-gradient(90deg, #00F5D4, #FF6B5E);
+    box-shadow: 0 0 18px rgba(0,245,212,0.45);
 }
 .page-subtitle {
     font-size: 15px; color: var(--text2);
@@ -104,19 +111,19 @@ h1, h2, h3 {
 
 /* ─── Cards ──────────────────────────────────────── */
 .card {
-    background: linear-gradient(145deg, rgba(26,31,43,0.85), rgba(19,28,50,0.75));
-    backdrop-filter: blur(18px);
-    -webkit-backdrop-filter: blur(18px);
+    background: linear-gradient(145deg, rgba(26,35,57,0.88), rgba(17,27,51,0.78));
+    backdrop-filter: blur(22px) saturate(140%);
+    -webkit-backdrop-filter: blur(22px) saturate(140%);
     border: 1px solid var(--border);
     border-radius: var(--radius-lg);
     padding: 32px;
     margin-bottom: 20px;
-    box-shadow: 0 8px 30px rgba(0,0,0,0.3);
+    box-shadow: 0 10px 36px rgba(0,0,0,0.35);
     transition: transform 0.35s cubic-bezier(.2,.8,.2,1), box-shadow 0.35s ease, border-color 0.35s ease;
 }
 .card:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 16px 48px rgba(0,0,0,0.4), 0 0 32px rgba(0,229,192,0.18);
+    transform: translateY(-3px) scale(1.01);
+    box-shadow: 0 20px 60px rgba(0,0,0,0.45), 0 0 40px rgba(0,245,212,0.2);
     border-color: var(--border-strong);
 }
 
@@ -129,9 +136,10 @@ h1, h2, h3 {
     color: var(--text2); margin-bottom: 8px;
 }
 .metric-value {
-    font-family: var(--font-body);
-    font-size: 34px; font-weight: 700;
-    line-height: 1.1; margin-bottom: 6px;
+    font-family: var(--font-display);
+    font-size: 42px; font-weight: 700;
+    line-height: 1.05; margin-bottom: 8px;
+    letter-spacing: -0.02em;
     color: var(--text);
 }
 .metric-sub { font-size: 13px; color: var(--text2); font-weight: 400; }
@@ -442,8 +450,8 @@ header[data-testid="stHeader"] > *:not([data-testid="stToolbar"]):not([data-test
     height: auto !important;
 }
 .st-key-nav_menu_container .stSelectbox [data-baseweb="select"] > div:hover {
-    border-color: var(--accent) !important;
-    box-shadow: 0 4px 20px rgba(79,124,130,0.3) !important;
+    border-color: var(--border-strong) !important;
+    box-shadow: 0 6px 24px rgba(0,245,212,0.28) !important;
 }
 .st-key-nav_menu_container .stSelectbox [data-baseweb="select"] > div > div,
 .st-key-nav_menu_container .stSelectbox [data-baseweb="select"] span {
@@ -486,7 +494,8 @@ div[data-testid="stExpander"] summary {
     text-transform: uppercase; letter-spacing: 0.04em;
 }
 .exec-pill.done {
-    color: var(--pos); background: rgba(79,124,130,0.2);
+    color: #0A1329; background: linear-gradient(135deg, #00F5D4, #10E9B8);
+    box-shadow: 0 0 18px rgba(0,245,212,0.35);
 }
 .exec-pill.pending {
     color: var(--text3); background: var(--bg2);
@@ -518,14 +527,16 @@ div[data-testid="stExpander"] summary {
 
 /* ─── Utility Classes ────────────────────────────── */
 .accent-left-card {
-    border-left: 3px solid transparent !important;
-    border-image: linear-gradient(180deg, #00E5C0, #14F5D4, #FF8A65) 1 !important;
     position: relative;
+    border: 1px solid transparent !important;
+    background:
+        linear-gradient(145deg, rgba(26,35,57,0.92), rgba(17,27,51,0.82)) padding-box,
+        linear-gradient(135deg, #00F5D4 0%, #14E9C8 50%, #FF6B5E 100%) border-box !important;
 }
 .accent-left-card::before {
     content: ''; position: absolute; inset: 0;
     border-radius: inherit; pointer-events: none;
-    background: linear-gradient(135deg, rgba(0,229,192,0.06), transparent 60%);
+    background: linear-gradient(135deg, rgba(0,245,212,0.05), transparent 60%);
 }
 
 .c-pos { color: var(--pos) !important; }
@@ -622,15 +633,17 @@ div[data-testid="stChatInput"] textarea {
 .day-table { width: 100%; border-collapse: collapse; margin-top: 16px; }
 .day-table th {
     font-family: var(--font-display);
-    font-size: 11px; text-transform: uppercase;
-    letter-spacing: 0.08em; color: var(--text2);
-    padding: 10px 12px; text-align: left;
-    border-bottom: 2px solid var(--border-strong);
+    font-size: 11px; text-transform: uppercase; font-weight: 600;
+    letter-spacing: 0.12em; color: var(--accent);
+    padding: 14px 16px; text-align: left;
+    border-bottom: 1px solid var(--border-strong);
+    background: rgba(0,245,212,0.04);
 }
 .day-table td {
-    padding: 10px 12px; font-size: 14px;
+    padding: 14px 16px; font-size: 14px;
     border-bottom: 1px solid var(--border); color: var(--text);
 }
+.day-table tr:nth-child(even) td { background: rgba(255,255,255,0.015); }
 .day-table tr:hover td { background: var(--accent-soft); }
 
 /* ─── Record Card ────────────────────────────────── */
