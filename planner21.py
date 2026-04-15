@@ -38,16 +38,12 @@ st.markdown(page_header("Ryan", "Your daily operating system"), unsafe_allow_htm
 pretty_date = today.strftime("%-d %B %Y \u2022 %A") if os.name != "nt" else today.strftime("%#d %B %Y \u2022 %A")
 st.markdown(f'<div style="margin:-4px 0 28px;"><span class="date-pill">{pretty_date}</span></div>', unsafe_allow_html=True)
 
-# ── Score Ring ────────────────────────────────────────────
-st.markdown(f'''
-<div style="text-align:center;">
-  <div class="score-ring" style="--pct:{today_score};">
-    <span class="score-ring-value">{today_score}</span>
-  </div>
-  <div style="font-family:var(--font-display);font-size:11px;letter-spacing:0.2em;
-              text-transform:uppercase;color:var(--text2);margin-top:-6px;">
-    FOCUS
-  </div>
+# ── Focus heading ─────────────────────────────────────────
+st.markdown('''
+<div style="text-align:center;margin:32px 0 28px;">
+  <h1 style="color:#000000 !important;font-family:var(--font-display);
+             font-size:88px;font-weight:800;letter-spacing:0.08em;
+             margin:0;line-height:1;">FOCUS</h1>
 </div>
 ''', unsafe_allow_html=True)
 
