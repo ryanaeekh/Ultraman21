@@ -3,8 +3,8 @@
 import streamlit as st
 
 # ── Design Token Constants ──────────────────────────────────────────
-ACCENT = "#f0DAC5"
-POS = "#f0DAC5"
+ACCENT = "#1C2340"
+POS = "#1C2340"
 NEG = "#c97a8a"
 BG = "#50223C"
 BG2 = "#3d1a2e"
@@ -22,10 +22,10 @@ _CSS = """<style>
     --bg2:         #3d1a2e;
     --card-bg:     #3d1a2e;
     --card-hover:  #5c2845;
-    --accent:      #f0DAC5;
-    --accent-soft: rgba(240,218,197,0.12);
-    --accent-glow: 0 4px 20px rgba(240,218,197,0.18);
-    --pos:         #f0DAC5;
+    --accent:      #1C2340;
+    --accent-soft: rgba(28,35,64,0.15);
+    --accent-glow: 0 4px 20px rgba(28,35,64,0.25);
+    --pos:         #1C2340;
     --neg:         #c97a8a;
     --text:        #f0DAC5;
     --text2:       #c9a898;
@@ -52,7 +52,7 @@ html, body, .stApp {
     content: '';
     position: fixed; inset: 0; z-index: -1;
     background:
-        radial-gradient(ellipse at 20% 0%, rgba(240,218,197,0.08) 0%, transparent 60%),
+        radial-gradient(ellipse at 20% 0%, rgba(28,35,64,0.1) 0%, transparent 60%),
         radial-gradient(ellipse at 80% 100%, rgba(201,122,138,0.06) 0%, transparent 50%),
         var(--bg);
 }
@@ -153,8 +153,8 @@ h1, h2, h3, .page-title, .section-title {
 /* ─── Buttons ────────────────────────────────────── */
 div.stButton > button {
     font-family: var(--font-body) !important;
-    background: #f0DAC5 !important;
-    color: #50223C !important;
+    background: #1C2340 !important;
+    color: #f0DAC5 !important;
     border: none !important;
     border-radius: 10px !important;
     padding: 6px 12px !important;
@@ -267,8 +267,8 @@ div[data-testid="stMarkdownContainer"] li {
 /* ─── Form Submit ────────────────────────────────── */
 div[data-testid="stFormSubmitButton"] button {
     font-family: var(--font-body) !important;
-    background: #f0DAC5 !important;
-    color: #50223C !important;
+    background: #1C2340 !important;
+    color: #f0DAC5 !important;
     border: none !important;
     border-radius: 10px !important;
     padding: 6px 12px !important;
@@ -425,7 +425,7 @@ header[data-testid="stHeader"] > *:not([data-testid="stToolbar"]):not([data-test
 }
 .st-key-nav_menu_container .stSelectbox [data-baseweb="select"] > div:hover {
     border-color: var(--accent) !important;
-    box-shadow: 0 4px 20px rgba(240,218,197,0.2) !important;
+    box-shadow: 0 4px 20px rgba(28,35,64,0.3) !important;
 }
 .st-key-nav_menu_container .stSelectbox [data-baseweb="select"] > div > div,
 .st-key-nav_menu_container .stSelectbox [data-baseweb="select"] span {
@@ -468,7 +468,7 @@ div[data-testid="stExpander"] summary {
     text-transform: uppercase; letter-spacing: 0.04em;
 }
 .exec-pill.done {
-    color: var(--pos); background: rgba(240,218,197,0.15);
+    color: var(--pos); background: rgba(28,35,64,0.2);
 }
 .exec-pill.pending {
     color: var(--text3); background: var(--bg2);
@@ -680,12 +680,12 @@ div[data-testid="stChatInput"] textarea {
 /* ─── Scrollbar ──────────────────────────────────── */
 ::-webkit-scrollbar { width: 6px; }
 ::-webkit-scrollbar-track { background: transparent; }
-::-webkit-scrollbar-thumb { background: rgba(240,218,197,0.3); border-radius: 3px; }
-::-webkit-scrollbar-thumb:hover { background: rgba(240,218,197,0.5); }
+::-webkit-scrollbar-thumb { background: rgba(28,35,64,0.4); border-radius: 3px; }
+::-webkit-scrollbar-thumb:hover { background: rgba(28,35,64,0.6); }
 
 /* ─── Status Boxes ───────────────────────────────── */
 .success-box {
-    background: rgba(240,218,197,0.1);
+    background: rgba(28,35,64,0.15);
     border-left: 3px solid var(--pos);
     border-radius: var(--radius-md);
     padding: 12px 16px; color: var(--pos); margin: 10px 0; font-size: 14px;
