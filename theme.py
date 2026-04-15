@@ -63,21 +63,14 @@ html, body, .stApp {
 }
 
 /* ─── Typography ─────────────────────────────────── */
-h1, h2, h3, .section-title {
+h1, h2, h3, .page-title, .section-title {
     font-family: var(--font-display) !important;
     color: var(--text) !important;
 }
 .page-title {
-    font-family: var(--font-display) !important;
-    color: #000000 !important;
-}
-.page-title {
     font-size: 26px; font-weight: 900;
     letter-spacing: 0.01em; margin-bottom: 4px;
-    color: #000000 !important;
-}
-h1.page-title, .page-title * {
-    color: #000000 !important;
+    color: var(--text) !important;
 }
 .page-subtitle {
     font-size: 13px; color: var(--text2);
@@ -815,7 +808,7 @@ def page_header(title: str, subtitle: str = "") -> str:
     """Return HTML string for page title + subtitle + divider."""
     sub_html = f'<div class="page-subtitle">{subtitle}</div>' if subtitle else ""
     return (
-        f'<div class="page-title" style="color:#000000 !important;">{title}</div>'
+        f'<div class="page-title">{title}</div>'
         f'{sub_html}'
         f'<div class="divider"></div>'
     )
