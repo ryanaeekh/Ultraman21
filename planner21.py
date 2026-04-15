@@ -75,6 +75,21 @@ else:
     </div>
     ''', unsafe_allow_html=True)
 
+# ── Ryan Aee Quote ────────────────────────────────────────
+ryan_quote_text = (
+    "Let's make sure that the man you become 3 years from now looks back and thanks you \u2014 "
+    "for the sacrifices you made, the discipline you held, and the hard decisions you chose today. "
+    "He's proud of you. Don't let him down."
+)
+st.markdown(f'''
+<div class="card" style="margin-top:22px;">
+  <div class="quote-block">
+    {ryan_quote_text}
+    <span class="quote-author">Ryan Aee 01.01.2026</span>
+  </div>
+</div>
+''', unsafe_allow_html=True)
+
 # ── Bruce Lee Quote ───────────────────────────────────────
 quote_text = (
     "Because you might as well be dead. Seriously, if you always put limits on everything you do, "
@@ -88,21 +103,6 @@ st.markdown(f'''
   <div class="quote-block">
     {quote_text}
     <span class="quote-author">Bruce Lee</span>
-  </div>
-</div>
-''', unsafe_allow_html=True)
-
-# ── Ryan Aee Quote ────────────────────────────────────────
-ryan_quote_text = (
-    "Let's make sure that the man you become 3 years from now looks back and thanks you \u2014 "
-    "for the sacrifices you made, the discipline you held, and the hard decisions you chose today. "
-    "He's proud of you. Don't let him down."
-)
-st.markdown(f'''
-<div class="card" style="margin-top:22px;">
-  <div class="quote-block">
-    {ryan_quote_text}
-    <span class="quote-author">Ryan Aee 01.01.2026</span>
   </div>
 </div>
 ''', unsafe_allow_html=True)
