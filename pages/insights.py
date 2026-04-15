@@ -64,7 +64,7 @@ area = alt.Chart(chart_data).mark_area(
 ).encode(
     x=alt.X("Date:T", axis=alt.Axis(labelColor="#7fbcc4", tickColor="#4F7C82", grid=False)),
     y=alt.Y("Score:Q", scale=alt.Scale(domain=[0, 100]), axis=alt.Axis(labelColor="#7fbcc4", tickColor="#4F7C82", gridColor="rgba(79,124,130,0.15)")),
-).properties(height=260, background="transparent")
+).properties(height=260)
 points = alt.Chart(chart_data).mark_point(filled=True, size=70, color="#B8E3E9", stroke="#7fbcc4").encode(
     x="Date:T", y="Score:Q"
 )
