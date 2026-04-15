@@ -46,7 +46,7 @@ st.markdown(f'''
   </div>
   <div style="font-family:var(--font-display);font-size:11px;letter-spacing:0.2em;
               text-transform:uppercase;color:var(--text2);margin-top:-6px;">
-    Today&#39;s Execution
+    FOCUS
   </div>
 </div>
 ''', unsafe_allow_html=True)
