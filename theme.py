@@ -3,38 +3,38 @@
 import streamlit as st
 
 # ── Design Token Constants ──────────────────────────────────────────
-ACCENT = "#7F9DB1"
-POS = "#7F9DB1"
-NEG = "#B4D6E3"
-BG = "#0D3B66"
-BG2 = "#0a3258"
-CARD_BG = "#0a3258"
-TEXT = "#B4D6E3"
-TEXT2 = "#7F9DB1"
-BORDER = "#7F9DB1"
+ACCENT = "#f0DAC5"
+POS = "#f0DAC5"
+NEG = "#c97a8a"
+BG = "#50223C"
+BG2 = "#3d1a2e"
+CARD_BG = "#3d1a2e"
+TEXT = "#f0DAC5"
+TEXT2 = "#c9a898"
+BORDER = "#6b3050"
 
 # ── CSS Strings ─────────────────────────────────────────────────────
 _CSS = """<style>
 @import url('https://fonts.googleapis.com/css2?family=Zen+Kaku+Gothic+New:wght@400;500;700;900&family=Outfit:wght@300;400;500;600;700&display=swap');
 
 :root {
-    --bg:          #0D3B66;
-    --bg2:         #0a3258;
-    --card-bg:     #0a3258;
-    --card-hover:  #114276;
-    --accent:      #7F9DB1;
-    --accent-soft: rgba(127,157,177,0.12);
-    --accent-glow: 0 4px 20px rgba(127,157,177,0.18);
-    --pos:         #7F9DB1;
-    --neg:         #B4D6E3;
-    --text:        #B4D6E3;
-    --text2:       #7F9DB1;
-    --text3:       #7F9DB1;
-    --border:      #7F9DB1;
-    --border-strong: #B4D6E3;
-    --shadow-sm:   0 1px 3px rgba(0,0,0,0.2), 0 1px 2px rgba(0,0,0,0.25);
-    --shadow-md:   0 4px 12px rgba(0,0,0,0.25), 0 2px 4px rgba(0,0,0,0.2);
-    --shadow-lg:   0 8px 30px rgba(0,0,0,0.3), 0 2px 8px rgba(0,0,0,0.2);
+    --bg:          #50223C;
+    --bg2:         #3d1a2e;
+    --card-bg:     #3d1a2e;
+    --card-hover:  #5c2845;
+    --accent:      #f0DAC5;
+    --accent-soft: rgba(240,218,197,0.12);
+    --accent-glow: 0 4px 20px rgba(240,218,197,0.18);
+    --pos:         #f0DAC5;
+    --neg:         #c97a8a;
+    --text:        #f0DAC5;
+    --text2:       #c9a898;
+    --text3:       #c9a898;
+    --border:      #6b3050;
+    --border-strong: #f0DAC5;
+    --shadow-sm:   0 1px 3px rgba(0,0,0,0.3), 0 1px 2px rgba(0,0,0,0.3);
+    --shadow-md:   0 4px 12px rgba(0,0,0,0.3), 0 2px 4px rgba(0,0,0,0.3);
+    --shadow-lg:   0 8px 30px rgba(0,0,0,0.3), 0 2px 8px rgba(0,0,0,0.3);
     --radius-lg:   14px;
     --radius-md:   8px;
     --font-display:'Zen Kaku Gothic New', sans-serif;
@@ -52,8 +52,8 @@ html, body, .stApp {
     content: '';
     position: fixed; inset: 0; z-index: -1;
     background:
-        radial-gradient(ellipse at 20% 0%, rgba(127,157,177,0.08) 0%, transparent 60%),
-        radial-gradient(ellipse at 80% 100%, rgba(180,214,227,0.06) 0%, transparent 50%),
+        radial-gradient(ellipse at 20% 0%, rgba(240,218,197,0.08) 0%, transparent 60%),
+        radial-gradient(ellipse at 80% 100%, rgba(201,122,138,0.06) 0%, transparent 50%),
         var(--bg);
 }
 
@@ -153,8 +153,8 @@ h1, h2, h3, .page-title, .section-title {
 /* ─── Buttons ────────────────────────────────────── */
 div.stButton > button {
     font-family: var(--font-body) !important;
-    background: #7F9DB1 !important;
-    color: #0D3B66 !important;
+    background: #f0DAC5 !important;
+    color: #50223C !important;
     border: none !important;
     border-radius: 10px !important;
     padding: 6px 12px !important;
@@ -166,8 +166,8 @@ div.stButton > button {
     cursor: pointer !important;
 }
 div.stButton > button:hover {
-    background: #B4D6E3 !important;
-    color: #0D3B66 !important;
+    background: #c97a8a !important;
+    color: #50223C !important;
     box-shadow: 0 4px 16px rgba(0,0,0,0.3) !important;
     transform: translateY(-1px);
 }
@@ -201,7 +201,7 @@ div[data-testid="stSelectbox"] > div > div {
 }
 input:focus, textarea:focus {
     border-bottom-color: var(--accent) !important;
-    background: #114276 !important;
+    background: #5c2845 !important;
     box-shadow: none !important;
     outline: none !important;
 }
@@ -267,8 +267,8 @@ div[data-testid="stMarkdownContainer"] li {
 /* ─── Form Submit ────────────────────────────────── */
 div[data-testid="stFormSubmitButton"] button {
     font-family: var(--font-body) !important;
-    background: #7F9DB1 !important;
-    color: #0D3B66 !important;
+    background: #f0DAC5 !important;
+    color: #50223C !important;
     border: none !important;
     border-radius: 10px !important;
     padding: 6px 12px !important;
@@ -291,7 +291,7 @@ div[data-testid="stFormSubmitButton"] button:active {
 
 /* ─── Popover / Dropdown ─────────────────────────── */
 [data-baseweb="popover"] {
-    background: #0a3258 !important;
+    background: #3d1a2e !important;
     border: 1px solid var(--border-strong) !important;
     box-shadow: var(--shadow-lg) !important;
     border-radius: var(--radius-md) !important;
@@ -425,7 +425,7 @@ header[data-testid="stHeader"] > *:not([data-testid="stToolbar"]):not([data-test
 }
 .st-key-nav_menu_container .stSelectbox [data-baseweb="select"] > div:hover {
     border-color: var(--accent) !important;
-    box-shadow: 0 4px 20px rgba(127,157,177,0.2) !important;
+    box-shadow: 0 4px 20px rgba(240,218,197,0.2) !important;
 }
 .st-key-nav_menu_container .stSelectbox [data-baseweb="select"] > div > div,
 .st-key-nav_menu_container .stSelectbox [data-baseweb="select"] span {
@@ -468,7 +468,7 @@ div[data-testid="stExpander"] summary {
     text-transform: uppercase; letter-spacing: 0.04em;
 }
 .exec-pill.done {
-    color: var(--pos); background: rgba(127,157,177,0.15);
+    color: var(--pos); background: rgba(240,218,197,0.15);
 }
 .exec-pill.pending {
     color: var(--text3); background: var(--bg2);
@@ -680,24 +680,24 @@ div[data-testid="stChatInput"] textarea {
 /* ─── Scrollbar ──────────────────────────────────── */
 ::-webkit-scrollbar { width: 6px; }
 ::-webkit-scrollbar-track { background: transparent; }
-::-webkit-scrollbar-thumb { background: rgba(127,157,177,0.3); border-radius: 3px; }
-::-webkit-scrollbar-thumb:hover { background: rgba(127,157,177,0.5); }
+::-webkit-scrollbar-thumb { background: rgba(240,218,197,0.3); border-radius: 3px; }
+::-webkit-scrollbar-thumb:hover { background: rgba(240,218,197,0.5); }
 
 /* ─── Status Boxes ───────────────────────────────── */
 .success-box {
-    background: rgba(127,157,177,0.1);
+    background: rgba(240,218,197,0.1);
     border-left: 3px solid var(--pos);
     border-radius: var(--radius-md);
     padding: 12px 16px; color: var(--pos); margin: 10px 0; font-size: 14px;
 }
 .warning-box {
-    background: rgba(180,214,227,0.1);
+    background: rgba(201,122,138,0.1);
     border-left: 3px solid var(--neg);
     border-radius: var(--radius-md);
     padding: 12px 16px; color: var(--neg); margin: 10px 0; font-size: 14px;
 }
 .error-box {
-    background: rgba(180,214,227,0.1);
+    background: rgba(201,122,138,0.1);
     border-left: 3px solid var(--neg);
     border-radius: var(--radius-md);
     padding: 12px 16px; color: var(--neg); margin: 10px 0; font-size: 14px;
