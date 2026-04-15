@@ -43,7 +43,7 @@ st.markdown('''
 <div style="text-align:center;margin:32px auto 28px;max-width:720px;padding:0 16px;">
   <h1 style="color:#000000 !important;font-family:var(--font-display);
              font-size:34px;font-weight:700;letter-spacing:-0.01em;
-             margin:0;line-height:1.25;">\u201cThe only limits in life are the one you make\u201d</h1>
+             margin:0;line-height:1.25;">The only limits in life are the one you make</h1>
 </div>
 ''', unsafe_allow_html=True)
 
