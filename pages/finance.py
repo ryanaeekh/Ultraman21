@@ -76,7 +76,14 @@ def fetch_gold_price_sgd_per_gram():
     except Exception:
         return None
 
-st.markdown(page_header("Finance", "Attention Is All You Need"), unsafe_allow_html=True)
+st.markdown(page_header("Finance", ""), unsafe_allow_html=True)
+st.markdown('''
+<div class="card" style="margin-top:22px;">
+  <div class="quote-block">
+    Attention Is All You Need
+  </div>
+</div>
+''', unsafe_allow_html=True)
 
 today = date.today()
 
