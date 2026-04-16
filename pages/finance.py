@@ -23,6 +23,28 @@ from utils import (
     filter_by_exact_date, filter_by_month, month_days,
 )
 
+
+@st.cache_data(ttl=300)
+def load_all_finance_data():
+    """Batch-load all sheets in one cached call."""
+    return {
+        "finance": load_finance(),
+        "monthly_expenses": load_monthly_expenses(),
+        "settings": load_settings(),
+        "assets": load_assets(),
+        "gold_assets": load_gold_assets(),
+        "liabilities": load_liabilities(),
+        "cpf": load_cpf(),
+        "medisave": load_medisave(),
+        "property": load_property(),
+    }
+
+
+def save_and_rerun():
+    """Clear batch cache and rerun so saved data is visible immediately."""
+    load_all_finance_data.clear()
+    st.rerun()
+
 inject_theme()
 nav_menu("Finance")
 
@@ -46,16 +68,17 @@ st.markdown(page_header("Finance", "Your money operating system"), unsafe_allow_
 
 today = date.today()
 
-# — Load all data upfront —
-finance_df = load_finance()
-monthly_df = load_monthly_expenses()
-settings_df = load_settings()
-assets_df = load_assets()
-gold_assets_df = load_gold_assets()
-liabilities_df = load_liabilities()
-cpf_df = load_cpf()
-medisave_df = load_medisave()
-property_df = load_property()
+# — Load all data upfront (single cached batch) —
+_data = load_all_finance_data()
+finance_df = _data["finance"]
+monthly_df = _data["monthly_expenses"]
+settings_df = _data["settings"]
+assets_df = _data["assets"]
+gold_assets_df = _data["gold_assets"]
+liabilities_df = _data["liabilities"]
+cpf_df = _data["cpf"]
+medisave_df = _data["medisave"]
+property_df = _data["property"]
 
 gold_sgd_per_gram = fetch_gold_price_sgd_per_gram()
 gold_discount = 0.85
@@ -113,7 +136,7 @@ if st.button("Save Income", use_container_width=True, key="save_inc"):
         new_row = pd.DataFrame([{"date": str(inc_date), "category": "Income", "amount": float(inc_amount)}])
         save_finance_df(pd.concat([finance_df, new_row], ignore_index=True))
         st.success(f"Income saved: ${inc_amount:,.2f}")
-        st.rerun()
+        save_and_rerun()
     else:
         st.warning("Enter an amount greater than zero.")
 
@@ -131,7 +154,7 @@ if st.button("Save Expense", use_container_width=True, key="save_exp"):
         new_row = pd.DataFrame([{"date": str(exp_date), "category": exp_cat, "amount": float(exp_amount)}])
         save_finance_df(pd.concat([finance_df, new_row], ignore_index=True))
         st.success(f"Expense saved: {exp_cat} \u2014 ${exp_amount:,.2f}")
-        st.rerun()
+        save_and_rerun()
     else:
         st.warning("Enter an amount greater than zero.")
 
@@ -159,7 +182,7 @@ with st.expander(f"{day_label} Transactions ({len(today_df)} entries)"):
             with row_cols[1]:
                 if st.button("Delete", key=f"del_tx_{idx}", use_container_width=True):
                     save_finance_df(finance_df.drop(idx).reset_index(drop=True))
-                    st.rerun()
+                    save_and_rerun()
     else:
         st.markdown(
             f'<div class="list-row" style="justify-content:center;opacity:0.7;">No transactions for {day_label.lower()}.</div>',
@@ -188,7 +211,7 @@ if st.button("Add Fixed Expense", use_container_width=True, key="add_fx"):
         new_row = pd.DataFrame([{"name": name, "amount": float(fx_amount)}])
         save_monthly_expenses_df(pd.concat([monthly_df, new_row], ignore_index=True))
         st.success(f"Added {name}: ${fx_amount:,.2f}")
-        st.rerun()
+        save_and_rerun()
     else:
         st.warning("Provide a name and an amount.")
 
@@ -205,7 +228,7 @@ with st.expander(f"Monthly Recurring ({len(monthly_df)} items)"):
             with row_cols[1]:
                 if st.button("Remove", key=f"rm_fx_{idx}", use_container_width=True):
                     save_monthly_expenses_df(monthly_df.drop(idx).reset_index(drop=True))
-                    st.rerun()
+                    save_and_rerun()
     else:
         st.markdown(
             '<div class="list-row" style="justify-content:center;opacity:0.7;">No recurring expenses yet.</div>',
@@ -250,7 +273,7 @@ if st.button("Add Asset", use_container_width=True, key="add_asset"):
         new_row = pd.DataFrame([{"name": name, "amount": float(asset_amount)}])
         save_assets_df(pd.concat([assets_df, new_row], ignore_index=True))
         st.success(f"Added {name}: ${asset_amount:,.2f}")
-        st.rerun()
+        save_and_rerun()
     else:
         st.warning("Provide a name and an amount.")
 
@@ -268,7 +291,7 @@ with st.expander(f"Assets ({total_asset_items} items)"):
             with row_cols[1]:
                 if st.button("Remove", key=f"rm_asset_{idx}", use_container_width=True):
                     save_assets_df(assets_df.drop(idx).reset_index(drop=True))
-                    st.rerun()
+                    save_and_rerun()
 
     # — Gold assets (live-calculated) —
     if not gold_assets_df.empty:
@@ -292,7 +315,7 @@ with st.expander(f"Assets ({total_asset_items} items)"):
             with row_cols[1]:
                 if st.button("Remove", key=f"rm_gold_{idx}", use_container_width=True):
                     save_gold_assets_df(gold_assets_df.drop(idx).reset_index(drop=True))
-                    st.rerun()
+                    save_and_rerun()
 
     if assets_df.empty and gold_assets_df.empty:
         st.markdown(
@@ -327,7 +350,7 @@ if gold_weight > 0 and gold_sgd_per_gram > 0:
         new_row = pd.DataFrame([{"name": "Gold 916", "weight_grams": float(gold_weight), "purity": 0.916}])
         save_gold_assets_df(pd.concat([gold_assets_df, new_row], ignore_index=True))
         st.success(f"Added Gold 916: {gold_weight:g}g")
-        st.rerun()
+        save_and_rerun()
 
 # ============================================================
 # 9 — LIABILITIES
@@ -342,7 +365,7 @@ if st.button("Add Liability", use_container_width=True, key="add_liab"):
         new_row = pd.DataFrame([{"name": name, "amount": float(liab_amount)}])
         save_liabilities_df(pd.concat([liabilities_df, new_row], ignore_index=True))
         st.success(f"Added {name}: ${liab_amount:,.2f}")
-        st.rerun()
+        save_and_rerun()
     else:
         st.warning("Provide a name and an amount.")
 
@@ -359,7 +382,7 @@ with st.expander(f"Liabilities ({len(liabilities_df)} items)"):
             with row_cols[1]:
                 if st.button("Remove", key=f"rm_liab_{idx}", use_container_width=True):
                     save_liabilities_df(liabilities_df.drop(idx).reset_index(drop=True))
-                    st.rerun()
+                    save_and_rerun()
     else:
         st.markdown(
             '<div class="list-row" style="justify-content:center;opacity:0.7;">No liabilities yet.</div>',
@@ -382,7 +405,7 @@ cpf_amount = st.number_input("Update Amount", min_value=0.0, step=100.0, format=
 if st.button("Save CPF", use_container_width=True, key="save_cpf"):
     save_cpf_df(pd.DataFrame([{"name": "CPF Account", "amount": float(cpf_amount)}]))
     st.success(f"CPF updated: ${cpf_amount:,.2f}")
-    st.rerun()
+    save_and_rerun()
 
 # ============================================================
 # 11 — MEDISAVE
@@ -400,7 +423,7 @@ ms_amount = st.number_input("Update Amount", min_value=0.0, step=100.0, format="
 if st.button("Save Medisave", use_container_width=True, key="save_ms"):
     save_medisave_df(pd.DataFrame([{"name": "Medisave Account", "amount": float(ms_amount)}]))
     st.success(f"Medisave updated: ${ms_amount:,.2f}")
-    st.rerun()
+    save_and_rerun()
 
 # ============================================================
 # 12 — PROPERTY
@@ -418,7 +441,7 @@ prop_amount = st.number_input("Update Amount", min_value=0.0, step=1000.0, forma
 if st.button("Save Property", use_container_width=True, key="save_prop"):
     save_property_df(pd.DataFrame([{"name": "Property", "amount": float(prop_amount), "notes": ""}]))
     st.success(f"Property updated: ${prop_amount:,.2f}")
-    st.rerun()
+    save_and_rerun()
 
 # — CPF, Medisave & Property totals (informational) —
 total_cpf = float(cpf_df["amount"].sum()) if not cpf_df.empty else 0.0
