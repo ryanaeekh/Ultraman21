@@ -46,9 +46,23 @@ st.markdown(page_header("Finance", "Your money operating system"), unsafe_allow_
 
 today = date.today()
 
+# — Load all data upfront —
 finance_df = load_finance()
 monthly_df = load_monthly_expenses()
 settings_df = load_settings()
+assets_df = load_assets()
+gold_assets_df = load_gold_assets()
+liabilities_df = load_liabilities()
+cpf_df = load_cpf()
+medisave_df = load_medisave()
+property_df = load_property()
+
+gold_sgd_per_gram = fetch_gold_price_sgd_per_gram()
+gold_discount = 0.85
+total_gold_value = 0.0
+if not gold_assets_df.empty and gold_sgd_per_gram is not None and gold_sgd_per_gram > 0:
+    for _, gr in gold_assets_df.iterrows():
+        total_gold_value += float(gr["weight_grams"]) * (gold_sgd_per_gram * float(gr["purity"])) * gold_discount
 
 categories_default = ["Food", "Transport", "Shopping", "Bills", "Health", "Entertainment", "Other"]
 if not settings_df.empty and "expense_categories" in settings_df.columns:
@@ -58,43 +72,17 @@ if not settings_df.empty and "expense_categories" in settings_df.columns:
         if parsed:
             categories_default = parsed
 
-# ============================================================
-# SECTION 1 — LOG INCOME
-# ============================================================
-st.markdown('<div class="section-title">\U0001f4b5 Log Income</div>', unsafe_allow_html=True)
-inc_date = st.date_input("Date", value=today, key="inc_date")
-inc_amount = st.number_input("Amount", min_value=0.0, step=10.0, format="%.2f", key="inc_amount")
-if st.button("Save Income", use_container_width=True, key="save_inc"):
-    if inc_amount > 0:
-        new_row = pd.DataFrame([{"date": str(inc_date), "category": "Income", "amount": float(inc_amount)}])
-        save_finance_df(pd.concat([finance_df, new_row], ignore_index=True))
-        st.success(f"Income saved: ${inc_amount:,.2f}")
-        st.rerun()
-    else:
-        st.warning("Enter an amount greater than zero.")
-
-st.markdown('<div style="height:18px;"></div>', unsafe_allow_html=True)
+# — Precompute month figures —
+month_df = filter_by_month(finance_df, today.year, today.month)
+month_income = float(month_df[month_df["category"] == "Income"]["amount"].sum()) if not month_df.empty else 0.0
+month_daily_exp = float(month_df[month_df["category"] != "Income"]["amount"].sum()) if not month_df.empty else 0.0
+month_fixed = float(monthly_df["amount"].sum()) if not monthly_df.empty else 0.0
+month_net = month_income - month_daily_exp - month_fixed
+days = month_days(today.year, today.month)
+month_label = today.strftime("%B %Y")
 
 # ============================================================
-# SECTION 2 — LOG EXPENSE
-# ============================================================
-st.markdown('<div class="section-title">\U0001f4b8 Log Expense</div>', unsafe_allow_html=True)
-exp_date = st.date_input("Date", value=today, key="exp_date")
-exp_cat = st.selectbox("Category", categories_default, key="exp_cat")
-exp_amount = st.number_input("Amount", min_value=0.0, step=1.0, format="%.2f", key="exp_amount")
-if st.button("Save Expense", use_container_width=True, key="save_exp"):
-    if exp_amount > 0:
-        new_row = pd.DataFrame([{"date": str(exp_date), "category": exp_cat, "amount": float(exp_amount)}])
-        save_finance_df(pd.concat([finance_df, new_row], ignore_index=True))
-        st.success(f"Expense saved: {exp_cat} \u2014 ${exp_amount:,.2f}")
-        st.rerun()
-    else:
-        st.warning("Enter an amount greater than zero.")
-
-st.markdown('<div style="height:18px;"></div>', unsafe_allow_html=True)
-
-# ============================================================
-# SECTION 3 — TODAY SUMMARY
+# 1 — TODAY SUMMARY
 # ============================================================
 st.markdown('<div class="section-title">\U0001f4ca Today Summary</div>', unsafe_allow_html=True)
 
@@ -113,7 +101,60 @@ with cols[2]:
     st.markdown(metric_card("Net", f"${today_net:,.2f}", color=net_color), unsafe_allow_html=True)
 
 # ============================================================
-# SECTION 4 — MONTHLY RECURRING
+# 2 — LOG INCOME
+# ============================================================
+st.markdown('<div class="section-title">\U0001f4b5 Log Income</div>', unsafe_allow_html=True)
+inc_date = st.date_input("Date", value=today, key="inc_date")
+inc_amount = st.number_input("Amount", min_value=0.0, step=10.0, format="%.2f", key="inc_amount")
+if st.button("Save Income", use_container_width=True, key="save_inc"):
+    if inc_amount > 0:
+        new_row = pd.DataFrame([{"date": str(inc_date), "category": "Income", "amount": float(inc_amount)}])
+        save_finance_df(pd.concat([finance_df, new_row], ignore_index=True))
+        st.success(f"Income saved: ${inc_amount:,.2f}")
+        st.rerun()
+    else:
+        st.warning("Enter an amount greater than zero.")
+
+st.markdown('<div style="height:18px;"></div>', unsafe_allow_html=True)
+
+# ============================================================
+# 3 — LOG EXPENSE
+# ============================================================
+st.markdown('<div class="section-title">\U0001f4b8 Log Expense</div>', unsafe_allow_html=True)
+exp_date = st.date_input("Date", value=today, key="exp_date")
+exp_cat = st.selectbox("Category", categories_default, key="exp_cat")
+exp_amount = st.number_input("Amount", min_value=0.0, step=1.0, format="%.2f", key="exp_amount")
+if st.button("Save Expense", use_container_width=True, key="save_exp"):
+    if exp_amount > 0:
+        new_row = pd.DataFrame([{"date": str(exp_date), "category": exp_cat, "amount": float(exp_amount)}])
+        save_finance_df(pd.concat([finance_df, new_row], ignore_index=True))
+        st.success(f"Expense saved: {exp_cat} \u2014 ${exp_amount:,.2f}")
+        st.rerun()
+    else:
+        st.warning("Enter an amount greater than zero.")
+
+st.markdown('<div style="height:18px;"></div>', unsafe_allow_html=True)
+
+# ============================================================
+# 4 — MONTH SUMMARY
+# ============================================================
+st.markdown('<div class="section-title">\U0001f4c5 Month Summary</div>', unsafe_allow_html=True)
+
+g1 = st.columns(2)
+with g1[0]:
+    st.markdown(metric_card("Income", f"${month_income:,.2f}", sub=month_label, color="var(--accent-2)"), unsafe_allow_html=True)
+with g1[1]:
+    st.markdown(metric_card("Variable Expenses", f"${month_daily_exp:,.2f}", sub="Logged this month", color="var(--neg)"), unsafe_allow_html=True)
+
+g2 = st.columns(2)
+with g2[0]:
+    st.markdown(metric_card("Fixed (Recurring)", f"${month_fixed:,.2f}", sub=f"${month_fixed/days:,.2f}/day", color="var(--neg)"), unsafe_allow_html=True)
+with g2[1]:
+    net_color = "var(--accent-2)" if month_net >= 0 else "var(--neg)"
+    st.markdown(metric_card("Net", f"${month_net:,.2f}", sub=month_label, color=net_color), unsafe_allow_html=True)
+
+# ============================================================
+# 5 — MONTHLY RECURRING
 # ============================================================
 st.markdown('<div class="section-title">\U0001f501 Monthly Recurring</div>', unsafe_allow_html=True)
 
@@ -150,11 +191,31 @@ with st.expander(f"Monthly Recurring ({len(monthly_df)} items)"):
         )
 
 # ============================================================
-# SECTION 5 — ASSETS
+# 6 — NET WORTH SUMMARY
+# ============================================================
+st.markdown('<div class="section-title">\U0001f4b0 Net Worth</div>', unsafe_allow_html=True)
+
+nw_assets_items = float(assets_df["amount"].sum()) if not assets_df.empty else 0.0
+nw_total_assets = month_income + nw_assets_items + total_gold_value
+
+nw_liab_items = float(liabilities_df["amount"].sum()) if not liabilities_df.empty else 0.0
+nw_total_liabilities = month_daily_exp + month_fixed + nw_liab_items
+
+nw_net = nw_total_assets - nw_total_liabilities
+
+nw1 = st.columns(3)
+with nw1[0]:
+    st.markdown(metric_card("Total Assets", f"${nw_total_assets:,.2f}", sub=f"Income ${month_income:,.2f} + Assets ${nw_assets_items:,.2f} + Gold ${total_gold_value:,.2f}", color="var(--accent-2)"), unsafe_allow_html=True)
+with nw1[1]:
+    st.markdown(metric_card("Total Liabilities", f"${nw_total_liabilities:,.2f}", sub=f"Variable ${month_daily_exp:,.2f} + Recurring ${month_fixed:,.2f} + Liabilities ${nw_liab_items:,.2f}", color="var(--neg)"), unsafe_allow_html=True)
+with nw1[2]:
+    nw_color = "var(--accent-2)" if nw_net >= 0 else "var(--neg)"
+    st.markdown(metric_card("Net Worth", f"${nw_net:,.2f}", color=nw_color), unsafe_allow_html=True)
+
+# ============================================================
+# 7 — ASSETS
 # ============================================================
 st.markdown('<div class="section-title">\U0001f3e6 Assets</div>', unsafe_allow_html=True)
-
-assets_df = load_assets()
 
 asset_name = st.text_input("Name", key="asset_name", placeholder="e.g. Savings Account")
 asset_amount = st.number_input("Amount", min_value=0.0, step=100.0, format="%.2f", key="asset_amount")
@@ -167,16 +228,6 @@ if st.button("Add Asset", use_container_width=True, key="add_asset"):
         st.rerun()
     else:
         st.warning("Provide a name and an amount.")
-
-gold_assets_df = load_gold_assets()
-gold_sgd_per_gram = fetch_gold_price_sgd_per_gram()
-
-# Calculate total gold value from stored weights
-gold_discount = 0.85
-total_gold_value = 0.0
-if not gold_assets_df.empty and gold_sgd_per_gram is not None and gold_sgd_per_gram > 0:
-    for _, gr in gold_assets_df.iterrows():
-        total_gold_value += float(gr["weight_grams"]) * (gold_sgd_per_gram * float(gr["purity"])) * gold_discount
 
 total_asset_items = len(assets_df) + len(gold_assets_df)
 with st.expander(f"Assets ({total_asset_items} items)"):
@@ -224,40 +275,39 @@ with st.expander(f"Assets ({total_asset_items} items)"):
             unsafe_allow_html=True,
         )
 
-    # — Gold Asset Calculator —
-    st.markdown("---")
-    st.markdown('<div class="section-title">Gold Asset Calculator (916 / 22k)</div>', unsafe_allow_html=True)
-    if gold_sgd_per_gram is not None:
-        st.markdown(
-            f'<div class="list-row"><span>Live Gold Price</span>'
-            f'<span class="amount">SGD ${gold_sgd_per_gram:,.2f}/g</span></div>',
-            unsafe_allow_html=True,
-        )
-    else:
-        gold_sgd_per_gram = st.number_input(
-            "Gold price (SGD/g)", min_value=0.0, step=1.0, format="%.2f", key="gold_manual_price"
-        )
-    gold_weight = st.number_input("Weight (grams)", min_value=0.0, step=1.0, format="%.2f", key="gold_weight")
-    gold_purity = 0.916
-    gold_value = gold_weight * (gold_sgd_per_gram * gold_purity) * gold_discount
-    if gold_weight > 0 and gold_sgd_per_gram > 0:
-        st.markdown(
-            f'<div class="list-row" style="font-weight:700;"><span>Your Gold Value (916)</span>'
-            f'<span class="amount">SGD ${gold_value:,.2f}</span></div>',
-            unsafe_allow_html=True,
-        )
-        if st.button("Add Gold", use_container_width=True, key="add_gold_asset"):
-            new_row = pd.DataFrame([{"name": "Gold 916", "weight_grams": float(gold_weight), "purity": 0.916}])
-            save_gold_assets_df(pd.concat([gold_assets_df, new_row], ignore_index=True))
-            st.success(f"Added Gold 916: {gold_weight:g}g")
-            st.rerun()
+# ============================================================
+# 8 — GOLD CALCULATOR
+# ============================================================
+st.markdown('<div class="section-title">Gold Asset Calculator (916 / 22k)</div>', unsafe_allow_html=True)
+if gold_sgd_per_gram is not None:
+    st.markdown(
+        f'<div class="list-row"><span>Live Gold Price</span>'
+        f'<span class="amount">SGD ${gold_sgd_per_gram:,.2f}/g</span></div>',
+        unsafe_allow_html=True,
+    )
+else:
+    gold_sgd_per_gram = st.number_input(
+        "Gold price (SGD/g)", min_value=0.0, step=1.0, format="%.2f", key="gold_manual_price"
+    )
+gold_weight = st.number_input("Weight (grams)", min_value=0.0, step=1.0, format="%.2f", key="gold_weight")
+gold_purity = 0.916
+gold_value = gold_weight * (gold_sgd_per_gram * gold_purity) * gold_discount
+if gold_weight > 0 and gold_sgd_per_gram > 0:
+    st.markdown(
+        f'<div class="list-row" style="font-weight:700;"><span>Your Gold Value (916)</span>'
+        f'<span class="amount">SGD ${gold_value:,.2f}</span></div>',
+        unsafe_allow_html=True,
+    )
+    if st.button("Add Gold", use_container_width=True, key="add_gold_asset"):
+        new_row = pd.DataFrame([{"name": "Gold 916", "weight_grams": float(gold_weight), "purity": 0.916}])
+        save_gold_assets_df(pd.concat([gold_assets_df, new_row], ignore_index=True))
+        st.success(f"Added Gold 916: {gold_weight:g}g")
+        st.rerun()
 
 # ============================================================
-# SECTION 6 — LIABILITIES
+# 9 — LIABILITIES
 # ============================================================
 st.markdown('<div class="section-title">\U0001f4c9 Liabilities</div>', unsafe_allow_html=True)
-
-liabilities_df = load_liabilities()
 
 liab_name = st.text_input("Name", key="liab_name", placeholder="e.g. Car Loan")
 liab_amount = st.number_input("Amount", min_value=0.0, step=100.0, format="%.2f", key="liab_amount")
@@ -292,37 +342,9 @@ with st.expander(f"Liabilities ({len(liabilities_df)} items)"):
         )
 
 # ============================================================
-# SECTION 7 — MONTH SUMMARY
-# ============================================================
-st.markdown('<div class="section-title">\U0001f4c5 Month Summary</div>', unsafe_allow_html=True)
-
-month_df = filter_by_month(finance_df, today.year, today.month)
-month_income = float(month_df[month_df["category"] == "Income"]["amount"].sum()) if not month_df.empty else 0.0
-month_daily_exp = float(month_df[month_df["category"] != "Income"]["amount"].sum()) if not month_df.empty else 0.0
-month_fixed = float(monthly_df["amount"].sum()) if not monthly_df.empty else 0.0
-month_net = month_income - month_daily_exp - month_fixed
-days = month_days(today.year, today.month)
-month_label = today.strftime("%B %Y")
-
-g1 = st.columns(2)
-with g1[0]:
-    st.markdown(metric_card("Income", f"${month_income:,.2f}", sub=month_label, color="var(--accent-2)"), unsafe_allow_html=True)
-with g1[1]:
-    st.markdown(metric_card("Variable Expenses", f"${month_daily_exp:,.2f}", sub="Logged this month", color="var(--neg)"), unsafe_allow_html=True)
-
-g2 = st.columns(2)
-with g2[0]:
-    st.markdown(metric_card("Fixed (Recurring)", f"${month_fixed:,.2f}", sub=f"${month_fixed/days:,.2f}/day", color="var(--neg)"), unsafe_allow_html=True)
-with g2[1]:
-    net_color = "var(--accent-2)" if month_net >= 0 else "var(--neg)"
-    st.markdown(metric_card("Net", f"${month_net:,.2f}", sub=month_label, color=net_color), unsafe_allow_html=True)
-
-# ============================================================
-# SECTION 8 — CPF
+# 10 — CPF
 # ============================================================
 st.markdown('<div class="section-title">\U0001f3e2 CPF</div>', unsafe_allow_html=True)
-
-cpf_df = load_cpf()
 
 cpf_name = st.text_input("Name", key="cpf_name", placeholder="e.g. Ordinary Account")
 cpf_amount = st.number_input("Amount", min_value=0.0, step=100.0, format="%.2f", key="cpf_amount")
@@ -357,11 +379,10 @@ with st.expander(f"CPF ({len(cpf_df)} items)"):
         )
 
 # ============================================================
-# SECTION 9 — MEDISAVE
+# 11 — MEDISAVE
 # ============================================================
 st.markdown('<div class="section-title">\U0001f3e5 Medisave</div>', unsafe_allow_html=True)
 
-medisave_df = load_medisave()
 current_medisave = float(medisave_df.iloc[0]["amount"]) if not medisave_df.empty else 0.0
 
 st.markdown(
@@ -376,11 +397,9 @@ if st.button("Save Medisave", use_container_width=True, key="save_ms"):
     st.rerun()
 
 # ============================================================
-# SECTION 10 — PROPERTY
+# 12 — PROPERTY
 # ============================================================
 st.markdown('<div class="section-title">\U0001f3e0 Property</div>', unsafe_allow_html=True)
-
-property_df = load_property()
 
 prop_name = st.text_input("Name", key="prop_name", placeholder="e.g. HDB Flat")
 prop_amount = st.number_input("Amount", min_value=0.0, step=1000.0, format="%.2f", key="prop_amount")
@@ -416,29 +435,7 @@ with st.expander(f"Property ({len(property_df)} items)"):
             unsafe_allow_html=True,
         )
 
-# ============================================================
-# SECTION 11 — NET WORTH
-# ============================================================
-st.markdown('<div class="section-title">\U0001f4b0 Net Worth</div>', unsafe_allow_html=True)
-
-nw_assets_items = float(assets_df["amount"].sum()) if not assets_df.empty else 0.0
-nw_total_assets = month_income + nw_assets_items + total_gold_value
-
-nw_liab_items = float(liabilities_df["amount"].sum()) if not liabilities_df.empty else 0.0
-nw_total_liabilities = month_daily_exp + month_fixed + nw_liab_items
-
-nw_net = nw_total_assets - nw_total_liabilities
-
-nw1 = st.columns(3)
-with nw1[0]:
-    st.markdown(metric_card("Total Assets", f"${nw_total_assets:,.2f}", sub=f"Income ${month_income:,.2f} + Assets ${nw_assets_items:,.2f} + Gold ${total_gold_value:,.2f}", color="var(--accent-2)"), unsafe_allow_html=True)
-with nw1[1]:
-    st.markdown(metric_card("Total Liabilities", f"${nw_total_liabilities:,.2f}", sub=f"Variable ${month_daily_exp:,.2f} + Recurring ${month_fixed:,.2f} + Liabilities ${nw_liab_items:,.2f}", color="var(--neg)"), unsafe_allow_html=True)
-with nw1[2]:
-    nw_color = "var(--accent-2)" if nw_net >= 0 else "var(--neg)"
-    st.markdown(metric_card("Net Worth", f"${nw_net:,.2f}", color=nw_color), unsafe_allow_html=True)
-
-# — CPF, Medisave & Property (informational, not in net worth) —
+# — CPF, Medisave & Property totals (informational) —
 total_cpf = float(cpf_df["amount"].sum()) if not cpf_df.empty else 0.0
 total_medisave = float(medisave_df["amount"].sum()) if not medisave_df.empty else 0.0
 total_property = float(property_df["amount"].sum()) if not property_df.empty else 0.0
