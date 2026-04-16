@@ -25,15 +25,15 @@ nav_menu("Finance")
 
 @st.cache_data(ttl=3600)
 def fetch_gold_price_sgd_per_gram():
-    """Fetch gold bid price in SGD/g from Swissquote. Returns None on failure."""
+    """Fetch gold price in SGD/g from GoldAPI. Returns None on failure."""
     try:
         resp = requests.get(
-            "https://forex-data-feed.swissquote.com/public-quotes/bboquotes/instrument/XAU/SGD",
+            "https://www.goldapi.io/api/XAU/SGD",
+            headers={"x-access-token": "goldapi-19lctk19mo1a4qqd-io"},
             timeout=10,
         )
         resp.raise_for_status()
-        data = resp.json()
-        sgd_per_oz = float(data[0]["spreadProfilePrices"][0]["bid"])
+        sgd_per_oz = float(resp.json()["price"])
         return sgd_per_oz / 31.1035
     except Exception:
         return None
