@@ -48,28 +48,6 @@ if st.button("Save Goals", use_container_width=True, key="save_goals"):
 
 st.markdown('<div style="height:14px;"></div>', unsafe_allow_html=True)
 
-# ── Targets ───────────────────────────────────────────────
-st.markdown('<div class="section-title">\U0001f3af Daily & Monthly Targets</div>', unsafe_allow_html=True)
-t_cols = st.columns(3)
-with t_cols[0]:
-    income_target = st.number_input("Daily Income Target (\u00a3)", min_value=0.0, step=10.0, format="%.2f",
-                                     value=s_float("daily_income_target"), key="ss_income_target")
-with t_cols[1]:
-    daily_budget = st.number_input("Daily Budget (\u00a3)", min_value=0.0, step=5.0, format="%.2f",
-                                    value=s_float("daily_budget"), key="ss_daily_budget")
-with t_cols[2]:
-    monthly_budget = st.number_input("Monthly Budget (\u00a3)", min_value=0.0, step=50.0, format="%.2f",
-                                      value=s_float("monthly_budget"), key="ss_monthly_budget")
-if st.button("Save Targets", use_container_width=True, key="save_targets"):
-    s_set("daily_income_target", str(income_target))
-    s_set("daily_budget", str(daily_budget))
-    s_set("monthly_budget", str(monthly_budget))
-    save_settings_df(settings_df)
-    st.success("Targets saved.")
-    st.rerun()
-
-st.markdown('<div style="height:14px;"></div>', unsafe_allow_html=True)
-
 # ── Expense Categories ────────────────────────────────────
 st.markdown('<div class="section-title">\U0001f3f7\ufe0f Expense Categories</div>', unsafe_allow_html=True)
 cats_raw = s_get("expense_categories", "Food, Transport, Shopping, Bills, Health, Entertainment, Other")
