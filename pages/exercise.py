@@ -49,17 +49,6 @@ with cols[2]:
 # ── Date ──────────────────────────────────────────────────
 sel_date = st.date_input("Date", value=date.today(), key="ex_date")
 
-# ── Status segmented pills ────────────────────────────────
-if "ex_status" not in st.session_state:
-    st.session_state.ex_status = "Done"
-statuses = ["Done", "Rest", "Planned"]
-s_cols = st.columns(3)
-for i, s in enumerate(statuses):
-    with s_cols[i]:
-        if st.button(s, key=f"status_{s}", use_container_width=True):
-            st.session_state.ex_status = s
-status = st.session_state.ex_status
-
 # ── Type horizontal scroll ────────────────────────────────
 if "ex_type" not in st.session_state:
     st.session_state.ex_type = "Run"
@@ -101,7 +90,7 @@ notes = st.text_input("Notes", key="ex_notes", placeholder="How did it feel?")
 if st.button("Save Session", use_container_width=True, key="save_ex"):
     new_row = pd.DataFrame([{
         "date": str(sel_date),
-        "status": status,
+        "status": "Done",
         "type": ex_type,
         "duration": float(duration),
         "km": float(km),
