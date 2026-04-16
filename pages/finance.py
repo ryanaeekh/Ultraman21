@@ -18,6 +18,7 @@ from utils import (
     load_liabilities, save_liabilities_df,
     load_cpf, save_cpf_df,
     load_medisave, save_medisave_df,
+    load_property, save_property_df,
     load_settings, clean_text,
     filter_by_exact_date, filter_by_month, month_days,
 )
@@ -375,7 +376,48 @@ if st.button("Save Medisave", use_container_width=True, key="save_ms"):
     st.rerun()
 
 # ============================================================
-# SECTION 10 — NET WORTH
+# SECTION 10 — PROPERTY
+# ============================================================
+st.markdown('<div class="section-title">\U0001f3e0 Property</div>', unsafe_allow_html=True)
+
+property_df = load_property()
+
+prop_name = st.text_input("Name", key="prop_name", placeholder="e.g. HDB Flat")
+prop_amount = st.number_input("Amount", min_value=0.0, step=1000.0, format="%.2f", key="prop_amount")
+prop_notes = st.text_input("Notes (optional)", key="prop_notes", placeholder="e.g. Estimated market value")
+if st.button("Add Property", use_container_width=True, key="add_prop"):
+    name = prop_name.strip()
+    if name and prop_amount > 0:
+        new_row = pd.DataFrame([{"name": name, "amount": float(prop_amount), "notes": prop_notes.strip()}])
+        save_property_df(pd.concat([property_df, new_row], ignore_index=True))
+        st.success(f"Added {name}: ${prop_amount:,.2f}")
+        st.rerun()
+    else:
+        st.warning("Provide a name and an amount.")
+
+with st.expander(f"Property ({len(property_df)} items)"):
+    if not property_df.empty:
+        for idx, r in property_df.iterrows():
+            notes_text = f' — {r["notes"]}' if str(r.get("notes", "")).strip() else ""
+            row_cols = st.columns([6, 2])
+            with row_cols[0]:
+                st.markdown(
+                    f'<div class="list-row"><span>{r["name"]}{notes_text}</span>'
+                    f'<span class="amount">${float(r["amount"]):,.2f}</span></div>',
+                    unsafe_allow_html=True,
+                )
+            with row_cols[1]:
+                if st.button("Remove", key=f"rm_prop_{idx}", use_container_width=True):
+                    save_property_df(property_df.drop(idx).reset_index(drop=True))
+                    st.rerun()
+    else:
+        st.markdown(
+            '<div class="list-row" style="justify-content:center;opacity:0.7;">No property entries yet.</div>',
+            unsafe_allow_html=True,
+        )
+
+# ============================================================
+# SECTION 11 — NET WORTH
 # ============================================================
 st.markdown('<div class="section-title">\U0001f4b0 Net Worth</div>', unsafe_allow_html=True)
 
@@ -396,17 +438,20 @@ with nw1[2]:
     nw_color = "var(--accent-2)" if nw_net >= 0 else "var(--neg)"
     st.markdown(metric_card("Net Worth", f"${nw_net:,.2f}", color=nw_color), unsafe_allow_html=True)
 
-# — CPF & Medisave (informational, not in net worth) —
+# — CPF, Medisave & Property (informational, not in net worth) —
 total_cpf = float(cpf_df["amount"].sum()) if not cpf_df.empty else 0.0
 total_medisave = float(medisave_df["amount"].sum()) if not medisave_df.empty else 0.0
+total_property = float(property_df["amount"].sum()) if not property_df.empty else 0.0
 
 st.markdown(
     '<div style="text-align:center;opacity:0.6;margin-top:18px;font-size:0.85rem;">'
     'Not included in Net Worth</div>',
     unsafe_allow_html=True,
 )
-nw2 = st.columns(2)
+nw2 = st.columns(3)
 with nw2[0]:
     st.markdown(metric_card("CPF", f"${total_cpf:,.2f}", color="var(--accent)"), unsafe_allow_html=True)
 with nw2[1]:
     st.markdown(metric_card("Medisave", f"${total_medisave:,.2f}", color="var(--accent)"), unsafe_allow_html=True)
+with nw2[2]:
+    st.markdown(metric_card("Property", f"${total_property:,.2f}", color="var(--accent)"), unsafe_allow_html=True)

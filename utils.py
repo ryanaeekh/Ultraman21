@@ -49,12 +49,14 @@ LIABILITIES_COLUMNS = ["name", "amount"]
 GOLD_ASSETS_COLUMNS = ["name", "weight_grams", "purity"]
 CPF_COLUMNS = ["name", "amount"]
 MEDISAVE_COLUMNS = ["name", "amount"]
+PROPERTY_COLUMNS = ["name", "amount", "notes"]
 
 ASSETS_SHEET = "assets"
 LIABILITIES_SHEET = "liabilities"
 GOLD_ASSETS_SHEET = "gold_assets"
 CPF_SHEET = "cpf"
 MEDISAVE_SHEET = "medisave"
+PROPERTY_SHEET = "property"
 
 EXERCISE_COLUMNS = ["date", "status", "type", "duration", "km", "pace", "notes"]
 
@@ -273,6 +275,19 @@ def save_medisave_df(df: pd.DataFrame) -> None:
         if col not in df.columns:
             df[col] = ""
     save_sheet(MEDISAVE_SHEET, df[MEDISAVE_COLUMNS], MEDISAVE_COLUMNS)
+
+
+def load_property() -> pd.DataFrame:
+    df = load_sheet(PROPERTY_SHEET, PROPERTY_COLUMNS)
+    df = coerce_numeric(df, ["amount"])
+    return df
+
+
+def save_property_df(df: pd.DataFrame) -> None:
+    for col in PROPERTY_COLUMNS:
+        if col not in df.columns:
+            df[col] = ""
+    save_sheet(PROPERTY_SHEET, df[PROPERTY_COLUMNS], PROPERTY_COLUMNS)
 
 
 # =========================================================
