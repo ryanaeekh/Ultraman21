@@ -7,6 +7,7 @@ from pathlib import Path
 import pandas as pd
 import calendar
 from datetime import datetime
+import streamlit as st
 
 from gsheets import load_sheet, save_sheet
 
@@ -141,6 +142,7 @@ def clean_text(value) -> str:
 # =========================================================
 # SPECIFIC LOADERS
 # =========================================================
+@st.cache_data(ttl=60)
 def load_planner() -> pd.DataFrame:
     df = load_csv(PLANNER_FILE, PLANNER_COLUMNS)
     df = coerce_numeric(df, ["score"])
@@ -149,34 +151,40 @@ def load_planner() -> pd.DataFrame:
     return df
 
 
+@st.cache_data(ttl=60)
 def load_driving() -> pd.DataFrame:
     df = load_csv(DRIVING_FILE, DRIVING_COLUMNS)
     df = coerce_numeric(df, ["earnings", "hours_driven", "hourly_rate"])
     return df
 
 
+@st.cache_data(ttl=60)
 def load_finance() -> pd.DataFrame:
     df = load_csv(FINANCE_FILE, FINANCE_COLUMNS)
     df = coerce_numeric(df, ["amount"])
     return df
 
 
+@st.cache_data(ttl=60)
 def load_monthly_expenses() -> pd.DataFrame:
     df = load_csv(MONTHLY_EXPENSES_FILE, MONTHLY_EXPENSES_COLUMNS)
     df = coerce_numeric(df, ["amount"])
     return df
 
 
+@st.cache_data(ttl=60)
 def load_exercise() -> pd.DataFrame:
     df = load_csv(EXERCISE_FILE, EXERCISE_COLUMNS)
     df = coerce_numeric(df, ["duration", "km"])
     return df
 
 
+@st.cache_data(ttl=60)
 def load_journal() -> pd.DataFrame:
     return load_csv(JOURNAL_FILE, JOURNAL_COLUMNS)
 
 
+@st.cache_data(ttl=60)
 def load_settings() -> pd.DataFrame:
     return load_csv(SETTINGS_FILE, SETTINGS_COLUMNS)
 
@@ -186,32 +194,40 @@ def load_settings() -> pd.DataFrame:
 # =========================================================
 def save_planner_df(df: pd.DataFrame) -> None:
     save_csv(df, PLANNER_FILE, PLANNER_COLUMNS)
+    load_planner.clear()
 
 
 def save_driving_df(df: pd.DataFrame) -> None:
     save_csv(df, DRIVING_FILE, DRIVING_COLUMNS)
+    load_driving.clear()
 
 
 def save_finance_df(df: pd.DataFrame) -> None:
     save_csv(df, FINANCE_FILE, FINANCE_COLUMNS)
+    load_finance.clear()
 
 
 def save_monthly_expenses_df(df: pd.DataFrame) -> None:
     save_csv(df, MONTHLY_EXPENSES_FILE, MONTHLY_EXPENSES_COLUMNS)
+    load_monthly_expenses.clear()
 
 
 def save_exercise_df(df: pd.DataFrame) -> None:
     save_csv(df, EXERCISE_FILE, EXERCISE_COLUMNS)
+    load_exercise.clear()
 
 
 def save_journal_df(df: pd.DataFrame) -> None:
     save_csv(df, JOURNAL_FILE, JOURNAL_COLUMNS)
+    load_journal.clear()
 
 
 def save_settings_df(df: pd.DataFrame) -> None:
     save_csv(df, SETTINGS_FILE, SETTINGS_COLUMNS)
+    load_settings.clear()
 
 
+@st.cache_data(ttl=60)
 def load_assets() -> pd.DataFrame:
     df = load_sheet(ASSETS_SHEET, ASSETS_COLUMNS)
     df = coerce_numeric(df, ["amount"])
@@ -223,8 +239,10 @@ def save_assets_df(df: pd.DataFrame) -> None:
         if col not in df.columns:
             df[col] = ""
     save_sheet(ASSETS_SHEET, df[ASSETS_COLUMNS], ASSETS_COLUMNS)
+    load_assets.clear()
 
 
+@st.cache_data(ttl=60)
 def load_liabilities() -> pd.DataFrame:
     df = load_sheet(LIABILITIES_SHEET, LIABILITIES_COLUMNS)
     df = coerce_numeric(df, ["amount"])
@@ -236,8 +254,10 @@ def save_liabilities_df(df: pd.DataFrame) -> None:
         if col not in df.columns:
             df[col] = ""
     save_sheet(LIABILITIES_SHEET, df[LIABILITIES_COLUMNS], LIABILITIES_COLUMNS)
+    load_liabilities.clear()
 
 
+@st.cache_data(ttl=60)
 def load_gold_assets() -> pd.DataFrame:
     df = load_sheet(GOLD_ASSETS_SHEET, GOLD_ASSETS_COLUMNS)
     df = coerce_numeric(df, ["weight_grams", "purity"])
@@ -249,8 +269,10 @@ def save_gold_assets_df(df: pd.DataFrame) -> None:
         if col not in df.columns:
             df[col] = ""
     save_sheet(GOLD_ASSETS_SHEET, df[GOLD_ASSETS_COLUMNS], GOLD_ASSETS_COLUMNS)
+    load_gold_assets.clear()
 
 
+@st.cache_data(ttl=60)
 def load_cpf() -> pd.DataFrame:
     df = load_sheet(CPF_SHEET, CPF_COLUMNS)
     df = coerce_numeric(df, ["amount"])
@@ -262,8 +284,10 @@ def save_cpf_df(df: pd.DataFrame) -> None:
         if col not in df.columns:
             df[col] = ""
     save_sheet(CPF_SHEET, df[CPF_COLUMNS], CPF_COLUMNS)
+    load_cpf.clear()
 
 
+@st.cache_data(ttl=60)
 def load_medisave() -> pd.DataFrame:
     df = load_sheet(MEDISAVE_SHEET, MEDISAVE_COLUMNS)
     df = coerce_numeric(df, ["amount"])
@@ -275,8 +299,10 @@ def save_medisave_df(df: pd.DataFrame) -> None:
         if col not in df.columns:
             df[col] = ""
     save_sheet(MEDISAVE_SHEET, df[MEDISAVE_COLUMNS], MEDISAVE_COLUMNS)
+    load_medisave.clear()
 
 
+@st.cache_data(ttl=60)
 def load_property() -> pd.DataFrame:
     df = load_sheet(PROPERTY_SHEET, PROPERTY_COLUMNS)
     df = coerce_numeric(df, ["amount"])
@@ -288,6 +314,7 @@ def save_property_df(df: pd.DataFrame) -> None:
         if col not in df.columns:
             df[col] = ""
     save_sheet(PROPERTY_SHEET, df[PROPERTY_COLUMNS], PROPERTY_COLUMNS)
+    load_property.clear()
 
 
 # =========================================================
