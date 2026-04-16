@@ -62,12 +62,18 @@ else:
         label = day_entries.iloc[0]["date_parsed"].strftime("%A, %d %B %Y")
         count = len(day_entries)
         with st.expander(f"{label}  ({count} {'entry' if count == 1 else 'entries'})"):
-            for _, r in day_entries.iterrows():
+            for idx, r in day_entries.iterrows():
                 time_str = clean_text(r.get("time", ""))
                 body = clean_text(r["entry"])
                 time_label = f'<span style="color:var(--accent);font-weight:600;">{time_str}</span> — ' if time_str else ''
-                st.markdown(
-                    f'<div style="white-space:pre-wrap;font-size:15px;line-height:1.85;color:var(--text);opacity:0.92;margin-bottom:16px;">'
-                    f'{time_label}{body}</div>',
-                    unsafe_allow_html=True,
-                )
+                row_cols = st.columns([8, 2])
+                with row_cols[0]:
+                    st.markdown(
+                        f'<div style="white-space:pre-wrap;font-size:15px;line-height:1.85;color:var(--text);opacity:0.92;margin-bottom:16px;">'
+                        f'{time_label}{body}</div>',
+                        unsafe_allow_html=True,
+                    )
+                with row_cols[1]:
+                    if st.button("Delete", key=f"del_j_{idx}", use_container_width=True):
+                        save_journal_df(journal_df.drop(idx).reset_index(drop=True))
+                        st.rerun()
