@@ -18,6 +18,34 @@ st.markdown(page_header("Exercise", "Move with intention"), unsafe_allow_html=Tr
 
 exercise_df = load_exercise()
 
+# ── Total km ──────────────────────────────────────────────
+total_km = float(exercise_df["km"].sum()) if not exercise_df.empty else 0.0
+st.markdown(
+    f'<div class="card" style="margin-top:20px;text-align:center;">'
+    f'<div class="section-title">\U0001f30d Total Distance</div>'
+    f'<div class="metric-value" style="font-size:56px;color:var(--text);">{total_km:,.1f} km</div>'
+    f'<div class="metric-sub">all sessions to date</div>'
+    f'</div>',
+    unsafe_allow_html=True,
+)
+
+# ── Today Summary ─────────────────────────────────────────
+st.markdown('<div class="section-title">\U0001f4a5 Today&#39;s Summary</div>', unsafe_allow_html=True)
+
+today_rows = filter_by_exact_date(exercise_df, date.today())
+today_min = float(today_rows["duration"].sum()) if not today_rows.empty else 0.0
+today_km = float(today_rows["km"].sum()) if not today_rows.empty else 0.0
+today_pace = (today_min / today_km) if today_km > 0 else 0.0
+
+cols = st.columns(3)
+with cols[0]:
+    st.markdown(metric_card("Minutes", f"{today_min:.0f}", color="var(--accent-2)"), unsafe_allow_html=True)
+with cols[1]:
+    st.markdown(metric_card("Distance", f"{today_km:.2f} km", color="var(--accent-2)"), unsafe_allow_html=True)
+with cols[2]:
+    pv = f"{today_pace:.2f}" if today_pace > 0 else "\u2014"
+    st.markdown(metric_card("Avg Pace", pv, sub="min/km", color="var(--accent-2)"), unsafe_allow_html=True)
+
 # ── Date ──────────────────────────────────────────────────
 sel_date = st.date_input("Date", value=date.today(), key="ex_date")
 
@@ -84,23 +112,6 @@ if st.button("Save Session", use_container_width=True, key="save_ex"):
     st.success("Session saved.")
     st.rerun()
 
-# ── Today Summary ─────────────────────────────────────────
-st.markdown('<div class="section-title">\U0001f4a5 Today&#39;s Summary</div>', unsafe_allow_html=True)
-
-today_rows = filter_by_exact_date(exercise_df, date.today())
-today_min = float(today_rows["duration"].sum()) if not today_rows.empty else 0.0
-today_km = float(today_rows["km"].sum()) if not today_rows.empty else 0.0
-today_pace = (today_min / today_km) if today_km > 0 else 0.0
-
-cols = st.columns(3)
-with cols[0]:
-    st.markdown(metric_card("Minutes", f"{today_min:.0f}", color="var(--accent-2)"), unsafe_allow_html=True)
-with cols[1]:
-    st.markdown(metric_card("Distance", f"{today_km:.2f} km", color="var(--accent-2)"), unsafe_allow_html=True)
-with cols[2]:
-    pv = f"{today_pace:.2f}" if today_pace > 0 else "\u2014"
-    st.markdown(metric_card("Avg Pace", pv, sub="min/km", color="var(--accent-2)"), unsafe_allow_html=True)
-
 # ── Last 7 Sessions ───────────────────────────────────────
 st.markdown('<div class="section-title">\U0001f4dc Last 7 Sessions</div>', unsafe_allow_html=True)
 if exercise_df.empty:
@@ -122,14 +133,3 @@ else:
         )
     rows_html += '</tbody></table>'
     st.markdown(rows_html, unsafe_allow_html=True)
-
-# ── Total km ──────────────────────────────────────────────
-total_km = float(exercise_df["km"].sum()) if not exercise_df.empty else 0.0
-st.markdown(
-    f'<div class="card" style="margin-top:20px;text-align:center;">'
-    f'<div class="section-title">\U0001f30d Total Distance</div>'
-    f'<div class="metric-value" style="font-size:56px;color:var(--text);">{total_km:,.1f} km</div>'
-    f'<div class="metric-sub">all sessions to date</div>'
-    f'</div>',
-    unsafe_allow_html=True,
-)
