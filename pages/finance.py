@@ -78,7 +78,7 @@ def fetch_gold_price_sgd_per_gram():
 
 st.markdown(page_header("Finance", ""), unsafe_allow_html=True)
 st.markdown(
-    '<div style="text-align:center;font-style:italic;font-size:28px;margin:18px 0;">Attention Is All You Need</div>',
+    '<div style="text-align:center;font-style:italic;font-size:22px;margin:18px 0;">Attention Is All You Need</div>',
     unsafe_allow_html=True,
 )
 
