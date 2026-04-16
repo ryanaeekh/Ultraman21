@@ -53,6 +53,13 @@ def fmt(v):
 inject_theme()
 nav_menu("Finance")
 
+st.markdown(
+    '<script>document.querySelectorAll("input[type=text]").forEach(i=>i.setAttribute("autocomplete","off"));'
+    'new MutationObserver(()=>document.querySelectorAll("input[type=text]").forEach(i=>i.setAttribute("autocomplete","off")))'
+    '.observe(document.body,{childList:true,subtree:true});</script>',
+    unsafe_allow_html=True,
+)
+
 
 @st.cache_data(ttl=3600)
 def fetch_gold_price_sgd_per_gram():
