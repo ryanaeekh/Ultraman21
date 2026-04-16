@@ -32,14 +32,6 @@ for i, s in enumerate(statuses):
             st.session_state.ex_status = s
 status = st.session_state.ex_status
 
-cls = lambda s: "seg-pill active" if status == s else "seg-pill"
-st.markdown(
-    f'<div class="seg-row">'
-    + "".join(f'<div class="{cls(s)}">{s}</div>' for s in statuses)
-    + '</div>',
-    unsafe_allow_html=True,
-)
-
 # ── Type horizontal scroll ────────────────────────────────
 if "ex_type" not in st.session_state:
     st.session_state.ex_type = "Run"
