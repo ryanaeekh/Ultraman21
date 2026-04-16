@@ -24,7 +24,8 @@ journal_df = load_journal()
 
 existing = ""
 if not journal_df.empty:
-    match = journal_df[journal_df["date"].astype(str) == today_str]
+    _jdates = pd.to_datetime(journal_df["date"], errors="coerce")
+    match = journal_df[_jdates.dt.date == today]
     if not match.empty:
         existing = clean_text(match.iloc[0]["entry"])
 
@@ -34,7 +35,7 @@ entry = st.text_area("Entry", value=existing, height=320, key="journal_entry",
 if st.button("Save Entry", use_container_width=True, key="save_journal"):
     trimmed = entry.strip()
     updated = journal_df.copy()
-    updated = updated[updated["date"].astype(str) != today_str]
+    updated = updated[pd.to_datetime(updated["date"], errors="coerce").dt.date != today]
     if trimmed:
         new_row = pd.DataFrame([{"date": today_str, "entry": trimmed}])
         updated = pd.concat([updated, new_row], ignore_index=True)
@@ -52,7 +53,7 @@ else:
     past = journal_df.copy()
     past["date_parsed"] = pd.to_datetime(past["date"], errors="coerce")
     past = past.dropna(subset=["date_parsed"]).sort_values("date_parsed", ascending=False)
-    past = past[past["date"].astype(str) != today_str]
+    past = past[past["date_parsed"].dt.date != today]
     for _, r in past.iterrows():
         label = r["date_parsed"].strftime("%A, %d %B %Y")
         body = clean_text(r["entry"])
