@@ -161,12 +161,6 @@ with st.expander(f"Assets ({len(assets_df)} items)"):
                 if st.button("Remove", key=f"rm_asset_{idx}", use_container_width=True):
                     save_assets_df(assets_df.drop(idx).reset_index(drop=True))
                     st.rerun()
-        total_assets_items = float(assets_df["amount"].sum())
-        st.markdown(
-            f'<div class="list-row" style="font-weight:700;"><span>Total Assets</span>'
-            f'<span class="amount">${total_assets_items:,.2f}</span></div>',
-            unsafe_allow_html=True,
-        )
     else:
         st.markdown(
             '<div class="list-row" style="justify-content:center;opacity:0.7;">No assets yet.</div>',
@@ -206,12 +200,6 @@ with st.expander(f"Liabilities ({len(liabilities_df)} items)"):
                 if st.button("Remove", key=f"rm_liab_{idx}", use_container_width=True):
                     save_liabilities_df(liabilities_df.drop(idx).reset_index(drop=True))
                     st.rerun()
-        total_liab_items = float(liabilities_df["amount"].sum())
-        st.markdown(
-            f'<div class="list-row" style="font-weight:700;"><span>Total Liabilities</span>'
-            f'<span class="amount">${total_liab_items:,.2f}</span></div>',
-            unsafe_allow_html=True,
-        )
     else:
         st.markdown(
             '<div class="list-row" style="justify-content:center;opacity:0.7;">No liabilities yet.</div>',
