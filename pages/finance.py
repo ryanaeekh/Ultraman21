@@ -335,37 +335,18 @@ with st.expander(f"Liabilities ({len(liabilities_df)} items)"):
 # ============================================================
 st.markdown('<div class="section-title">\U0001f3e2 CPF</div>', unsafe_allow_html=True)
 
-cpf_name = st.text_input("Name", key="cpf_name", placeholder="e.g. Ordinary Account")
-cpf_amount = st.number_input("Amount", min_value=0.0, step=100.0, format="%.2f", key="cpf_amount")
-if st.button("Add CPF Entry", use_container_width=True, key="add_cpf"):
-    name = cpf_name.strip()
-    if name and cpf_amount > 0:
-        new_row = pd.DataFrame([{"name": name, "amount": float(cpf_amount)}])
-        save_cpf_df(pd.concat([cpf_df, new_row], ignore_index=True))
-        st.success(f"Added {name}: ${cpf_amount:,.2f}")
-        st.rerun()
-    else:
-        st.warning("Provide a name and an amount.")
+current_cpf = float(cpf_df.iloc[0]["amount"]) if not cpf_df.empty else 0.0
 
-with st.expander(f"CPF ({len(cpf_df)} items)"):
-    if not cpf_df.empty:
-        for idx, r in cpf_df.iterrows():
-            row_cols = st.columns([6, 2])
-            with row_cols[0]:
-                st.markdown(
-                    f'<div class="list-row"><span>{r["name"]}</span>'
-                    f'<span class="amount">${float(r["amount"]):,.2f}</span></div>',
-                    unsafe_allow_html=True,
-                )
-            with row_cols[1]:
-                if st.button("Remove", key=f"rm_cpf_{idx}", use_container_width=True):
-                    save_cpf_df(cpf_df.drop(idx).reset_index(drop=True))
-                    st.rerun()
-    else:
-        st.markdown(
-            '<div class="list-row" style="justify-content:center;opacity:0.7;">No CPF entries yet.</div>',
-            unsafe_allow_html=True,
-        )
+st.markdown(
+    f'<div class="list-row"><span>CPF Account</span>'
+    f'<span class="amount">${current_cpf:,.2f}</span></div>',
+    unsafe_allow_html=True,
+)
+cpf_amount = st.number_input("Update Amount", min_value=0.0, step=100.0, format="%.2f", value=current_cpf, key="cpf_amount")
+if st.button("Save CPF", use_container_width=True, key="save_cpf"):
+    save_cpf_df(pd.DataFrame([{"name": "CPF Account", "amount": float(cpf_amount)}]))
+    st.success(f"CPF updated: ${cpf_amount:,.2f}")
+    st.rerun()
 
 # ============================================================
 # 11 — MEDISAVE
@@ -390,39 +371,18 @@ if st.button("Save Medisave", use_container_width=True, key="save_ms"):
 # ============================================================
 st.markdown('<div class="section-title">\U0001f3e0 Property</div>', unsafe_allow_html=True)
 
-prop_name = st.text_input("Name", key="prop_name", placeholder="e.g. HDB Flat")
-prop_amount = st.number_input("Amount", min_value=0.0, step=1000.0, format="%.2f", key="prop_amount")
-prop_notes = st.text_input("Notes (optional)", key="prop_notes", placeholder="e.g. Estimated market value")
-if st.button("Add Property", use_container_width=True, key="add_prop"):
-    name = prop_name.strip()
-    if name and prop_amount > 0:
-        new_row = pd.DataFrame([{"name": name, "amount": float(prop_amount), "notes": prop_notes.strip()}])
-        save_property_df(pd.concat([property_df, new_row], ignore_index=True))
-        st.success(f"Added {name}: ${prop_amount:,.2f}")
-        st.rerun()
-    else:
-        st.warning("Provide a name and an amount.")
+current_property = float(property_df.iloc[0]["amount"]) if not property_df.empty else 0.0
 
-with st.expander(f"Property ({len(property_df)} items)"):
-    if not property_df.empty:
-        for idx, r in property_df.iterrows():
-            notes_text = f' — {r["notes"]}' if str(r.get("notes", "")).strip() else ""
-            row_cols = st.columns([6, 2])
-            with row_cols[0]:
-                st.markdown(
-                    f'<div class="list-row"><span>{r["name"]}{notes_text}</span>'
-                    f'<span class="amount">${float(r["amount"]):,.2f}</span></div>',
-                    unsafe_allow_html=True,
-                )
-            with row_cols[1]:
-                if st.button("Remove", key=f"rm_prop_{idx}", use_container_width=True):
-                    save_property_df(property_df.drop(idx).reset_index(drop=True))
-                    st.rerun()
-    else:
-        st.markdown(
-            '<div class="list-row" style="justify-content:center;opacity:0.7;">No property entries yet.</div>',
-            unsafe_allow_html=True,
-        )
+st.markdown(
+    f'<div class="list-row"><span>Property</span>'
+    f'<span class="amount">${current_property:,.2f}</span></div>',
+    unsafe_allow_html=True,
+)
+prop_amount = st.number_input("Update Amount", min_value=0.0, step=1000.0, format="%.2f", value=current_property, key="prop_amount")
+if st.button("Save Property", use_container_width=True, key="save_prop"):
+    save_property_df(pd.DataFrame([{"name": "Property", "amount": float(prop_amount), "notes": ""}]))
+    st.success(f"Property updated: ${prop_amount:,.2f}")
+    st.rerun()
 
 # — CPF, Medisave & Property totals (informational) —
 total_cpf = float(cpf_df["amount"].sum()) if not cpf_df.empty else 0.0
