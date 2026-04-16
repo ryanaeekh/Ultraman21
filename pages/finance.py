@@ -24,17 +24,59 @@ nav_menu("Finance")
 
 
 @st.cache_data(ttl=3600)
+def _fetch_gold_usd_per_oz():
+    """Try multiple sources for gold spot price in USD/oz."""
+    # Primary: metals.live
+    try:
+        resp = requests.get("https://api.metals.live/v1/spot/gold", timeout=10)
+        resp.raise_for_status()
+        return float(resp.json()[0]["price"])
+    except Exception:
+        pass
+
+    # Fallback 1: metals-api.com (XAU is oz-based, price is USD per XAU)
+    try:
+        resp = requests.get(
+            "https://metals-api.com/api/latest?base=USD&symbols=XAU", timeout=10
+        )
+        resp.raise_for_status()
+        rate = float(resp.json()["rates"]["XAU"])
+        return 1.0 / rate  # rate is XAU per 1 USD, invert to get USD per oz
+    except Exception:
+        pass
+
+    # Fallback 2: Yahoo Finance gold futures
+    try:
+        resp = requests.get(
+            "https://query1.finance.yahoo.com/v8/finance/chart/GC%3DF?interval=1d&range=1d",
+            timeout=10,
+        )
+        resp.raise_for_status()
+        data = resp.json()
+        return float(data["chart"]["result"][0]["meta"]["regularMarketPrice"])
+    except Exception:
+        pass
+
+    return None
+
+
+@st.cache_data(ttl=3600)
+def _fetch_usd_sgd():
+    """Fetch USD to SGD exchange rate."""
+    resp = requests.get("https://api.exchangerate-api.com/v4/latest/USD", timeout=10)
+    resp.raise_for_status()
+    return float(resp.json()["rates"]["SGD"])
+
+
 def fetch_gold_price_sgd_per_gram():
-    """Fetch live gold spot price and return SGD per gram."""
-    gold_resp = requests.get("https://api.metals.live/v1/spot/gold", timeout=10)
-    gold_resp.raise_for_status()
-    gold_data = gold_resp.json()
-    usd_per_oz = float(gold_data[0]["price"])
-
-    fx_resp = requests.get("https://api.exchangerate-api.com/v4/latest/USD", timeout=10)
-    fx_resp.raise_for_status()
-    usd_sgd = float(fx_resp.json()["rates"]["SGD"])
-
+    """Return (sgd_per_gram, True) on success or (None, False) on failure."""
+    usd_per_oz = _fetch_gold_usd_per_oz()
+    if usd_per_oz is None:
+        return None
+    try:
+        usd_sgd = _fetch_usd_sgd()
+    except Exception:
+        return None
     return usd_per_oz / 31.1035 * usd_sgd
 
 st.markdown(page_header("Finance", "Your money operating system"), unsafe_allow_html=True)
@@ -186,30 +228,33 @@ with st.expander(f"Assets ({len(assets_df)} items)"):
     # — Gold Asset Calculator —
     st.markdown("---")
     st.markdown('<div class="section-title">Gold Asset Calculator (916 / 22k)</div>', unsafe_allow_html=True)
-    try:
-        gold_sgd_per_gram = fetch_gold_price_sgd_per_gram()
+    gold_sgd_per_gram = fetch_gold_price_sgd_per_gram()
+    if gold_sgd_per_gram is not None:
         st.markdown(
             f'<div class="list-row"><span>Live Gold Price</span>'
             f'<span class="amount">SGD ${gold_sgd_per_gram:,.2f}/g</span></div>',
             unsafe_allow_html=True,
         )
-        gold_weight = st.number_input("Weight (grams)", min_value=0.0, step=1.0, format="%.2f", key="gold_weight")
-        gold_purity = 0.916
-        gold_value = gold_weight * gold_sgd_per_gram * gold_purity
-        if gold_weight > 0:
-            st.markdown(
-                f'<div class="list-row" style="font-weight:700;"><span>Your Gold Value (916)</span>'
-                f'<span class="amount">SGD ${gold_value:,.2f}</span></div>',
-                unsafe_allow_html=True,
-            )
-            if st.button("Add to Assets", use_container_width=True, key="add_gold_asset"):
-                name = f"Gold ({gold_weight:g}g 916)"
-                new_row = pd.DataFrame([{"name": name, "amount": float(gold_value)}])
-                save_assets_df(pd.concat([assets_df, new_row], ignore_index=True))
-                st.success(f"Added {name}: SGD ${gold_value:,.2f}")
-                st.rerun()
-    except Exception:
-        st.warning("Could not fetch live gold price. Try again later.")
+    else:
+        st.warning("Could not fetch live gold price. Enter manually:")
+        gold_sgd_per_gram = st.number_input(
+            "Gold price (SGD/g)", min_value=0.0, step=1.0, format="%.2f", key="gold_manual_price"
+        )
+    gold_weight = st.number_input("Weight (grams)", min_value=0.0, step=1.0, format="%.2f", key="gold_weight")
+    gold_purity = 0.916
+    gold_value = gold_weight * gold_sgd_per_gram * gold_purity
+    if gold_weight > 0 and gold_sgd_per_gram > 0:
+        st.markdown(
+            f'<div class="list-row" style="font-weight:700;"><span>Your Gold Value (916)</span>'
+            f'<span class="amount">SGD ${gold_value:,.2f}</span></div>',
+            unsafe_allow_html=True,
+        )
+        if st.button("Add to Assets", use_container_width=True, key="add_gold_asset"):
+            name = f"Gold ({gold_weight:g}g 916)"
+            new_row = pd.DataFrame([{"name": name, "amount": float(gold_value)}])
+            save_assets_df(pd.concat([assets_df, new_row], ignore_index=True))
+            st.success(f"Added {name}: SGD ${gold_value:,.2f}")
+            st.rerun()
 
 # ============================================================
 # SECTION 6 — LIABILITIES
