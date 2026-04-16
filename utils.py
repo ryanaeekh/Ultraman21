@@ -43,6 +43,12 @@ FINANCE_COLUMNS = ["date", "category", "amount"]
 
 MONTHLY_EXPENSES_COLUMNS = ["name", "amount"]
 
+ASSETS_COLUMNS = ["name", "amount"]
+LIABILITIES_COLUMNS = ["name", "amount"]
+
+ASSETS_SHEET = "assets"
+LIABILITIES_SHEET = "liabilities"
+
 EXERCISE_COLUMNS = ["date", "status", "type", "duration", "km", "pace", "notes"]
 
 JOURNAL_COLUMNS = ["date", "entry"]
@@ -195,6 +201,32 @@ def save_journal_df(df: pd.DataFrame) -> None:
 
 def save_settings_df(df: pd.DataFrame) -> None:
     save_csv(df, SETTINGS_FILE, SETTINGS_COLUMNS)
+
+
+def load_assets() -> pd.DataFrame:
+    df = load_sheet(ASSETS_SHEET, ASSETS_COLUMNS)
+    df = coerce_numeric(df, ["amount"])
+    return df
+
+
+def save_assets_df(df: pd.DataFrame) -> None:
+    for col in ASSETS_COLUMNS:
+        if col not in df.columns:
+            df[col] = ""
+    save_sheet(ASSETS_SHEET, df[ASSETS_COLUMNS], ASSETS_COLUMNS)
+
+
+def load_liabilities() -> pd.DataFrame:
+    df = load_sheet(LIABILITIES_SHEET, LIABILITIES_COLUMNS)
+    df = coerce_numeric(df, ["amount"])
+    return df
+
+
+def save_liabilities_df(df: pd.DataFrame) -> None:
+    for col in LIABILITIES_COLUMNS:
+        if col not in df.columns:
+            df[col] = ""
+    save_sheet(LIABILITIES_SHEET, df[LIABILITIES_COLUMNS], LIABILITIES_COLUMNS)
 
 
 # =========================================================

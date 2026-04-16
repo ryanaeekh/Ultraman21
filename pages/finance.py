@@ -12,6 +12,8 @@ from theme import inject_theme, nav_menu, page_header, metric_card
 from utils import (
     load_finance, save_finance_df,
     load_monthly_expenses, save_monthly_expenses_df,
+    load_assets, save_assets_df,
+    load_liabilities, save_liabilities_df,
     load_settings, clean_text,
     filter_by_exact_date, filter_by_month, month_days,
 )
@@ -127,7 +129,97 @@ else:
     )
 
 # ============================================================
-# SECTION 5 — MONTH SUMMARY
+# SECTION 5 — ASSETS
+# ============================================================
+st.markdown('<div class="section-title">\U0001f3e6 Assets</div>', unsafe_allow_html=True)
+
+assets_df = load_assets()
+
+asset_name = st.text_input("Name", key="asset_name", placeholder="e.g. Savings Account")
+asset_amount = st.number_input("Amount", min_value=0.0, step=100.0, format="%.2f", key="asset_amount")
+if st.button("Add Asset", use_container_width=True, key="add_asset"):
+    name = asset_name.strip()
+    if name and asset_amount > 0:
+        new_row = pd.DataFrame([{"name": name, "amount": float(asset_amount)}])
+        save_assets_df(pd.concat([assets_df, new_row], ignore_index=True))
+        st.success(f"Added {name}: ${asset_amount:,.2f}")
+        st.rerun()
+    else:
+        st.warning("Provide a name and an amount.")
+
+if not assets_df.empty:
+    st.markdown('<div style="margin-top:12px;"></div>', unsafe_allow_html=True)
+    for idx, r in assets_df.iterrows():
+        row_cols = st.columns([6, 2])
+        with row_cols[0]:
+            st.markdown(
+                f'<div class="list-row"><span>{r["name"]}</span>'
+                f'<span class="amount">${float(r["amount"]):,.2f}</span></div>',
+                unsafe_allow_html=True,
+            )
+        with row_cols[1]:
+            if st.button("Remove", key=f"rm_asset_{idx}", use_container_width=True):
+                save_assets_df(assets_df.drop(idx).reset_index(drop=True))
+                st.rerun()
+    total_assets_items = float(assets_df["amount"].sum())
+    st.markdown(
+        f'<div class="list-row" style="font-weight:700;"><span>Total Assets</span>'
+        f'<span class="amount">${total_assets_items:,.2f}</span></div>',
+        unsafe_allow_html=True,
+    )
+else:
+    st.markdown(
+        '<div class="list-row" style="justify-content:center;opacity:0.7;">No assets yet.</div>',
+        unsafe_allow_html=True,
+    )
+
+# ============================================================
+# SECTION 6 — LIABILITIES
+# ============================================================
+st.markdown('<div class="section-title">\U0001f4c9 Liabilities</div>', unsafe_allow_html=True)
+
+liabilities_df = load_liabilities()
+
+liab_name = st.text_input("Name", key="liab_name", placeholder="e.g. Car Loan")
+liab_amount = st.number_input("Amount", min_value=0.0, step=100.0, format="%.2f", key="liab_amount")
+if st.button("Add Liability", use_container_width=True, key="add_liab"):
+    name = liab_name.strip()
+    if name and liab_amount > 0:
+        new_row = pd.DataFrame([{"name": name, "amount": float(liab_amount)}])
+        save_liabilities_df(pd.concat([liabilities_df, new_row], ignore_index=True))
+        st.success(f"Added {name}: ${liab_amount:,.2f}")
+        st.rerun()
+    else:
+        st.warning("Provide a name and an amount.")
+
+if not liabilities_df.empty:
+    st.markdown('<div style="margin-top:12px;"></div>', unsafe_allow_html=True)
+    for idx, r in liabilities_df.iterrows():
+        row_cols = st.columns([6, 2])
+        with row_cols[0]:
+            st.markdown(
+                f'<div class="list-row"><span>{r["name"]}</span>'
+                f'<span class="amount">${float(r["amount"]):,.2f}</span></div>',
+                unsafe_allow_html=True,
+            )
+        with row_cols[1]:
+            if st.button("Remove", key=f"rm_liab_{idx}", use_container_width=True):
+                save_liabilities_df(liabilities_df.drop(idx).reset_index(drop=True))
+                st.rerun()
+    total_liab_items = float(liabilities_df["amount"].sum())
+    st.markdown(
+        f'<div class="list-row" style="font-weight:700;"><span>Total Liabilities</span>'
+        f'<span class="amount">${total_liab_items:,.2f}</span></div>',
+        unsafe_allow_html=True,
+    )
+else:
+    st.markdown(
+        '<div class="list-row" style="justify-content:center;opacity:0.7;">No liabilities yet.</div>',
+        unsafe_allow_html=True,
+    )
+
+# ============================================================
+# SECTION 7 — MONTH SUMMARY
 # ============================================================
 st.markdown('<div class="section-title">\U0001f4c5 Month Summary</div>', unsafe_allow_html=True)
 
@@ -151,3 +243,27 @@ with g2[0]:
 with g2[1]:
     net_color = "var(--accent-2)" if month_net >= 0 else "var(--neg)"
     st.markdown(metric_card("Net", f"${month_net:,.2f}", sub=month_label, color=net_color), unsafe_allow_html=True)
+
+# ============================================================
+# SECTION 8 — NET WORTH
+# ============================================================
+st.markdown('<div class="section-title">\U0001f4b0 Net Worth</div>', unsafe_allow_html=True)
+
+nw_assets_items = float(assets_df["amount"].sum()) if not assets_df.empty else 0.0
+nw_recurring_income = float(month_income)
+nw_total_assets = nw_recurring_income + nw_assets_items
+
+nw_liab_items = float(liabilities_df["amount"].sum()) if not liabilities_df.empty else 0.0
+nw_recurring_expenses = month_fixed
+nw_total_liabilities = nw_recurring_expenses + nw_liab_items
+
+nw_net = nw_total_assets - nw_total_liabilities
+
+nw1 = st.columns(3)
+with nw1[0]:
+    st.markdown(metric_card("Total Assets", f"${nw_total_assets:,.2f}", sub=f"Income ${nw_recurring_income:,.2f} + Assets ${nw_assets_items:,.2f}", color="var(--accent-2)"), unsafe_allow_html=True)
+with nw1[1]:
+    st.markdown(metric_card("Total Liabilities", f"${nw_total_liabilities:,.2f}", sub=f"Recurring ${nw_recurring_expenses:,.2f} + Liabilities ${nw_liab_items:,.2f}", color="var(--neg)"), unsafe_allow_html=True)
+with nw1[2]:
+    nw_color = "var(--accent-2)" if nw_net >= 0 else "var(--neg)"
+    st.markdown(metric_card("Net Worth", f"${nw_net:,.2f}", color=nw_color), unsafe_allow_html=True)
