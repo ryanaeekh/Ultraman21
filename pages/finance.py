@@ -4,6 +4,7 @@ sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 from datetime import date
 
 import pandas as pd
+import requests
 import streamlit as st
 
 st.set_page_config(page_title="Finance", page_icon="\U0001f4b0", layout="wide", initial_sidebar_state="collapsed")
@@ -20,6 +21,21 @@ from utils import (
 
 inject_theme()
 nav_menu("Finance")
+
+
+@st.cache_data(ttl=3600)
+def fetch_gold_price_sgd_per_gram():
+    """Fetch live gold spot price and return SGD per gram."""
+    gold_resp = requests.get("https://api.metals.live/v1/spot/gold", timeout=10)
+    gold_resp.raise_for_status()
+    gold_data = gold_resp.json()
+    usd_per_oz = float(gold_data[0]["price"])
+
+    fx_resp = requests.get("https://api.exchangerate-api.com/v4/latest/USD", timeout=10)
+    fx_resp.raise_for_status()
+    usd_sgd = float(fx_resp.json()["rates"]["SGD"])
+
+    return usd_per_oz / 31.1035 * usd_sgd
 
 st.markdown(page_header("Finance", "Your money operating system"), unsafe_allow_html=True)
 
@@ -166,6 +182,34 @@ with st.expander(f"Assets ({len(assets_df)} items)"):
             '<div class="list-row" style="justify-content:center;opacity:0.7;">No assets yet.</div>',
             unsafe_allow_html=True,
         )
+
+    # — Gold Asset Calculator —
+    st.markdown("---")
+    st.markdown('<div class="section-title">Gold Asset Calculator (916 / 22k)</div>', unsafe_allow_html=True)
+    try:
+        gold_sgd_per_gram = fetch_gold_price_sgd_per_gram()
+        st.markdown(
+            f'<div class="list-row"><span>Live Gold Price</span>'
+            f'<span class="amount">SGD ${gold_sgd_per_gram:,.2f}/g</span></div>',
+            unsafe_allow_html=True,
+        )
+        gold_weight = st.number_input("Weight (grams)", min_value=0.0, step=1.0, format="%.2f", key="gold_weight")
+        gold_purity = 0.916
+        gold_value = gold_weight * gold_sgd_per_gram * gold_purity
+        if gold_weight > 0:
+            st.markdown(
+                f'<div class="list-row" style="font-weight:700;"><span>Your Gold Value (916)</span>'
+                f'<span class="amount">SGD ${gold_value:,.2f}</span></div>',
+                unsafe_allow_html=True,
+            )
+            if st.button("Add to Assets", use_container_width=True, key="add_gold_asset"):
+                name = f"Gold ({gold_weight:g}g 916)"
+                new_row = pd.DataFrame([{"name": name, "amount": float(gold_value)}])
+                save_assets_df(pd.concat([assets_df, new_row], ignore_index=True))
+                st.success(f"Added {name}: SGD ${gold_value:,.2f}")
+                st.rerun()
+    except Exception:
+        st.warning("Could not fetch live gold price. Try again later.")
 
 # ============================================================
 # SECTION 6 — LIABILITIES
