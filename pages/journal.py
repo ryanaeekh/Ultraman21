@@ -58,10 +58,11 @@ else:
         cutoff = pd.Timestamp(today - timedelta(days=30))
         all_entries = all_entries[all_entries["date_parsed"] >= cutoff]
 
-    # Group by date
-    grouped = all_entries.groupby(all_entries["date_parsed"].dt.date)
-    for day in sorted(grouped.groups.keys(), reverse=True):
-        day_entries = grouped.get_group(day)
+    # Group by date (string key to avoid type mismatch)
+    all_entries["_date_key"] = all_entries["date_parsed"].dt.date.astype(str)
+    grouped = all_entries.groupby("_date_key")
+    for day_str in sorted(grouped.groups.keys(), reverse=True):
+        day_entries = grouped.get_group(day_str)
         label = day_entries.iloc[0]["date_parsed"].strftime("%A, %d %B %Y")
         count = len(day_entries)
         with st.expander(f"{label}  ({count} {'entry' if count == 1 else 'entries'})"):
