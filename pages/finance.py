@@ -140,32 +140,31 @@ st.markdown('<div style="height:18px;"></div>', unsafe_allow_html=True)
 # ============================================================
 # 3b — TRANSACTION HISTORY (today)
 # ============================================================
-st.markdown(f'<div class="section-title">\U0001f4cb {day_label} Transactions</div>', unsafe_allow_html=True)
-
-if not today_df.empty:
-    for idx in today_df.index:
-        r = finance_df.loc[idx]
-        cat = r["category"]
-        amt = float(r["amount"])
-        is_income = cat == "Income"
-        color = "var(--accent-2)" if is_income else "var(--neg)"
-        sign = "+" if is_income else "-"
-        row_cols = st.columns([6, 2])
-        with row_cols[0]:
-            st.markdown(
-                f'<div class="list-row"><span>{cat}</span>'
-                f'<span class="amount" style="color:{color};">{sign}${amt:,.2f}</span></div>',
-                unsafe_allow_html=True,
-            )
-        with row_cols[1]:
-            if st.button("Delete", key=f"del_tx_{idx}", use_container_width=True):
-                save_finance_df(finance_df.drop(idx).reset_index(drop=True))
-                st.rerun()
-else:
-    st.markdown(
-        f'<div class="list-row" style="justify-content:center;opacity:0.7;">No transactions for {day_label.lower()}.</div>',
-        unsafe_allow_html=True,
-    )
+with st.expander(f"{day_label} Transactions ({len(today_df)} entries)"):
+    if not today_df.empty:
+        for idx in today_df.index:
+            r = finance_df.loc[idx]
+            cat = r["category"]
+            amt = float(r["amount"])
+            is_income = cat == "Income"
+            color = "var(--accent-2)" if is_income else "var(--neg)"
+            sign = "+" if is_income else "-"
+            row_cols = st.columns([6, 2])
+            with row_cols[0]:
+                st.markdown(
+                    f'<div class="list-row"><span>{cat}</span>'
+                    f'<span class="amount" style="color:{color};">{sign}${amt:,.2f}</span></div>',
+                    unsafe_allow_html=True,
+                )
+            with row_cols[1]:
+                if st.button("Delete", key=f"del_tx_{idx}", use_container_width=True):
+                    save_finance_df(finance_df.drop(idx).reset_index(drop=True))
+                    st.rerun()
+    else:
+        st.markdown(
+            f'<div class="list-row" style="justify-content:center;opacity:0.7;">No transactions for {day_label.lower()}.</div>',
+            unsafe_allow_html=True,
+        )
 
 st.markdown('<div style="height:18px;"></div>', unsafe_allow_html=True)
 
