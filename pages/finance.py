@@ -218,19 +218,22 @@ with st.expander(f"Monthly Recurring ({len(monthly_df)} items)"):
 # ============================================================
 st.markdown('<div class="section-title">\U0001f4b0 Net Worth</div>', unsafe_allow_html=True)
 
+alltime_income = float(finance_df[finance_df["category"] == "Income"]["amount"].sum()) if not finance_df.empty else 0.0
+alltime_expenses = float(finance_df[finance_df["category"] != "Income"]["amount"].sum()) if not finance_df.empty else 0.0
+
 nw_assets_items = float(assets_df["amount"].sum()) if not assets_df.empty else 0.0
-nw_total_assets = month_income + nw_assets_items + total_gold_value
+nw_total_assets = nw_assets_items + total_gold_value + alltime_income
 
 nw_liab_items = float(liabilities_df["amount"].sum()) if not liabilities_df.empty else 0.0
-nw_total_liabilities = month_daily_exp + month_fixed + nw_liab_items
+nw_total_liabilities = nw_liab_items + alltime_expenses
 
 nw_net = nw_total_assets - nw_total_liabilities
 
 nw1 = st.columns(3)
 with nw1[0]:
-    st.markdown(metric_card("Total Assets", f"${nw_total_assets:,.2f}", sub=f"Income ${month_income:,.2f} + Assets ${nw_assets_items:,.2f} + Gold ${total_gold_value:,.2f}", color="var(--accent-2)"), unsafe_allow_html=True)
+    st.markdown(metric_card("Total Assets", f"${nw_total_assets:,.2f}", sub=f"Assets ${nw_assets_items:,.2f} + Gold ${total_gold_value:,.2f} + Income ${alltime_income:,.2f}", color="var(--accent-2)"), unsafe_allow_html=True)
 with nw1[1]:
-    st.markdown(metric_card("Total Liabilities", f"${nw_total_liabilities:,.2f}", sub=f"Variable ${month_daily_exp:,.2f} + Recurring ${month_fixed:,.2f} + Liabilities ${nw_liab_items:,.2f}", color="var(--neg)"), unsafe_allow_html=True)
+    st.markdown(metric_card("Total Liabilities", f"${nw_total_liabilities:,.2f}", sub=f"Liabilities ${nw_liab_items:,.2f} + Expenses ${alltime_expenses:,.2f}", color="var(--neg)"), unsafe_allow_html=True)
 with nw1[2]:
     nw_color = "var(--accent-2)" if nw_net >= 0 else "var(--neg)"
     st.markdown(metric_card("Net Worth", f"${nw_net:,.2f}", color=nw_color), unsafe_allow_html=True)
