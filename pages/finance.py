@@ -108,25 +108,25 @@ if st.button("Add Fixed Expense", use_container_width=True, key="add_fx"):
     else:
         st.warning("Provide a name and an amount.")
 
-if not monthly_df.empty:
-    st.markdown('<div style="margin-top:12px;"></div>', unsafe_allow_html=True)
-    for idx, r in monthly_df.iterrows():
-        row_cols = st.columns([6, 2])
-        with row_cols[0]:
-            st.markdown(
-                f'<div class="list-row"><span>{r["name"]}</span>'
-                f'<span class="amount">${float(r["amount"]):,.2f}</span></div>',
-                unsafe_allow_html=True,
-            )
-        with row_cols[1]:
-            if st.button("Remove", key=f"rm_fx_{idx}", use_container_width=True):
-                save_monthly_expenses_df(monthly_df.drop(idx).reset_index(drop=True))
-                st.rerun()
-else:
-    st.markdown(
-        '<div class="list-row" style="justify-content:center;opacity:0.7;">No recurring expenses yet.</div>',
-        unsafe_allow_html=True,
-    )
+with st.expander(f"Monthly Recurring ({len(monthly_df)} items)"):
+    if not monthly_df.empty:
+        for idx, r in monthly_df.iterrows():
+            row_cols = st.columns([6, 2])
+            with row_cols[0]:
+                st.markdown(
+                    f'<div class="list-row"><span>{r["name"]}</span>'
+                    f'<span class="amount">${float(r["amount"]):,.2f}</span></div>',
+                    unsafe_allow_html=True,
+                )
+            with row_cols[1]:
+                if st.button("Remove", key=f"rm_fx_{idx}", use_container_width=True):
+                    save_monthly_expenses_df(monthly_df.drop(idx).reset_index(drop=True))
+                    st.rerun()
+    else:
+        st.markdown(
+            '<div class="list-row" style="justify-content:center;opacity:0.7;">No recurring expenses yet.</div>',
+            unsafe_allow_html=True,
+        )
 
 # ============================================================
 # SECTION 5 — ASSETS
@@ -147,31 +147,31 @@ if st.button("Add Asset", use_container_width=True, key="add_asset"):
     else:
         st.warning("Provide a name and an amount.")
 
-if not assets_df.empty:
-    st.markdown('<div style="margin-top:12px;"></div>', unsafe_allow_html=True)
-    for idx, r in assets_df.iterrows():
-        row_cols = st.columns([6, 2])
-        with row_cols[0]:
-            st.markdown(
-                f'<div class="list-row"><span>{r["name"]}</span>'
-                f'<span class="amount">${float(r["amount"]):,.2f}</span></div>',
-                unsafe_allow_html=True,
-            )
-        with row_cols[1]:
-            if st.button("Remove", key=f"rm_asset_{idx}", use_container_width=True):
-                save_assets_df(assets_df.drop(idx).reset_index(drop=True))
-                st.rerun()
-    total_assets_items = float(assets_df["amount"].sum())
-    st.markdown(
-        f'<div class="list-row" style="font-weight:700;"><span>Total Assets</span>'
-        f'<span class="amount">${total_assets_items:,.2f}</span></div>',
-        unsafe_allow_html=True,
-    )
-else:
-    st.markdown(
-        '<div class="list-row" style="justify-content:center;opacity:0.7;">No assets yet.</div>',
-        unsafe_allow_html=True,
-    )
+with st.expander(f"Assets ({len(assets_df)} items)"):
+    if not assets_df.empty:
+        for idx, r in assets_df.iterrows():
+            row_cols = st.columns([6, 2])
+            with row_cols[0]:
+                st.markdown(
+                    f'<div class="list-row"><span>{r["name"]}</span>'
+                    f'<span class="amount">${float(r["amount"]):,.2f}</span></div>',
+                    unsafe_allow_html=True,
+                )
+            with row_cols[1]:
+                if st.button("Remove", key=f"rm_asset_{idx}", use_container_width=True):
+                    save_assets_df(assets_df.drop(idx).reset_index(drop=True))
+                    st.rerun()
+        total_assets_items = float(assets_df["amount"].sum())
+        st.markdown(
+            f'<div class="list-row" style="font-weight:700;"><span>Total Assets</span>'
+            f'<span class="amount">${total_assets_items:,.2f}</span></div>',
+            unsafe_allow_html=True,
+        )
+    else:
+        st.markdown(
+            '<div class="list-row" style="justify-content:center;opacity:0.7;">No assets yet.</div>',
+            unsafe_allow_html=True,
+        )
 
 # ============================================================
 # SECTION 6 — LIABILITIES
@@ -192,31 +192,31 @@ if st.button("Add Liability", use_container_width=True, key="add_liab"):
     else:
         st.warning("Provide a name and an amount.")
 
-if not liabilities_df.empty:
-    st.markdown('<div style="margin-top:12px;"></div>', unsafe_allow_html=True)
-    for idx, r in liabilities_df.iterrows():
-        row_cols = st.columns([6, 2])
-        with row_cols[0]:
-            st.markdown(
-                f'<div class="list-row"><span>{r["name"]}</span>'
-                f'<span class="amount">${float(r["amount"]):,.2f}</span></div>',
-                unsafe_allow_html=True,
-            )
-        with row_cols[1]:
-            if st.button("Remove", key=f"rm_liab_{idx}", use_container_width=True):
-                save_liabilities_df(liabilities_df.drop(idx).reset_index(drop=True))
-                st.rerun()
-    total_liab_items = float(liabilities_df["amount"].sum())
-    st.markdown(
-        f'<div class="list-row" style="font-weight:700;"><span>Total Liabilities</span>'
-        f'<span class="amount">${total_liab_items:,.2f}</span></div>',
-        unsafe_allow_html=True,
-    )
-else:
-    st.markdown(
-        '<div class="list-row" style="justify-content:center;opacity:0.7;">No liabilities yet.</div>',
-        unsafe_allow_html=True,
-    )
+with st.expander(f"Liabilities ({len(liabilities_df)} items)"):
+    if not liabilities_df.empty:
+        for idx, r in liabilities_df.iterrows():
+            row_cols = st.columns([6, 2])
+            with row_cols[0]:
+                st.markdown(
+                    f'<div class="list-row"><span>{r["name"]}</span>'
+                    f'<span class="amount">${float(r["amount"]):,.2f}</span></div>',
+                    unsafe_allow_html=True,
+                )
+            with row_cols[1]:
+                if st.button("Remove", key=f"rm_liab_{idx}", use_container_width=True):
+                    save_liabilities_df(liabilities_df.drop(idx).reset_index(drop=True))
+                    st.rerun()
+        total_liab_items = float(liabilities_df["amount"].sum())
+        st.markdown(
+            f'<div class="list-row" style="font-weight:700;"><span>Total Liabilities</span>'
+            f'<span class="amount">${total_liab_items:,.2f}</span></div>',
+            unsafe_allow_html=True,
+        )
+    else:
+        st.markdown(
+            '<div class="list-row" style="justify-content:center;opacity:0.7;">No liabilities yet.</div>',
+            unsafe_allow_html=True,
+        )
 
 # ============================================================
 # SECTION 7 — MONTH SUMMARY
