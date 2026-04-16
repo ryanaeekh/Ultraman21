@@ -361,38 +361,18 @@ with st.expander(f"CPF ({len(cpf_df)} items)"):
 st.markdown('<div class="section-title">\U0001f3e5 Medisave</div>', unsafe_allow_html=True)
 
 medisave_df = load_medisave()
+current_medisave = float(medisave_df.iloc[0]["amount"]) if not medisave_df.empty else 0.0
 
-ms_name = st.text_input("Name", key="ms_name", placeholder="e.g. Medisave Account")
-ms_amount = st.number_input("Amount", min_value=0.0, step=100.0, format="%.2f", key="ms_amount")
-if st.button("Add Medisave Entry", use_container_width=True, key="add_ms"):
-    name = ms_name.strip()
-    if name and ms_amount > 0:
-        new_row = pd.DataFrame([{"name": name, "amount": float(ms_amount)}])
-        save_medisave_df(pd.concat([medisave_df, new_row], ignore_index=True))
-        st.success(f"Added {name}: ${ms_amount:,.2f}")
-        st.rerun()
-    else:
-        st.warning("Provide a name and an amount.")
-
-with st.expander(f"Medisave ({len(medisave_df)} items)"):
-    if not medisave_df.empty:
-        for idx, r in medisave_df.iterrows():
-            row_cols = st.columns([6, 2])
-            with row_cols[0]:
-                st.markdown(
-                    f'<div class="list-row"><span>{r["name"]}</span>'
-                    f'<span class="amount">${float(r["amount"]):,.2f}</span></div>',
-                    unsafe_allow_html=True,
-                )
-            with row_cols[1]:
-                if st.button("Remove", key=f"rm_ms_{idx}", use_container_width=True):
-                    save_medisave_df(medisave_df.drop(idx).reset_index(drop=True))
-                    st.rerun()
-    else:
-        st.markdown(
-            '<div class="list-row" style="justify-content:center;opacity:0.7;">No Medisave entries yet.</div>',
-            unsafe_allow_html=True,
-        )
+st.markdown(
+    f'<div class="list-row"><span>Medisave Account</span>'
+    f'<span class="amount">${current_medisave:,.2f}</span></div>',
+    unsafe_allow_html=True,
+)
+ms_amount = st.number_input("Update Amount", min_value=0.0, step=100.0, format="%.2f", value=current_medisave, key="ms_amount")
+if st.button("Save Medisave", use_container_width=True, key="save_ms"):
+    save_medisave_df(pd.DataFrame([{"name": "Medisave Account", "amount": float(ms_amount)}]))
+    st.success(f"Medisave updated: ${ms_amount:,.2f}")
+    st.rerun()
 
 # ============================================================
 # SECTION 10 — NET WORTH
