@@ -101,6 +101,15 @@ if st.button("Save Session", use_container_width=True, key="save_ex"):
     st.success("Session saved.")
     st.rerun()
 
+if st.button("Delete Session", use_container_width=True, key="del_ex"):
+    matched = filter_by_exact_date(exercise_df, sel_date)
+    if not matched.empty:
+        save_exercise_df(exercise_df.drop(matched.index).reset_index(drop=True))
+        st.success(f"Session on {sel_date} deleted.")
+        st.rerun()
+    else:
+        st.warning("No session found for this date.")
+
 # ── Last 7 Sessions ───────────────────────────────────────
 st.markdown('<div class="section-title">\U0001f4dc Last 7 Sessions</div>', unsafe_allow_html=True)
 if exercise_df.empty:
