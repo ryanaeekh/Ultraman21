@@ -39,9 +39,12 @@ if st.button("Save Entry", use_container_width=True, key="save_journal"):
         st.warning("Write something before saving.")
 
 # Past entries
-st.markdown('<div class="section-title">\U0001f4da Past Entries</div>', unsafe_allow_html=True)
-
-show_all = st.checkbox("Show all entries", value=False, key="journal_show_all")
+_pe_cols = st.columns([6, 4])
+with _pe_cols[0]:
+    st.markdown('<div class="section-title">\U0001f4da Past Entries</div>', unsafe_allow_html=True)
+with _pe_cols[1]:
+    show_all = st.checkbox("Show all", value=False, key="journal_show_all")
+    st.caption("Last 30 days by default" if not show_all else "Showing all entries")
 
 if journal_df.empty:
     st.markdown('<div class="list-row" style="justify-content:center;opacity:0.7;">No entries yet.</div>', unsafe_allow_html=True)
