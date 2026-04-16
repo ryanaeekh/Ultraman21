@@ -41,12 +41,19 @@ if st.button("Save Entry", use_container_width=True, key="save_journal"):
 # Past entries
 st.markdown('<div class="section-title">\U0001f4da Past Entries</div>', unsafe_allow_html=True)
 
+show_all = st.checkbox("Show all entries", value=False, key="journal_show_all")
+
 if journal_df.empty:
     st.markdown('<div class="list-row" style="justify-content:center;opacity:0.7;">No entries yet.</div>', unsafe_allow_html=True)
 else:
     all_entries = journal_df.copy()
     all_entries["date_parsed"] = pd.to_datetime(all_entries["date"], errors="coerce")
     all_entries = all_entries.dropna(subset=["date_parsed"]).sort_values("date_parsed", ascending=False)
+
+    if not show_all:
+        from datetime import timedelta
+        cutoff = pd.Timestamp(today - timedelta(days=30))
+        all_entries = all_entries[all_entries["date_parsed"] >= cutoff]
 
     # Group by date
     grouped = all_entries.groupby(all_entries["date_parsed"].dt.date)
