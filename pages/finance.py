@@ -14,6 +14,7 @@ from utils import (
     load_finance, save_finance_df,
     load_monthly_expenses, save_monthly_expenses_df,
     load_assets, save_assets_df,
+    load_gold_assets, save_gold_assets_df,
     load_liabilities, save_liabilities_df,
     load_settings, clean_text,
     filter_by_exact_date, filter_by_month, month_days,
@@ -164,7 +165,18 @@ if st.button("Add Asset", use_container_width=True, key="add_asset"):
     else:
         st.warning("Provide a name and an amount.")
 
-with st.expander(f"Assets ({len(assets_df)} items)"):
+gold_assets_df = load_gold_assets()
+gold_sgd_per_gram = fetch_gold_price_sgd_per_gram()
+
+# Calculate total gold value from stored weights
+gold_discount = 0.85
+total_gold_value = 0.0
+if not gold_assets_df.empty and gold_sgd_per_gram is not None and gold_sgd_per_gram > 0:
+    for _, gr in gold_assets_df.iterrows():
+        total_gold_value += float(gr["weight_grams"]) * (gold_sgd_per_gram * float(gr["purity"])) * gold_discount
+
+total_asset_items = len(assets_df) + len(gold_assets_df)
+with st.expander(f"Assets ({total_asset_items} items)"):
     if not assets_df.empty:
         for idx, r in assets_df.iterrows():
             row_cols = st.columns([6, 2])
@@ -178,7 +190,32 @@ with st.expander(f"Assets ({len(assets_df)} items)"):
                 if st.button("Remove", key=f"rm_asset_{idx}", use_container_width=True):
                     save_assets_df(assets_df.drop(idx).reset_index(drop=True))
                     st.rerun()
-    else:
+
+    # — Gold assets (live-calculated) —
+    if not gold_assets_df.empty:
+        st.markdown("---")
+        st.markdown('<div class="section-title">Gold Holdings (live price)</div>', unsafe_allow_html=True)
+        for idx, gr in gold_assets_df.iterrows():
+            w = float(gr["weight_grams"])
+            p = float(gr["purity"])
+            if gold_sgd_per_gram is not None and gold_sgd_per_gram > 0:
+                val = w * (gold_sgd_per_gram * p) * gold_discount
+                val_label = f"SGD ${val:,.2f}"
+            else:
+                val_label = "price unavailable"
+            row_cols = st.columns([6, 2])
+            with row_cols[0]:
+                st.markdown(
+                    f'<div class="list-row"><span>{gr["name"]} ({w:g}g)</span>'
+                    f'<span class="amount">{val_label}</span></div>',
+                    unsafe_allow_html=True,
+                )
+            with row_cols[1]:
+                if st.button("Remove", key=f"rm_gold_{idx}", use_container_width=True):
+                    save_gold_assets_df(gold_assets_df.drop(idx).reset_index(drop=True))
+                    st.rerun()
+
+    if assets_df.empty and gold_assets_df.empty:
         st.markdown(
             '<div class="list-row" style="justify-content:center;opacity:0.7;">No assets yet.</div>',
             unsafe_allow_html=True,
@@ -187,7 +224,6 @@ with st.expander(f"Assets ({len(assets_df)} items)"):
     # — Gold Asset Calculator —
     st.markdown("---")
     st.markdown('<div class="section-title">Gold Asset Calculator (916 / 22k)</div>', unsafe_allow_html=True)
-    gold_sgd_per_gram = fetch_gold_price_sgd_per_gram()
     if gold_sgd_per_gram is not None:
         st.markdown(
             f'<div class="list-row"><span>Live Gold Price</span>'
@@ -200,7 +236,6 @@ with st.expander(f"Assets ({len(assets_df)} items)"):
         )
     gold_weight = st.number_input("Weight (grams)", min_value=0.0, step=1.0, format="%.2f", key="gold_weight")
     gold_purity = 0.916
-    gold_discount = 0.85
     gold_value = gold_weight * (gold_sgd_per_gram * gold_purity) * gold_discount
     if gold_weight > 0 and gold_sgd_per_gram > 0:
         st.markdown(
@@ -208,11 +243,10 @@ with st.expander(f"Assets ({len(assets_df)} items)"):
             f'<span class="amount">SGD ${gold_value:,.2f}</span></div>',
             unsafe_allow_html=True,
         )
-        if st.button("Add to Assets", use_container_width=True, key="add_gold_asset"):
-            name = f"Gold ({gold_weight:g}g 916)"
-            new_row = pd.DataFrame([{"name": name, "amount": float(gold_value)}])
-            save_assets_df(pd.concat([assets_df, new_row], ignore_index=True))
-            st.success(f"Added {name}: SGD ${gold_value:,.2f}")
+        if st.button("Add Gold", use_container_width=True, key="add_gold_asset"):
+            new_row = pd.DataFrame([{"name": "Gold 916", "weight_grams": float(gold_weight), "purity": 0.916}])
+            save_gold_assets_df(pd.concat([gold_assets_df, new_row], ignore_index=True))
+            st.success(f"Added Gold 916: {gold_weight:g}g")
             st.rerun()
 
 # ============================================================
@@ -286,7 +320,7 @@ with g2[1]:
 st.markdown('<div class="section-title">\U0001f4b0 Net Worth</div>', unsafe_allow_html=True)
 
 nw_assets_items = float(assets_df["amount"].sum()) if not assets_df.empty else 0.0
-nw_total_assets = month_income + nw_assets_items
+nw_total_assets = month_income + nw_assets_items + total_gold_value
 
 nw_liab_items = float(liabilities_df["amount"].sum()) if not liabilities_df.empty else 0.0
 nw_total_liabilities = month_daily_exp + month_fixed + nw_liab_items
@@ -295,7 +329,7 @@ nw_net = nw_total_assets - nw_total_liabilities
 
 nw1 = st.columns(3)
 with nw1[0]:
-    st.markdown(metric_card("Total Assets", f"${nw_total_assets:,.2f}", sub=f"Income ${month_income:,.2f} + Assets ${nw_assets_items:,.2f}", color="var(--accent-2)"), unsafe_allow_html=True)
+    st.markdown(metric_card("Total Assets", f"${nw_total_assets:,.2f}", sub=f"Income ${month_income:,.2f} + Assets ${nw_assets_items:,.2f} + Gold ${total_gold_value:,.2f}", color="var(--accent-2)"), unsafe_allow_html=True)
 with nw1[1]:
     st.markdown(metric_card("Total Liabilities", f"${nw_total_liabilities:,.2f}", sub=f"Variable ${month_daily_exp:,.2f} + Recurring ${month_fixed:,.2f} + Liabilities ${nw_liab_items:,.2f}", color="var(--neg)"), unsafe_allow_html=True)
 with nw1[2]:

@@ -46,8 +46,11 @@ MONTHLY_EXPENSES_COLUMNS = ["name", "amount"]
 ASSETS_COLUMNS = ["name", "amount"]
 LIABILITIES_COLUMNS = ["name", "amount"]
 
+GOLD_ASSETS_COLUMNS = ["name", "weight_grams", "purity"]
+
 ASSETS_SHEET = "assets"
 LIABILITIES_SHEET = "liabilities"
+GOLD_ASSETS_SHEET = "gold_assets"
 
 EXERCISE_COLUMNS = ["date", "status", "type", "duration", "km", "pace", "notes"]
 
@@ -227,6 +230,19 @@ def save_liabilities_df(df: pd.DataFrame) -> None:
         if col not in df.columns:
             df[col] = ""
     save_sheet(LIABILITIES_SHEET, df[LIABILITIES_COLUMNS], LIABILITIES_COLUMNS)
+
+
+def load_gold_assets() -> pd.DataFrame:
+    df = load_sheet(GOLD_ASSETS_SHEET, GOLD_ASSETS_COLUMNS)
+    df = coerce_numeric(df, ["weight_grams", "purity"])
+    return df
+
+
+def save_gold_assets_df(df: pd.DataFrame) -> None:
+    for col in GOLD_ASSETS_COLUMNS:
+        if col not in df.columns:
+            df[col] = ""
+    save_sheet(GOLD_ASSETS_SHEET, df[GOLD_ASSETS_COLUMNS], GOLD_ASSETS_COLUMNS)
 
 
 # =========================================================
