@@ -250,20 +250,18 @@ with g2[1]:
 st.markdown('<div class="section-title">\U0001f4b0 Net Worth</div>', unsafe_allow_html=True)
 
 nw_assets_items = float(assets_df["amount"].sum()) if not assets_df.empty else 0.0
-nw_recurring_income = float(month_income)
-nw_total_assets = nw_recurring_income + nw_assets_items
+nw_total_assets = month_income + nw_assets_items
 
 nw_liab_items = float(liabilities_df["amount"].sum()) if not liabilities_df.empty else 0.0
-nw_recurring_expenses = month_fixed
-nw_total_liabilities = nw_recurring_expenses + nw_liab_items
+nw_total_liabilities = month_daily_exp + month_fixed + nw_liab_items
 
 nw_net = nw_total_assets - nw_total_liabilities
 
 nw1 = st.columns(3)
 with nw1[0]:
-    st.markdown(metric_card("Total Assets", f"${nw_total_assets:,.2f}", sub=f"Income ${nw_recurring_income:,.2f} + Assets ${nw_assets_items:,.2f}", color="var(--accent-2)"), unsafe_allow_html=True)
+    st.markdown(metric_card("Total Assets", f"${nw_total_assets:,.2f}", sub=f"Income ${month_income:,.2f} + Assets ${nw_assets_items:,.2f}", color="var(--accent-2)"), unsafe_allow_html=True)
 with nw1[1]:
-    st.markdown(metric_card("Total Liabilities", f"${nw_total_liabilities:,.2f}", sub=f"Recurring ${nw_recurring_expenses:,.2f} + Liabilities ${nw_liab_items:,.2f}", color="var(--neg)"), unsafe_allow_html=True)
+    st.markdown(metric_card("Total Liabilities", f"${nw_total_liabilities:,.2f}", sub=f"Variable ${month_daily_exp:,.2f} + Recurring ${month_fixed:,.2f} + Liabilities ${nw_liab_items:,.2f}", color="var(--neg)"), unsafe_allow_html=True)
 with nw1[2]:
     nw_color = "var(--accent-2)" if nw_net >= 0 else "var(--neg)"
     st.markdown(metric_card("Net Worth", f"${nw_net:,.2f}", color=nw_color), unsafe_allow_html=True)
