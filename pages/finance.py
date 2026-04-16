@@ -200,7 +200,8 @@ with st.expander(f"Assets ({len(assets_df)} items)"):
         )
     gold_weight = st.number_input("Weight (grams)", min_value=0.0, step=1.0, format="%.2f", key="gold_weight")
     gold_purity = 0.916
-    gold_value = gold_weight * gold_sgd_per_gram * gold_purity
+    gold_discount = 0.85
+    gold_value = gold_weight * (gold_sgd_per_gram * gold_purity) * gold_discount
     if gold_weight > 0 and gold_sgd_per_gram > 0:
         st.markdown(
             f'<div class="list-row" style="font-weight:700;"><span>Your Gold Value (916)</span>'
