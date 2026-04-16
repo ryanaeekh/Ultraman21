@@ -140,18 +140,7 @@ st.markdown('<div style="height:18px;"></div>', unsafe_allow_html=True)
 # ============================================================
 st.markdown('<div class="section-title">\U0001f4c5 Month Summary</div>', unsafe_allow_html=True)
 
-g1 = st.columns(2)
-with g1[0]:
-    st.markdown(metric_card("Income", f"${month_income:,.2f}", sub=month_label, color="var(--accent-2)"), unsafe_allow_html=True)
-with g1[1]:
-    st.markdown(metric_card("Variable Expenses", f"${month_daily_exp:,.2f}", sub="Logged this month", color="var(--neg)"), unsafe_allow_html=True)
-
-g2 = st.columns(2)
-with g2[0]:
-    st.markdown(metric_card("Fixed (Recurring)", f"${month_fixed:,.2f}", sub=f"${month_fixed/days:,.2f}/day", color="var(--neg)"), unsafe_allow_html=True)
-with g2[1]:
-    net_color = "var(--accent-2)" if month_net >= 0 else "var(--neg)"
-    st.markdown(metric_card("Net", f"${month_net:,.2f}", sub=month_label, color=net_color), unsafe_allow_html=True)
+st.markdown(metric_card("Fixed (Recurring)", f"${month_fixed:,.2f}", sub=f"${month_fixed/days:,.2f}/day", color="var(--neg)"), unsafe_allow_html=True)
 
 # ============================================================
 # 5 — MONTHLY RECURRING
