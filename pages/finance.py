@@ -118,12 +118,12 @@ today_net = today_income - today_expense
 
 cols = st.columns(3)
 with cols[0]:
-    st.markdown(metric_card("Income", f"${today_income:,.2f}", color="var(--accent-2)"), unsafe_allow_html=True)
+    st.markdown(metric_card("Income", f"${today_income:,.0f}", color="var(--accent-2)"), unsafe_allow_html=True)
 with cols[1]:
-    st.markdown(metric_card("Expenses", f"${today_expense:,.2f}", color="var(--neg)"), unsafe_allow_html=True)
+    st.markdown(metric_card("Expenses", f"${today_expense:,.0f}", color="var(--neg)"), unsafe_allow_html=True)
 with cols[2]:
     net_color = "var(--accent-2)" if today_net >= 0 else "var(--neg)"
-    st.markdown(metric_card("Net", f"${today_net:,.2f}", color=net_color), unsafe_allow_html=True)
+    st.markdown(metric_card("Net", f"${today_net:,.0f}", color=net_color), unsafe_allow_html=True)
 
 # ============================================================
 # 2 — LOG INCOME
@@ -135,7 +135,7 @@ if st.button("Save Income", use_container_width=True, key="save_inc"):
     if inc_amount > 0:
         new_row = pd.DataFrame([{"date": str(inc_date), "category": "Income", "amount": float(inc_amount)}])
         save_finance_df(pd.concat([finance_df, new_row], ignore_index=True))
-        st.success(f"Income saved: ${inc_amount:,.2f}")
+        st.success(f"Income saved: ${inc_amount:,.0f}")
         save_and_rerun()
     else:
         st.warning("Enter an amount greater than zero.")
@@ -153,7 +153,7 @@ if st.button("Save Expense", use_container_width=True, key="save_exp"):
     if exp_amount > 0:
         new_row = pd.DataFrame([{"date": str(exp_date), "category": exp_cat, "amount": float(exp_amount)}])
         save_finance_df(pd.concat([finance_df, new_row], ignore_index=True))
-        st.success(f"Expense saved: {exp_cat} \u2014 ${exp_amount:,.2f}")
+        st.success(f"Expense saved: {exp_cat} \u2014 ${exp_amount:,.0f}")
         save_and_rerun()
     else:
         st.warning("Enter an amount greater than zero.")
@@ -176,7 +176,7 @@ with st.expander(f"{day_label} Transactions ({len(today_df)} entries)"):
             with row_cols[0]:
                 st.markdown(
                     f'<div class="list-row"><span>{cat}</span>'
-                    f'<span class="amount" style="color:{color};">{sign}${amt:,.2f}</span></div>',
+                    f'<span class="amount" style="color:{color};">{sign}${amt:,.0f}</span></div>',
                     unsafe_allow_html=True,
                 )
             with row_cols[1]:
@@ -196,7 +196,7 @@ st.markdown('<div style="height:18px;"></div>', unsafe_allow_html=True)
 # ============================================================
 st.markdown('<div class="section-title">\U0001f4c5 Month Summary</div>', unsafe_allow_html=True)
 
-st.markdown(metric_card("Fixed (Recurring)", f"${month_fixed:,.2f}", sub=f"${month_fixed/days:,.2f}/day", color="var(--neg)"), unsafe_allow_html=True)
+st.markdown(metric_card("Fixed (Recurring)", f"${month_fixed:,.0f}", sub=f"${month_fixed/days:,.0f}/day", color="var(--neg)"), unsafe_allow_html=True)
 
 # ============================================================
 # 5 — MONTHLY RECURRING
@@ -210,7 +210,7 @@ if st.button("Add Fixed Expense", use_container_width=True, key="add_fx"):
     if name and fx_amount > 0:
         new_row = pd.DataFrame([{"name": name, "amount": float(fx_amount)}])
         save_monthly_expenses_df(pd.concat([monthly_df, new_row], ignore_index=True))
-        st.success(f"Added {name}: ${fx_amount:,.2f}")
+        st.success(f"Added {name}: ${fx_amount:,.0f}")
         save_and_rerun()
     else:
         st.warning("Provide a name and an amount.")
@@ -222,7 +222,7 @@ with st.expander(f"Monthly Recurring ({len(monthly_df)} items)"):
             with row_cols[0]:
                 st.markdown(
                     f'<div class="list-row"><span>{r["name"]}</span>'
-                    f'<span class="amount">${float(r["amount"]):,.2f}</span></div>',
+                    f'<span class="amount">${float(r["amount"]):,.0f}</span></div>',
                     unsafe_allow_html=True,
                 )
             with row_cols[1]:
@@ -253,12 +253,12 @@ nw_net = nw_total_assets - nw_total_liabilities
 
 nw1 = st.columns(3)
 with nw1[0]:
-    st.markdown(metric_card("Total Assets", f"${nw_total_assets:,.2f}", sub=f"Assets ${nw_assets_items:,.2f} + Gold ${total_gold_value:,.2f} + Income ${alltime_income:,.2f}", color="var(--accent-2)"), unsafe_allow_html=True)
+    st.markdown(metric_card("Total Assets", f"${nw_total_assets:,.0f}", sub=f"Assets ${nw_assets_items:,.0f} + Gold ${total_gold_value:,.0f} + Income ${alltime_income:,.0f}", color="var(--accent-2)"), unsafe_allow_html=True)
 with nw1[1]:
-    st.markdown(metric_card("Total Liabilities", f"${nw_total_liabilities:,.2f}", sub=f"Liabilities ${nw_liab_items:,.2f} + Expenses ${alltime_expenses:,.2f}", color="var(--neg)"), unsafe_allow_html=True)
+    st.markdown(metric_card("Total Liabilities", f"${nw_total_liabilities:,.0f}", sub=f"Liabilities ${nw_liab_items:,.0f} + Expenses ${alltime_expenses:,.0f}", color="var(--neg)"), unsafe_allow_html=True)
 with nw1[2]:
     nw_color = "var(--accent-2)" if nw_net >= 0 else "var(--neg)"
-    st.markdown(metric_card("Net Worth", f"${nw_net:,.2f}", color=nw_color), unsafe_allow_html=True)
+    st.markdown(metric_card("Net Worth", f"${nw_net:,.0f}", color=nw_color), unsafe_allow_html=True)
 
 # ============================================================
 # 7 — ASSETS
@@ -272,7 +272,7 @@ if st.button("Add Asset", use_container_width=True, key="add_asset"):
     if name and asset_amount > 0:
         new_row = pd.DataFrame([{"name": name, "amount": float(asset_amount)}])
         save_assets_df(pd.concat([assets_df, new_row], ignore_index=True))
-        st.success(f"Added {name}: ${asset_amount:,.2f}")
+        st.success(f"Added {name}: ${asset_amount:,.0f}")
         save_and_rerun()
     else:
         st.warning("Provide a name and an amount.")
@@ -285,7 +285,7 @@ with st.expander(f"Assets ({total_asset_items} items)"):
             with row_cols[0]:
                 st.markdown(
                     f'<div class="list-row"><span>{r["name"]}</span>'
-                    f'<span class="amount">${float(r["amount"]):,.2f}</span></div>',
+                    f'<span class="amount">${float(r["amount"]):,.0f}</span></div>',
                     unsafe_allow_html=True,
                 )
             with row_cols[1]:
@@ -302,7 +302,7 @@ with st.expander(f"Assets ({total_asset_items} items)"):
             p = float(gr["purity"])
             if gold_sgd_per_gram is not None and gold_sgd_per_gram > 0:
                 val = w * (gold_sgd_per_gram * p) * gold_discount
-                val_label = f"SGD ${val:,.2f}"
+                val_label = f"SGD ${val:,.0f}"
             else:
                 val_label = "price unavailable"
             row_cols = st.columns([6, 2])
@@ -330,7 +330,7 @@ st.markdown('<div class="section-title">Gold Asset Calculator (916 / 22k)</div>'
 if gold_sgd_per_gram is not None:
     st.markdown(
         f'<div class="list-row"><span>Live Gold Price</span>'
-        f'<span class="amount">SGD ${gold_sgd_per_gram:,.2f}/g</span></div>',
+        f'<span class="amount">SGD ${gold_sgd_per_gram:,.0f}/g</span></div>',
         unsafe_allow_html=True,
     )
 else:
@@ -343,7 +343,7 @@ gold_value = gold_weight * (gold_sgd_per_gram * gold_purity) * gold_discount
 if gold_weight > 0 and gold_sgd_per_gram > 0:
     st.markdown(
         f'<div class="list-row" style="font-weight:700;"><span>Your Gold Value (916)</span>'
-        f'<span class="amount">SGD ${gold_value:,.2f}</span></div>',
+        f'<span class="amount">SGD ${gold_value:,.0f}</span></div>',
         unsafe_allow_html=True,
     )
     if st.button("Add Gold", use_container_width=True, key="add_gold_asset"):
@@ -364,7 +364,7 @@ if st.button("Add Liability", use_container_width=True, key="add_liab"):
     if name and liab_amount > 0:
         new_row = pd.DataFrame([{"name": name, "amount": float(liab_amount)}])
         save_liabilities_df(pd.concat([liabilities_df, new_row], ignore_index=True))
-        st.success(f"Added {name}: ${liab_amount:,.2f}")
+        st.success(f"Added {name}: ${liab_amount:,.0f}")
         save_and_rerun()
     else:
         st.warning("Provide a name and an amount.")
@@ -376,7 +376,7 @@ with st.expander(f"Liabilities ({len(liabilities_df)} items)"):
             with row_cols[0]:
                 st.markdown(
                     f'<div class="list-row"><span>{r["name"]}</span>'
-                    f'<span class="amount">${float(r["amount"]):,.2f}</span></div>',
+                    f'<span class="amount">${float(r["amount"]):,.0f}</span></div>',
                     unsafe_allow_html=True,
                 )
             with row_cols[1]:
@@ -398,13 +398,13 @@ current_cpf = float(cpf_df.iloc[0]["amount"]) if not cpf_df.empty else 0.0
 
 st.markdown(
     f'<div class="list-row"><span>CPF Account</span>'
-    f'<span class="amount">${current_cpf:,.2f}</span></div>',
+    f'<span class="amount">${current_cpf:,.0f}</span></div>',
     unsafe_allow_html=True,
 )
 cpf_amount = st.number_input("Update Amount", min_value=0.0, step=100.0, format="%.2f", value=current_cpf, key="cpf_amount")
 if st.button("Save CPF", use_container_width=True, key="save_cpf"):
     save_cpf_df(pd.DataFrame([{"name": "CPF Account", "amount": float(cpf_amount)}]))
-    st.success(f"CPF updated: ${cpf_amount:,.2f}")
+    st.success(f"CPF updated: ${cpf_amount:,.0f}")
     save_and_rerun()
 
 # ============================================================
@@ -416,13 +416,13 @@ current_medisave = float(medisave_df.iloc[0]["amount"]) if not medisave_df.empty
 
 st.markdown(
     f'<div class="list-row"><span>Medisave Account</span>'
-    f'<span class="amount">${current_medisave:,.2f}</span></div>',
+    f'<span class="amount">${current_medisave:,.0f}</span></div>',
     unsafe_allow_html=True,
 )
 ms_amount = st.number_input("Update Amount", min_value=0.0, step=100.0, format="%.2f", value=current_medisave, key="ms_amount")
 if st.button("Save Medisave", use_container_width=True, key="save_ms"):
     save_medisave_df(pd.DataFrame([{"name": "Medisave Account", "amount": float(ms_amount)}]))
-    st.success(f"Medisave updated: ${ms_amount:,.2f}")
+    st.success(f"Medisave updated: ${ms_amount:,.0f}")
     save_and_rerun()
 
 # ============================================================
@@ -434,13 +434,13 @@ current_property = float(property_df.iloc[0]["amount"]) if not property_df.empty
 
 st.markdown(
     f'<div class="list-row"><span>Property</span>'
-    f'<span class="amount">${current_property:,.2f}</span></div>',
+    f'<span class="amount">${current_property:,.0f}</span></div>',
     unsafe_allow_html=True,
 )
 prop_amount = st.number_input("Update Amount", min_value=0.0, step=1000.0, format="%.2f", value=current_property, key="prop_amount")
 if st.button("Save Property", use_container_width=True, key="save_prop"):
     save_property_df(pd.DataFrame([{"name": "Property", "amount": float(prop_amount), "notes": ""}]))
-    st.success(f"Property updated: ${prop_amount:,.2f}")
+    st.success(f"Property updated: ${prop_amount:,.0f}")
     save_and_rerun()
 
 # — CPF, Medisave & Property totals (informational) —
@@ -455,8 +455,8 @@ st.markdown(
 )
 nw2 = st.columns(3)
 with nw2[0]:
-    st.markdown(metric_card("CPF", f"${total_cpf:,.2f}", color="var(--accent)"), unsafe_allow_html=True)
+    st.markdown(metric_card("CPF", f"${total_cpf:,.0f}", color="var(--accent)"), unsafe_allow_html=True)
 with nw2[1]:
-    st.markdown(metric_card("Medisave", f"${total_medisave:,.2f}", color="var(--accent)"), unsafe_allow_html=True)
+    st.markdown(metric_card("Medisave", f"${total_medisave:,.0f}", color="var(--accent)"), unsafe_allow_html=True)
 with nw2[2]:
-    st.markdown(metric_card("Property", f"${total_property:,.2f}", color="var(--accent)"), unsafe_allow_html=True)
+    st.markdown(metric_card("Property", f"${total_property:,.0f}", color="var(--accent)"), unsafe_allow_html=True)
