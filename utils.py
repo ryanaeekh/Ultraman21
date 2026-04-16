@@ -47,10 +47,14 @@ ASSETS_COLUMNS = ["name", "amount"]
 LIABILITIES_COLUMNS = ["name", "amount"]
 
 GOLD_ASSETS_COLUMNS = ["name", "weight_grams", "purity"]
+CPF_COLUMNS = ["name", "amount"]
+MEDISAVE_COLUMNS = ["name", "amount"]
 
 ASSETS_SHEET = "assets"
 LIABILITIES_SHEET = "liabilities"
 GOLD_ASSETS_SHEET = "gold_assets"
+CPF_SHEET = "cpf"
+MEDISAVE_SHEET = "medisave"
 
 EXERCISE_COLUMNS = ["date", "status", "type", "duration", "km", "pace", "notes"]
 
@@ -243,6 +247,32 @@ def save_gold_assets_df(df: pd.DataFrame) -> None:
         if col not in df.columns:
             df[col] = ""
     save_sheet(GOLD_ASSETS_SHEET, df[GOLD_ASSETS_COLUMNS], GOLD_ASSETS_COLUMNS)
+
+
+def load_cpf() -> pd.DataFrame:
+    df = load_sheet(CPF_SHEET, CPF_COLUMNS)
+    df = coerce_numeric(df, ["amount"])
+    return df
+
+
+def save_cpf_df(df: pd.DataFrame) -> None:
+    for col in CPF_COLUMNS:
+        if col not in df.columns:
+            df[col] = ""
+    save_sheet(CPF_SHEET, df[CPF_COLUMNS], CPF_COLUMNS)
+
+
+def load_medisave() -> pd.DataFrame:
+    df = load_sheet(MEDISAVE_SHEET, MEDISAVE_COLUMNS)
+    df = coerce_numeric(df, ["amount"])
+    return df
+
+
+def save_medisave_df(df: pd.DataFrame) -> None:
+    for col in MEDISAVE_COLUMNS:
+        if col not in df.columns:
+            df[col] = ""
+    save_sheet(MEDISAVE_SHEET, df[MEDISAVE_COLUMNS], MEDISAVE_COLUMNS)
 
 
 # =========================================================

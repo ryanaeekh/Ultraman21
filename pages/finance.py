@@ -16,6 +16,8 @@ from utils import (
     load_assets, save_assets_df,
     load_gold_assets, save_gold_assets_df,
     load_liabilities, save_liabilities_df,
+    load_cpf, save_cpf_df,
+    load_medisave, save_medisave_df,
     load_settings, clean_text,
     filter_by_exact_date, filter_by_month, month_days,
 )
@@ -315,7 +317,85 @@ with g2[1]:
     st.markdown(metric_card("Net", f"${month_net:,.2f}", sub=month_label, color=net_color), unsafe_allow_html=True)
 
 # ============================================================
-# SECTION 8 — NET WORTH
+# SECTION 8 — CPF
+# ============================================================
+st.markdown('<div class="section-title">\U0001f3e2 CPF</div>', unsafe_allow_html=True)
+
+cpf_df = load_cpf()
+
+cpf_name = st.text_input("Name", key="cpf_name", placeholder="e.g. Ordinary Account")
+cpf_amount = st.number_input("Amount", min_value=0.0, step=100.0, format="%.2f", key="cpf_amount")
+if st.button("Add CPF Entry", use_container_width=True, key="add_cpf"):
+    name = cpf_name.strip()
+    if name and cpf_amount > 0:
+        new_row = pd.DataFrame([{"name": name, "amount": float(cpf_amount)}])
+        save_cpf_df(pd.concat([cpf_df, new_row], ignore_index=True))
+        st.success(f"Added {name}: ${cpf_amount:,.2f}")
+        st.rerun()
+    else:
+        st.warning("Provide a name and an amount.")
+
+with st.expander(f"CPF ({len(cpf_df)} items)"):
+    if not cpf_df.empty:
+        for idx, r in cpf_df.iterrows():
+            row_cols = st.columns([6, 2])
+            with row_cols[0]:
+                st.markdown(
+                    f'<div class="list-row"><span>{r["name"]}</span>'
+                    f'<span class="amount">${float(r["amount"]):,.2f}</span></div>',
+                    unsafe_allow_html=True,
+                )
+            with row_cols[1]:
+                if st.button("Remove", key=f"rm_cpf_{idx}", use_container_width=True):
+                    save_cpf_df(cpf_df.drop(idx).reset_index(drop=True))
+                    st.rerun()
+    else:
+        st.markdown(
+            '<div class="list-row" style="justify-content:center;opacity:0.7;">No CPF entries yet.</div>',
+            unsafe_allow_html=True,
+        )
+
+# ============================================================
+# SECTION 9 — MEDISAVE
+# ============================================================
+st.markdown('<div class="section-title">\U0001f3e5 Medisave</div>', unsafe_allow_html=True)
+
+medisave_df = load_medisave()
+
+ms_name = st.text_input("Name", key="ms_name", placeholder="e.g. Medisave Account")
+ms_amount = st.number_input("Amount", min_value=0.0, step=100.0, format="%.2f", key="ms_amount")
+if st.button("Add Medisave Entry", use_container_width=True, key="add_ms"):
+    name = ms_name.strip()
+    if name and ms_amount > 0:
+        new_row = pd.DataFrame([{"name": name, "amount": float(ms_amount)}])
+        save_medisave_df(pd.concat([medisave_df, new_row], ignore_index=True))
+        st.success(f"Added {name}: ${ms_amount:,.2f}")
+        st.rerun()
+    else:
+        st.warning("Provide a name and an amount.")
+
+with st.expander(f"Medisave ({len(medisave_df)} items)"):
+    if not medisave_df.empty:
+        for idx, r in medisave_df.iterrows():
+            row_cols = st.columns([6, 2])
+            with row_cols[0]:
+                st.markdown(
+                    f'<div class="list-row"><span>{r["name"]}</span>'
+                    f'<span class="amount">${float(r["amount"]):,.2f}</span></div>',
+                    unsafe_allow_html=True,
+                )
+            with row_cols[1]:
+                if st.button("Remove", key=f"rm_ms_{idx}", use_container_width=True):
+                    save_medisave_df(medisave_df.drop(idx).reset_index(drop=True))
+                    st.rerun()
+    else:
+        st.markdown(
+            '<div class="list-row" style="justify-content:center;opacity:0.7;">No Medisave entries yet.</div>',
+            unsafe_allow_html=True,
+        )
+
+# ============================================================
+# SECTION 10 — NET WORTH
 # ============================================================
 st.markdown('<div class="section-title">\U0001f4b0 Net Worth</div>', unsafe_allow_html=True)
 
@@ -335,3 +415,18 @@ with nw1[1]:
 with nw1[2]:
     nw_color = "var(--accent-2)" if nw_net >= 0 else "var(--neg)"
     st.markdown(metric_card("Net Worth", f"${nw_net:,.2f}", color=nw_color), unsafe_allow_html=True)
+
+# — CPF & Medisave (informational, not in net worth) —
+total_cpf = float(cpf_df["amount"].sum()) if not cpf_df.empty else 0.0
+total_medisave = float(medisave_df["amount"].sum()) if not medisave_df.empty else 0.0
+
+st.markdown(
+    '<div style="text-align:center;opacity:0.6;margin-top:18px;font-size:0.85rem;">'
+    'Not included in Net Worth</div>',
+    unsafe_allow_html=True,
+)
+nw2 = st.columns(2)
+with nw2[0]:
+    st.markdown(metric_card("CPF", f"${total_cpf:,.2f}", color="var(--accent)"), unsafe_allow_html=True)
+with nw2[1]:
+    st.markdown(metric_card("Medisave", f"${total_medisave:,.2f}", color="var(--accent)"), unsafe_allow_html=True)
