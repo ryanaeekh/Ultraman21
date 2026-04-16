@@ -61,7 +61,7 @@ PROPERTY_SHEET = "property"
 
 EXERCISE_COLUMNS = ["date", "status", "type", "duration", "km", "pace", "notes"]
 
-JOURNAL_COLUMNS = ["date", "entry"]
+JOURNAL_COLUMNS = ["date", "time", "entry"]
 
 SETTINGS_COLUMNS = [
     "long_term_goals", "daily_income_target", "hourly_rate_target",

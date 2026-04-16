@@ -1,7 +1,7 @@
 import sys, os
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
-from datetime import date
+from datetime import date, datetime
 
 import pandas as pd
 import streamlit as st
@@ -22,27 +22,21 @@ st.markdown(page_header(pretty, "A quiet place to think"), unsafe_allow_html=Tru
 
 journal_df = load_journal()
 
-existing = ""
-if not journal_df.empty:
-    _jdates = pd.to_datetime(journal_df["date"], errors="coerce")
-    match = journal_df[_jdates.dt.date == today]
-    if not match.empty:
-        existing = clean_text(match.iloc[0]["entry"])
-
-entry = st.text_area("Entry", value=existing, height=320, key="journal_entry",
+entry = st.text_area("Entry", value="", height=320, key="journal_entry",
                      placeholder="Write freely. No judgement. Just presence.")
 
 if st.button("Save Entry", use_container_width=True, key="save_journal"):
     trimmed = entry.strip()
-    updated = journal_df.copy()
-    updated = updated[pd.to_datetime(updated["date"], errors="coerce").dt.date != today]
     if trimmed:
-        new_row = pd.DataFrame([{"date": today_str, "entry": trimmed}])
-        updated = pd.concat([updated, new_row], ignore_index=True)
-    with st.spinner("Saving..."):
-        save_journal_df(updated)
-    st.success("Entry saved.")
-    st.rerun()
+        now_time = datetime.now().strftime("%H:%M")
+        new_row = pd.DataFrame([{"date": today_str, "time": now_time, "entry": trimmed}])
+        updated = pd.concat([journal_df, new_row], ignore_index=True)
+        with st.spinner("Saving..."):
+            save_journal_df(updated)
+        st.success("Entry saved.")
+        st.rerun()
+    else:
+        st.warning("Write something before saving.")
 
 # Past entries
 st.markdown('<div class="section-title">\U0001f4da Past Entries</div>', unsafe_allow_html=True)
@@ -50,16 +44,23 @@ st.markdown('<div class="section-title">\U0001f4da Past Entries</div>', unsafe_a
 if journal_df.empty:
     st.markdown('<div class="list-row" style="justify-content:center;opacity:0.7;">No entries yet.</div>', unsafe_allow_html=True)
 else:
-    past = journal_df.copy()
-    past["date_parsed"] = pd.to_datetime(past["date"], errors="coerce")
-    past = past.dropna(subset=["date_parsed"]).sort_values("date_parsed", ascending=False)
-    past = past[past["date_parsed"].dt.date != today]
-    for _, r in past.iterrows():
-        label = r["date_parsed"].strftime("%A, %d %B %Y")
-        body = clean_text(r["entry"])
-        preview = (body[:120] + "\u2026") if len(body) > 120 else body
-        with st.expander(f"{label}  \u2014  {preview}"):
-            st.markdown(
-                f'<div style="white-space:pre-wrap;font-size:15px;line-height:1.85;color:var(--text);opacity:0.92;">{body}</div>',
-                unsafe_allow_html=True,
-            )
+    all_entries = journal_df.copy()
+    all_entries["date_parsed"] = pd.to_datetime(all_entries["date"], errors="coerce")
+    all_entries = all_entries.dropna(subset=["date_parsed"]).sort_values("date_parsed", ascending=False)
+
+    # Group by date
+    grouped = all_entries.groupby(all_entries["date_parsed"].dt.date)
+    for day in sorted(grouped.groups.keys(), reverse=True):
+        day_entries = grouped.get_group(day)
+        label = day_entries.iloc[0]["date_parsed"].strftime("%A, %d %B %Y")
+        count = len(day_entries)
+        with st.expander(f"{label}  ({count} {'entry' if count == 1 else 'entries'})"):
+            for _, r in day_entries.iterrows():
+                time_str = clean_text(r.get("time", ""))
+                body = clean_text(r["entry"])
+                time_label = f'<span style="color:var(--accent);font-weight:600;">{time_str}</span> — ' if time_str else ''
+                st.markdown(
+                    f'<div style="white-space:pre-wrap;font-size:15px;line-height:1.85;color:var(--text);opacity:0.92;margin-bottom:16px;">'
+                    f'{time_label}{body}</div>',
+                    unsafe_allow_html=True,
+                )
