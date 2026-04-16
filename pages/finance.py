@@ -82,11 +82,13 @@ days = month_days(today.year, today.month)
 month_label = today.strftime("%B %Y")
 
 # ============================================================
-# 1 — TODAY SUMMARY
+# 1 — DAY SUMMARY
 # ============================================================
-st.markdown('<div class="section-title">\U0001f4ca Today Summary</div>', unsafe_allow_html=True)
+selected_date = st.date_input("View date", value=today, key="view_date")
+day_label = "Today" if selected_date == today else selected_date.strftime("%d %b %Y")
+st.markdown(f'<div class="section-title">\U0001f4ca {day_label} Summary</div>', unsafe_allow_html=True)
 
-today_df = filter_by_exact_date(finance_df, today)
+today_df = filter_by_exact_date(finance_df, selected_date)
 today_income = float(today_df[today_df["category"] == "Income"]["amount"].sum()) if not today_df.empty else 0.0
 today_expense = float(today_df[today_df["category"] != "Income"]["amount"].sum()) if not today_df.empty else 0.0
 today_net = today_income - today_expense
@@ -138,7 +140,7 @@ st.markdown('<div style="height:18px;"></div>', unsafe_allow_html=True)
 # ============================================================
 # 3b — TRANSACTION HISTORY (today)
 # ============================================================
-st.markdown('<div class="section-title">\U0001f4cb Today\'s Transactions</div>', unsafe_allow_html=True)
+st.markdown(f'<div class="section-title">\U0001f4cb {day_label} Transactions</div>', unsafe_allow_html=True)
 
 if not today_df.empty:
     for idx in today_df.index:
@@ -161,7 +163,7 @@ if not today_df.empty:
                 st.rerun()
 else:
     st.markdown(
-        '<div class="list-row" style="justify-content:center;opacity:0.7;">No transactions today.</div>',
+        f'<div class="list-row" style="justify-content:center;opacity:0.7;">No transactions for {day_label.lower()}.</div>',
         unsafe_allow_html=True,
     )
 
