@@ -19,7 +19,7 @@ nav_menu("B.Mission")
 
 # ── Constants ───────────────────────────────────────────────────────
 DISCHARGE_DATE = date(2027, 10, 4)
-START_DATE = date(2025, 1, 1)
+START_DATE = date(2024, 10, 1)
 
 STATUS_OPTIONS = ["Not Started", "In Progress", "Done"]
 
