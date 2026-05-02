@@ -867,10 +867,10 @@ div[data-testid="stChatInput"] textarea {
 # ── Page Registry ──────────────────────────────────────────────────
 _PAGES = {
     "Mission 21": "planner21.py",
-    "B.Mission": "pages/bmission.py",
     "Finance": "pages/finance.py",
     "Exercise": "pages/exercise.py",
     "Journal": "pages/journal.py",
+    "B.Mission": "pages/bmission.py",
     "Insights": "pages/insights.py",
     "Weekly Review": "pages/weekly_review.py",
     "News": "pages/news.py",
