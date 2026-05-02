@@ -11,7 +11,6 @@ st.set_page_config(page_title="B.Mission", page_icon="⚡", layout="wide", initi
 from theme import inject_theme, nav_menu, page_header, metric_card, progress_bar
 from utils import (
     load_bmission_goals, save_bmission_goals_df,
-    load_bmission_milestones, save_bmission_milestones_df,
     clean_text,
 )
 
@@ -21,14 +20,6 @@ nav_menu("B.Mission")
 # ── Constants ───────────────────────────────────────────────────────
 DISCHARGE_DATE = date(2027, 10, 4)
 START_DATE = date(2025, 1, 1)
-
-FIXED_MILESTONES = [
-    "Clear all outstanding debts",
-    "Build $10,000 emergency fund",
-    "Have profitable trading system",
-    "First condo deposit saved",
-    "Stable monthly income > $5,000",
-]
 
 STATUS_OPTIONS = ["Not Started", "In Progress", "Done"]
 
@@ -221,117 +212,6 @@ else:
                 if st.button("\U0001f5d1️", key=f"goal_del_{idx}", use_container_width=True):
                     save_bmission_goals_df(goals_df.drop(idx).reset_index(drop=True))
                     st.rerun()
-
-# ── Financial milestones ────────────────────────────────────────────
-st.markdown('<div class="section-title" style="margin-top:32px;">\U0001f4b0 Financial Milestones</div>', unsafe_allow_html=True)
-
-milestones_df = load_bmission_milestones()
-
-
-def _is_done(value) -> bool:
-    return str(value).strip().lower() in ("true", "1", "yes", "done")
-
-
-existing_names = set(clean_text(m) for m in milestones_df.get("milestone", pd.Series([], dtype=object)))
-missing_fixed = [m for m in FIXED_MILESTONES if m not in existing_names]
-if missing_fixed:
-    seed = pd.DataFrame([{"milestone": m, "done": "False"} for m in missing_fixed])
-    milestones_df = pd.concat([milestones_df, seed], ignore_index=True)
-    save_bmission_milestones_df(milestones_df)
-    milestones_df = load_bmission_milestones()
-
-ordered_rows = []
-for fm in FIXED_MILESTONES:
-    match = milestones_df[milestones_df["milestone"].astype(str) == fm]
-    if not match.empty:
-        ordered_rows.append((match.index[0], match.iloc[0], True))
-for idx, r in milestones_df.iterrows():
-    name = clean_text(r.get("milestone", ""))
-    if name and name not in FIXED_MILESTONES:
-        ordered_rows.append((idx, r, False))
-
-done_count = sum(1 for _, r, _ in ordered_rows if _is_done(r.get("done", "")))
-total_count = len(ordered_rows)
-st.markdown(
-    f'<div style="font-size:13px;color:var(--text2);margin-bottom:10px;">'
-    f'{done_count} of {total_count} complete</div>',
-    unsafe_allow_html=True,
-)
-
-for idx, r, is_fixed in ordered_rows:
-    name = clean_text(r.get("milestone", ""))
-    done = _is_done(r.get("done", ""))
-    m_cols = st.columns([0.6, 8, 1])
-    with m_cols[0]:
-        new_done = st.checkbox("done", value=done, key=f"ms_chk_{idx}", label_visibility="collapsed")
-    with m_cols[1]:
-        decoration = "line-through" if new_done else "none"
-        opacity = "0.55" if new_done else "1"
-        tag = ' <span class="badge" style="color:var(--text3);background:var(--accent-soft);font-size:10px;">custom</span>' if not is_fixed else ""
-        st.markdown(
-            f'<div style="font-size:15px;text-decoration:{decoration};opacity:{opacity};'
-            f'padding-top:4px;">{name}{tag}</div>',
-            unsafe_allow_html=True,
-        )
-    with m_cols[2]:
-        if not is_fixed:
-            if st.button("\U0001f5d1️", key=f"ms_del_{idx}", use_container_width=True):
-                save_bmission_milestones_df(milestones_df.drop(idx).reset_index(drop=True))
-                st.rerun()
-
-    if new_done != done:
-        milestones_df.at[idx, "done"] = "True" if new_done else "False"
-        save_bmission_milestones_df(milestones_df)
-        st.rerun()
-
-with st.expander("➕ Add custom milestone"):
-    with st.form("add_milestone_form", clear_on_submit=True):
-        new_ms = st.text_input("Milestone", placeholder="e.g. Open SRS account")
-        if st.form_submit_button("Add milestone", use_container_width=True):
-            if new_ms.strip():
-                row = pd.DataFrame([{"milestone": new_ms.strip(), "done": "False"}])
-                save_bmission_milestones_df(pd.concat([milestones_df, row], ignore_index=True))
-                st.rerun()
-            else:
-                st.warning("Milestone name is required.")
-
-# ── Time allocation ─────────────────────────────────────────────────
-st.markdown('<div class="section-title" style="margin-top:32px;">⏱️ Time Allocation</div>', unsafe_allow_html=True)
-
-if days_remaining > 0:
-    working_days = int(round(days_remaining * 6 / 7))
-    rest_days = days_remaining - working_days
-else:
-    working_days = 0
-    rest_days = 0
-
-t_cols = st.columns(3)
-with t_cols[0]:
-    st.markdown(metric_card("Total days left", f"{max(days_remaining, 0):,}", color="var(--text)"), unsafe_allow_html=True)
-with t_cols[1]:
-    st.markdown(metric_card("Working days", f"{working_days:,}", sub="6 days/week", color="var(--accent-2)"), unsafe_allow_html=True)
-with t_cols[2]:
-    st.markdown(metric_card("Rest days", f"{rest_days:,}", sub="1 day/week", color="var(--text2)"), unsafe_allow_html=True)
-
-daily_target = st.number_input(
-    "Daily income target ($)",
-    min_value=0.0, value=200.0, step=10.0,
-    key="bm_daily_target",
-)
-potential = daily_target * working_days
-st.markdown(
-    f'<div class="card" style="margin-top:14px;text-align:center;padding:24px;">'
-    f'<div style="font-size:14px;color:var(--text2);text-transform:uppercase;letter-spacing:0.16em;">'
-    f'If you earn <span style="color:var(--accent-2);font-weight:700;">${daily_target:,.0f}</span> per working day</div>'
-    f'<div style="font-size:48px;font-weight:800;line-height:1;margin:12px 0;'
-    f'background:var(--gradient-hero);-webkit-background-clip:text;'
-    f'-webkit-text-fill-color:transparent;background-clip:text;">'
-    f'${potential:,.0f}</div>'
-    f'<div style="font-size:13px;color:var(--text3);">'
-    f'total earnings possible before discharge ({working_days:,} working days)</div>'
-    f'</div>',
-    unsafe_allow_html=True,
-)
 
 # ── Mindset section ─────────────────────────────────────────────────
 st.markdown('<div class="section-title" style="margin-top:32px;">\U0001f9e0 Mindset</div>', unsafe_allow_html=True)
