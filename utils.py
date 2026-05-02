@@ -59,6 +59,12 @@ CPF_SHEET = "cpf"
 MEDISAVE_SHEET = "medisave"
 PROPERTY_SHEET = "property"
 
+BMISSION_GOALS_SHEET = "bmission_goals"
+BMISSION_GOALS_COLUMNS = ["goal", "target_date", "status", "notes"]
+
+BMISSION_MILESTONES_SHEET = "bmission_milestones"
+BMISSION_MILESTONES_COLUMNS = ["milestone", "done"]
+
 EXERCISE_COLUMNS = ["date", "status", "type", "duration", "km", "pace", "notes"]
 
 JOURNAL_COLUMNS = ["date", "time", "entry", "mood", "tags"]
@@ -315,6 +321,32 @@ def save_property_df(df: pd.DataFrame) -> None:
             df[col] = ""
     save_sheet(PROPERTY_SHEET, df[PROPERTY_COLUMNS], PROPERTY_COLUMNS)
     load_property.clear()
+
+
+@st.cache_data(ttl=60, show_spinner=False)
+def load_bmission_goals() -> pd.DataFrame:
+    return load_sheet(BMISSION_GOALS_SHEET, BMISSION_GOALS_COLUMNS)
+
+
+def save_bmission_goals_df(df: pd.DataFrame) -> None:
+    for col in BMISSION_GOALS_COLUMNS:
+        if col not in df.columns:
+            df[col] = ""
+    save_sheet(BMISSION_GOALS_SHEET, df[BMISSION_GOALS_COLUMNS], BMISSION_GOALS_COLUMNS)
+    load_bmission_goals.clear()
+
+
+@st.cache_data(ttl=60, show_spinner=False)
+def load_bmission_milestones() -> pd.DataFrame:
+    return load_sheet(BMISSION_MILESTONES_SHEET, BMISSION_MILESTONES_COLUMNS)
+
+
+def save_bmission_milestones_df(df: pd.DataFrame) -> None:
+    for col in BMISSION_MILESTONES_COLUMNS:
+        if col not in df.columns:
+            df[col] = ""
+    save_sheet(BMISSION_MILESTONES_SHEET, df[BMISSION_MILESTONES_COLUMNS], BMISSION_MILESTONES_COLUMNS)
+    load_bmission_milestones.clear()
 
 
 # =========================================================
