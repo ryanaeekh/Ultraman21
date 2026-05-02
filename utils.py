@@ -67,7 +67,7 @@ BMISSION_MILESTONES_COLUMNS = ["milestone", "done"]
 
 EXERCISE_COLUMNS = ["date", "status", "type", "duration", "km", "pace", "notes"]
 
-JOURNAL_COLUMNS = ["date", "time", "entry", "mood", "tags"]
+JOURNAL_COLUMNS = ["date", "time", "session", "entry", "mood", "tags"]
 
 SETTINGS_COLUMNS = [
     "long_term_goals", "daily_income_target", "hourly_rate_target",
