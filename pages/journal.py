@@ -41,11 +41,6 @@ PROMPTS = [
     "What do you need to forgive yourself for?",
 ]
 
-MOODS = ["\U0001f614", "\U0001f610", "\U0001f642", "\U0001f60a", "\U0001f525"]
-
-SESSIONS = ["Morning", "Noon", "Night"]
-
-
 def calc_streak(df: pd.DataFrame) -> int:
     if df.empty or "date" not in df.columns:
         return 0
@@ -89,31 +84,11 @@ st.markdown(
     unsafe_allow_html=True,
 )
 
-st.markdown(
-    '<div style="font-size:13px;color:var(--text2);'
-    'text-transform:uppercase;letter-spacing:0.1em;margin-bottom:6px;">Mood</div>',
-    unsafe_allow_html=True,
-)
-selected_mood = st.session_state.get("selected_mood", "")
-mood_cols = st.columns(5)
-for i, m in enumerate(MOODS):
-    btn_type = "primary" if selected_mood == m else "secondary"
-    if mood_cols[i].button(m, key=f"mood_btn_{i}", type=btn_type, use_container_width=True):
-        st.session_state["selected_mood"] = "" if selected_mood == m else m
-        st.rerun()
+st.radio("MOOD", ["\U0001f614", "\U0001f610", "\U0001f642", "\U0001f60a", "\U0001f525"],
+         horizontal=True, key="mood_select")
 
-st.markdown(
-    '<div style="font-size:13px;color:var(--text2);'
-    'text-transform:uppercase;letter-spacing:0.1em;margin-bottom:6px;">Session</div>',
-    unsafe_allow_html=True,
-)
-selected_session = st.session_state.get("selected_session", "")
-session_cols = st.columns(3)
-for i, s in enumerate(SESSIONS):
-    btn_type = "primary" if selected_session == s else "secondary"
-    if session_cols[i].button(s, key=f"session_btn_{i}", type=btn_type, use_container_width=True):
-        st.session_state["selected_session"] = "" if selected_session == s else s
-        st.rerun()
+st.radio("SESSION", ["Morning", "Noon", "Night"],
+         horizontal=True, key="session_select")
 
 entry = st.text_area("Entry", value="", height=320, key="journal_entry",
                      placeholder="Write freely. No judgement. Just presence.")
@@ -136,16 +111,14 @@ if st.button("Save Entry", use_container_width=True, key="save_journal"):
         new_row = pd.DataFrame([{
             "date": today_str,
             "time": now_time,
-            "session": st.session_state.get("selected_session", ""),
+            "session": st.session_state.session_select,
             "entry": trimmed,
-            "mood": st.session_state.get("selected_mood", ""),
+            "mood": st.session_state.mood_select,
             "tags": clean_tags,
         }])
         updated = pd.concat([journal_df, new_row], ignore_index=True)
         with st.spinner("Saving..."):
             save_journal_df(updated)
-        st.session_state["selected_mood"] = ""
-        st.session_state["selected_session"] = ""
         st.success("Entry saved.")
         st.rerun()
     else:
