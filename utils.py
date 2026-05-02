@@ -142,7 +142,7 @@ def clean_text(value) -> str:
 # =========================================================
 # SPECIFIC LOADERS
 # =========================================================
-@st.cache_data(ttl=60)
+@st.cache_data(ttl=60, show_spinner=False)
 def load_planner() -> pd.DataFrame:
     df = load_csv(PLANNER_FILE, PLANNER_COLUMNS)
     df = coerce_numeric(df, ["score"])
@@ -151,40 +151,40 @@ def load_planner() -> pd.DataFrame:
     return df
 
 
-@st.cache_data(ttl=60)
+@st.cache_data(ttl=60, show_spinner=False)
 def load_driving() -> pd.DataFrame:
     df = load_csv(DRIVING_FILE, DRIVING_COLUMNS)
     df = coerce_numeric(df, ["earnings", "hours_driven", "hourly_rate"])
     return df
 
 
-@st.cache_data(ttl=60)
+@st.cache_data(ttl=60, show_spinner=False)
 def load_finance() -> pd.DataFrame:
     df = load_csv(FINANCE_FILE, FINANCE_COLUMNS)
     df = coerce_numeric(df, ["amount"])
     return df
 
 
-@st.cache_data(ttl=60)
+@st.cache_data(ttl=60, show_spinner=False)
 def load_monthly_expenses() -> pd.DataFrame:
     df = load_csv(MONTHLY_EXPENSES_FILE, MONTHLY_EXPENSES_COLUMNS)
     df = coerce_numeric(df, ["amount"])
     return df
 
 
-@st.cache_data(ttl=60)
+@st.cache_data(ttl=60, show_spinner=False)
 def load_exercise() -> pd.DataFrame:
     df = load_csv(EXERCISE_FILE, EXERCISE_COLUMNS)
     df = coerce_numeric(df, ["duration", "km"])
     return df
 
 
-@st.cache_data(ttl=60)
+@st.cache_data(ttl=60, show_spinner=False)
 def load_journal() -> pd.DataFrame:
     return load_csv(JOURNAL_FILE, JOURNAL_COLUMNS)
 
 
-@st.cache_data(ttl=60)
+@st.cache_data(ttl=60, show_spinner=False)
 def load_settings() -> pd.DataFrame:
     return load_csv(SETTINGS_FILE, SETTINGS_COLUMNS)
 
@@ -227,7 +227,7 @@ def save_settings_df(df: pd.DataFrame) -> None:
     load_settings.clear()
 
 
-@st.cache_data(ttl=60)
+@st.cache_data(ttl=60, show_spinner=False)
 def load_assets() -> pd.DataFrame:
     df = load_sheet(ASSETS_SHEET, ASSETS_COLUMNS)
     df = coerce_numeric(df, ["amount"])
@@ -242,7 +242,7 @@ def save_assets_df(df: pd.DataFrame) -> None:
     load_assets.clear()
 
 
-@st.cache_data(ttl=60)
+@st.cache_data(ttl=60, show_spinner=False)
 def load_liabilities() -> pd.DataFrame:
     df = load_sheet(LIABILITIES_SHEET, LIABILITIES_COLUMNS)
     df = coerce_numeric(df, ["amount"])
@@ -257,7 +257,7 @@ def save_liabilities_df(df: pd.DataFrame) -> None:
     load_liabilities.clear()
 
 
-@st.cache_data(ttl=60)
+@st.cache_data(ttl=60, show_spinner=False)
 def load_gold_assets() -> pd.DataFrame:
     df = load_sheet(GOLD_ASSETS_SHEET, GOLD_ASSETS_COLUMNS)
     df = coerce_numeric(df, ["weight_grams", "purity"])
@@ -272,7 +272,7 @@ def save_gold_assets_df(df: pd.DataFrame) -> None:
     load_gold_assets.clear()
 
 
-@st.cache_data(ttl=60)
+@st.cache_data(ttl=60, show_spinner=False)
 def load_cpf() -> pd.DataFrame:
     df = load_sheet(CPF_SHEET, CPF_COLUMNS)
     df = coerce_numeric(df, ["amount"])
@@ -287,7 +287,7 @@ def save_cpf_df(df: pd.DataFrame) -> None:
     load_cpf.clear()
 
 
-@st.cache_data(ttl=60)
+@st.cache_data(ttl=60, show_spinner=False)
 def load_medisave() -> pd.DataFrame:
     df = load_sheet(MEDISAVE_SHEET, MEDISAVE_COLUMNS)
     df = coerce_numeric(df, ["amount"])
@@ -302,7 +302,7 @@ def save_medisave_df(df: pd.DataFrame) -> None:
     load_medisave.clear()
 
 
-@st.cache_data(ttl=60)
+@st.cache_data(ttl=60, show_spinner=False)
 def load_property() -> pd.DataFrame:
     df = load_sheet(PROPERTY_SHEET, PROPERTY_COLUMNS)
     df = coerce_numeric(df, ["amount"])

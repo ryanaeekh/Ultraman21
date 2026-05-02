@@ -13,7 +13,7 @@ inject_theme()
 nav_menu("News")
 
 
-@st.cache_data(ttl=1800)
+@st.cache_data(ttl=1800, show_spinner=False)
 def fetch_news(query, page_size=8, category=None, country=None):
     if not NEWS_API_KEY:
         return []

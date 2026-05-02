@@ -24,7 +24,7 @@ from utils import (
 )
 
 
-@st.cache_data(ttl=300)
+@st.cache_data(ttl=300, show_spinner=False)
 def load_all_finance_data():
     """Batch-load all sheets in one cached call."""
     return {
@@ -61,7 +61,7 @@ st.markdown(
 )
 
 
-@st.cache_data(ttl=3600)
+@st.cache_data(ttl=3600, show_spinner=False)
 def fetch_gold_price_sgd_per_gram():
     """Fetch gold price in SGD/g from GoldAPI. Returns None on failure."""
     try:
