@@ -224,9 +224,7 @@ with count_cols[0]:
         f'text-transform:uppercase;letter-spacing:0.12em;color:var(--text2);'
         f'margin-bottom:6px;">Stayed with myself</div>'
         f'<div style="font-family:var(--font-display);font-size:22px;'
-        f'font-weight:700;color:var(--accent-2);">{stayed_count} '
-        f'<span style="font-size:13px;color:var(--text2);font-weight:500;">'
-        f'{"day" if stayed_count == 1 else "days"}</span></div>'
+        f'font-weight:700;color:var(--accent-2);">{stayed_count}</div>'
         f'</div>',
         unsafe_allow_html=True,
     )
@@ -239,9 +237,7 @@ with count_cols[1]:
         f'text-transform:uppercase;letter-spacing:0.12em;color:var(--text2);'
         f'margin-bottom:6px;">Abandoned myself</div>'
         f'<div style="font-family:var(--font-display);font-size:22px;'
-        f'font-weight:700;color:var(--neg);">{abandoned_count} '
-        f'<span style="font-size:13px;color:var(--text2);font-weight:500;">'
-        f'{"day" if abandoned_count == 1 else "days"}</span></div>'
+        f'font-weight:700;color:var(--neg);">{abandoned_count}</div>'
         f'</div>',
         unsafe_allow_html=True,
     )
