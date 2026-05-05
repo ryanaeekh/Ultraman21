@@ -49,14 +49,7 @@ BODY_OPTIONS = ["Calm", "Anxious", "Heavy", "Light", "Tense", "Numb", "Tired", "
 
 today_checkin = checkin_df[checkin_df["date"].astype(str) == today_str]
 existing_body = clean_text(today_checkin.iloc[0]["body_feeling"]) if not today_checkin.empty else ""
-existing_fear = clean_text(today_checkin.iloc[0]["fear_driven"]) if not today_checkin.empty else ""
-try:
-    existing_tension = int(float(today_checkin.iloc[0]["tension_score"])) if not today_checkin.empty else 5
-except (ValueError, TypeError):
-    existing_tension = 5
-
 body_index = BODY_OPTIONS.index(existing_body) if existing_body in BODY_OPTIONS else 0
-fear_index = 0 if existing_fear == "Yes" else 1  # default No
 
 body_feeling = st.selectbox(
     "How am I feeling right now, in my body?",
@@ -64,26 +57,11 @@ body_feeling = st.selectbox(
     index=body_index,
     key="thy_body",
 )
-fear_driven = st.radio(
-    "Am I putting others first out of fear today?",
-    ["Yes", "No"],
-    index=fear_index,
-    horizontal=True,
-    key="thy_fear",
-)
-tension_score = st.slider(
-    "Body tension (morning) — 1 very relaxed, 10 very tense",
-    min_value=1, max_value=10,
-    value=max(1, min(10, existing_tension)),
-    key="thy_tension",
-)
 
 if st.button("Save check-in", use_container_width=True, key="save_checkin"):
     new_row = pd.DataFrame([{
         "date": today_str,
         "body_feeling": body_feeling,
-        "fear_driven": fear_driven,
-        "tension_score": int(tension_score),
     }])
     others = checkin_df[checkin_df["date"].astype(str) != today_str]
     updated = pd.concat([others, new_row], ignore_index=True)
@@ -94,102 +72,7 @@ if st.button("Save check-in", use_container_width=True, key="save_checkin"):
 
 
 # =========================================================
-# SECTION 2 — DAILY REMINDER
-# =========================================================
-QUOTES = [
-    "Trauma is not what happens to you. It is what happens inside you as a result of what happens to you. — Gabor Maté",
-    "The attempt to escape from pain creates more pain. — Gabor Maté",
-    "Authenticity is not a luxury. It is a survival imperative. — Gabor Maté",
-    "Safety is not the absence of threat. It is the presence of connection. — Gabor Maté",
-    "When the body says no, the cost is often paid in disease. — Gabor Maté",
-    "Healing begins when we stop abandoning ourselves. — Gabor Maté",
-    "The greatest damage done by neglect, trauma or emotional loss is not the immediate pain they inflict but the long-term distortions they induce. — Gabor Maté",
-    "Recovery is the slow practice of choosing yourself, again and again. — Pete Walker",
-    "You are not a problem to be solved. You are a person to be witnessed. — Pete Walker",
-    "Self-compassion is the antidote to the inner critic. — Pete Walker",
-    "Grieving is the work that lets the past become the past. — Pete Walker",
-    "The fawn response is the survival strategy of pleasing others to stay safe. — Pete Walker",
-    "Healing is non-linear. Setbacks are part of the path. — Pete Walker",
-    "Re-parenting yourself is the quiet, daily work of becoming whole. — Pete Walker",
-    "Three things cannot be long hidden: the sun, the moon, and the truth. — Buddha",
-    "You yourself, as much as anybody in the entire universe, deserve your love and affection. — Buddha",
-    "What you think, you become. What you feel, you attract. What you imagine, you create. — Buddha",
-    "Pain is inevitable. Suffering is optional. — Buddha",
-    "Peace comes from within. Do not seek it without. — Buddha",
-    "The mind is everything. What you think, you become. — Buddha",
-]
-
-quote_today = QUOTES[today.toordinal() % len(QUOTES)]
-
-st.markdown(
-    f'<div style="margin:32px 0 28px;padding:24px 20px;'
-    f'border-top:1px solid var(--border);border-bottom:1px solid var(--border);'
-    f'text-align:center;font-style:italic;font-size:16px;line-height:1.7;'
-    f'color:var(--text);font-family:var(--font-display);opacity:0.92;">'
-    f'{quote_today}</div>',
-    unsafe_allow_html=True,
-)
-
-
-# =========================================================
-# SECTION 3 — PATTERN TRACKER
-# =========================================================
-st.markdown('<div class="section-title">Pattern Tracker</div>', unsafe_allow_html=True)
-
-PATTERN_OPTIONS = [
-    "People pleasing",
-    "Suppressing emotion",
-    "Overworking",
-    "Isolating",
-    "Seeking approval",
-    "Other",
-]
-
-pattern_type = st.selectbox(
-    "Pattern noticed",
-    PATTERN_OPTIONS,
-    key="thy_pattern_type",
-)
-pattern_notes = st.text_area(
-    "Describe what happened — just observe, don't judge",
-    value="",
-    key="thy_pattern_notes",
-    height=140,
-)
-trigger = st.text_input(
-    "What happened just before the feeling shifted? (optional)",
-    value="",
-    key="thy_trigger",
-)
-
-st.markdown(
-    '<div style="margin:12px 0 18px;padding:12px 16px;'
-    'font-style:italic;color:var(--text2);font-size:14px;'
-    'border-left:3px solid var(--accent);background:var(--accent-soft);'
-    'border-radius:6px;">'
-    'What would you say to a friend who did the same thing?</div>',
-    unsafe_allow_html=True,
-)
-
-if st.button("Save pattern entry", use_container_width=True, key="save_pattern"):
-    if pattern_notes.strip():
-        new_row = pd.DataFrame([{
-            "date": today_str,
-            "pattern_type": pattern_type,
-            "pattern_notes": pattern_notes.strip(),
-            "trigger": trigger.strip(),
-        }])
-        updated = pd.concat([patterns_df, new_row], ignore_index=True)
-        with st.spinner("Saving..."):
-            save_thyself_patterns_df(updated)
-        st.success("Pattern logged.")
-        st.rerun()
-    else:
-        st.warning("Add a note before saving.")
-
-
-# =========================================================
-# SECTION 4 — GRATITUDE (SELF-AWARENESS)
+# SECTION 2 — SELF-AWARENESS
 # =========================================================
 st.markdown('<div class="section-title">Self-awareness</div>', unsafe_allow_html=True)
 
@@ -256,7 +139,102 @@ if st.button("Save", use_container_width=True, key="save_gratitude"):
 
 
 # =========================================================
-# SECTION 6 — WEEKLY REFLECTION
+# SECTION 3 — DAILY REMINDER
+# =========================================================
+QUOTES = [
+    "Trauma is not what happens to you. It is what happens inside you as a result of what happens to you. — Gabor Maté",
+    "The attempt to escape from pain creates more pain. — Gabor Maté",
+    "Authenticity is not a luxury. It is a survival imperative. — Gabor Maté",
+    "Safety is not the absence of threat. It is the presence of connection. — Gabor Maté",
+    "When the body says no, the cost is often paid in disease. — Gabor Maté",
+    "Healing begins when we stop abandoning ourselves. — Gabor Maté",
+    "The greatest damage done by neglect, trauma or emotional loss is not the immediate pain they inflict but the long-term distortions they induce. — Gabor Maté",
+    "Recovery is the slow practice of choosing yourself, again and again. — Pete Walker",
+    "You are not a problem to be solved. You are a person to be witnessed. — Pete Walker",
+    "Self-compassion is the antidote to the inner critic. — Pete Walker",
+    "Grieving is the work that lets the past become the past. — Pete Walker",
+    "The fawn response is the survival strategy of pleasing others to stay safe. — Pete Walker",
+    "Healing is non-linear. Setbacks are part of the path. — Pete Walker",
+    "Re-parenting yourself is the quiet, daily work of becoming whole. — Pete Walker",
+    "Three things cannot be long hidden: the sun, the moon, and the truth. — Buddha",
+    "You yourself, as much as anybody in the entire universe, deserve your love and affection. — Buddha",
+    "What you think, you become. What you feel, you attract. What you imagine, you create. — Buddha",
+    "Pain is inevitable. Suffering is optional. — Buddha",
+    "Peace comes from within. Do not seek it without. — Buddha",
+    "The mind is everything. What you think, you become. — Buddha",
+]
+
+quote_today = QUOTES[today.toordinal() % len(QUOTES)]
+
+st.markdown(
+    f'<div style="margin:32px 0 28px;padding:24px 20px;'
+    f'border-top:1px solid var(--border);border-bottom:1px solid var(--border);'
+    f'text-align:center;font-style:italic;font-size:16px;line-height:1.7;'
+    f'color:var(--text);font-family:var(--font-display);opacity:0.92;">'
+    f'{quote_today}</div>',
+    unsafe_allow_html=True,
+)
+
+
+# =========================================================
+# SECTION 4 — PATTERN TRACKER
+# =========================================================
+st.markdown('<div class="section-title">Pattern Tracker</div>', unsafe_allow_html=True)
+
+PATTERN_OPTIONS = [
+    "People pleasing",
+    "Suppressing emotion",
+    "Overworking",
+    "Isolating",
+    "Seeking approval",
+    "Other",
+]
+
+pattern_type = st.selectbox(
+    "Pattern noticed",
+    PATTERN_OPTIONS,
+    key="thy_pattern_type",
+)
+pattern_notes = st.text_area(
+    "Describe what happened — just observe, don't judge",
+    value="",
+    key="thy_pattern_notes",
+    height=140,
+)
+trigger = st.text_input(
+    "What happened just before the feeling shifted? (optional)",
+    value="",
+    key="thy_trigger",
+)
+
+st.markdown(
+    '<div style="margin:12px 0 18px;padding:12px 16px;'
+    'font-style:italic;color:var(--text2);font-size:14px;'
+    'border-left:3px solid var(--accent);background:var(--accent-soft);'
+    'border-radius:6px;">'
+    'What would you say to a friend who did the same thing?</div>',
+    unsafe_allow_html=True,
+)
+
+if st.button("Save pattern entry", use_container_width=True, key="save_pattern"):
+    if pattern_notes.strip():
+        new_row = pd.DataFrame([{
+            "date": today_str,
+            "pattern_type": pattern_type,
+            "pattern_notes": pattern_notes.strip(),
+            "trigger": trigger.strip(),
+        }])
+        updated = pd.concat([patterns_df, new_row], ignore_index=True)
+        with st.spinner("Saving..."):
+            save_thyself_patterns_df(updated)
+        st.success("Pattern logged.")
+        st.rerun()
+    else:
+        st.warning("Add a note before saving.")
+
+
+# =========================================================
+# SECTION 5 — WEEKLY REFLECTION
 # =========================================================
 st.markdown('<div class="section-title">Weekly Reflection</div>', unsafe_allow_html=True)
 st.caption("Best done on Sundays.")
