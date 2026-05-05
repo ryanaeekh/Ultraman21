@@ -92,43 +92,6 @@ if st.button("Save check-in", use_container_width=True, key="save_checkin"):
     st.success("Check-in saved.")
     st.rerun()
 
-# Yes/No totals from all check-in entries
-fear_series = checkin_df["fear_driven"].astype(str).str.strip() if not checkin_df.empty else pd.Series(dtype=str)
-yes_count = int((fear_series == "Yes").sum())
-no_count = int((fear_series == "No").sum())
-
-count_cols = st.columns(2)
-with count_cols[0]:
-    st.markdown(
-        f'<div style="padding:14px 18px;border:1px solid var(--border);'
-        f'border-radius:var(--radius-md);background:var(--accent-soft);'
-        f'text-align:center;margin-top:14px;">'
-        f'<div style="font-family:var(--font-display);font-size:11px;'
-        f'text-transform:uppercase;letter-spacing:0.12em;color:var(--text2);'
-        f'margin-bottom:6px;">Stayed with myself</div>'
-        f'<div style="font-family:var(--font-display);font-size:22px;'
-        f'font-weight:700;color:var(--accent-2);">{no_count} '
-        f'<span style="font-size:13px;color:var(--text2);font-weight:500;">'
-        f'{"day" if no_count == 1 else "days"}</span></div>'
-        f'</div>',
-        unsafe_allow_html=True,
-    )
-with count_cols[1]:
-    st.markdown(
-        f'<div style="padding:14px 18px;border:1px solid var(--border);'
-        f'border-radius:var(--radius-md);background:rgba(201,122,138,0.08);'
-        f'text-align:center;margin-top:14px;">'
-        f'<div style="font-family:var(--font-display);font-size:11px;'
-        f'text-transform:uppercase;letter-spacing:0.12em;color:var(--text2);'
-        f'margin-bottom:6px;">Abandoned myself</div>'
-        f'<div style="font-family:var(--font-display);font-size:22px;'
-        f'font-weight:700;color:var(--neg);">{yes_count} '
-        f'<span style="font-size:13px;color:var(--text2);font-weight:500;">'
-        f'{"day" if yes_count == 1 else "days"}</span></div>'
-        f'</div>',
-        unsafe_allow_html=True,
-    )
-
 
 # =========================================================
 # SECTION 2 — DAILY REMINDER
@@ -233,27 +196,67 @@ st.markdown('<div class="section-title">Self-awareness</div>', unsafe_allow_html
 today_gratitude = gratitude_df[gratitude_df["date"].astype(str) == today_str]
 existing_gratitude = clean_text(today_gratitude.iloc[0]["gratitude_note"]) if not today_gratitude.empty else ""
 
-gratitude_note = st.text_area(
-    "One moment today where you stayed with yourself instead of abandoning yourself.",
-    value=existing_gratitude,
+gratitude_index = 1 if existing_gratitude == "No" else 0  # default Yes
+
+gratitude_choice = st.radio(
+    "Did I stay with myself today instead of abandoning myself?",
+    ["Yes", "No"],
+    index=gratitude_index,
+    horizontal=True,
     key="thy_gratitude",
-    height=120,
 )
 
+# Counts from all gratitude entries
+gratitude_series = (
+    gratitude_df["gratitude_note"].astype(str).str.strip()
+    if not gratitude_df.empty else pd.Series(dtype=str)
+)
+stayed_count = int((gratitude_series == "Yes").sum())
+abandoned_count = int((gratitude_series == "No").sum())
+
+count_cols = st.columns(2)
+with count_cols[0]:
+    st.markdown(
+        f'<div style="padding:14px 18px;border:1px solid var(--border);'
+        f'border-radius:var(--radius-md);background:var(--accent-soft);'
+        f'text-align:center;margin-top:14px;">'
+        f'<div style="font-family:var(--font-display);font-size:11px;'
+        f'text-transform:uppercase;letter-spacing:0.12em;color:var(--text2);'
+        f'margin-bottom:6px;">Stayed with myself</div>'
+        f'<div style="font-family:var(--font-display);font-size:22px;'
+        f'font-weight:700;color:var(--accent-2);">{stayed_count} '
+        f'<span style="font-size:13px;color:var(--text2);font-weight:500;">'
+        f'{"day" if stayed_count == 1 else "days"}</span></div>'
+        f'</div>',
+        unsafe_allow_html=True,
+    )
+with count_cols[1]:
+    st.markdown(
+        f'<div style="padding:14px 18px;border:1px solid var(--border);'
+        f'border-radius:var(--radius-md);background:rgba(201,122,138,0.08);'
+        f'text-align:center;margin-top:14px;">'
+        f'<div style="font-family:var(--font-display);font-size:11px;'
+        f'text-transform:uppercase;letter-spacing:0.12em;color:var(--text2);'
+        f'margin-bottom:6px;">Abandoned myself</div>'
+        f'<div style="font-family:var(--font-display);font-size:22px;'
+        f'font-weight:700;color:var(--neg);">{abandoned_count} '
+        f'<span style="font-size:13px;color:var(--text2);font-weight:500;">'
+        f'{"day" if abandoned_count == 1 else "days"}</span></div>'
+        f'</div>',
+        unsafe_allow_html=True,
+    )
+
 if st.button("Save", use_container_width=True, key="save_gratitude"):
-    if gratitude_note.strip():
-        new_row = pd.DataFrame([{
-            "date": today_str,
-            "gratitude_note": gratitude_note.strip(),
-        }])
-        others = gratitude_df[gratitude_df["date"].astype(str) != today_str]
-        updated = pd.concat([others, new_row], ignore_index=True)
-        with st.spinner("Saving..."):
-            save_thyself_gratitude_df(updated)
-        st.success("Saved.")
-        st.rerun()
-    else:
-        st.warning("Write something before saving.")
+    new_row = pd.DataFrame([{
+        "date": today_str,
+        "gratitude_note": gratitude_choice,
+    }])
+    others = gratitude_df[gratitude_df["date"].astype(str) != today_str]
+    updated = pd.concat([others, new_row], ignore_index=True)
+    with st.spinner("Saving..."):
+        save_thyself_gratitude_df(updated)
+    st.success("Saved.")
+    st.rerun()
 
 
 # =========================================================
