@@ -1,7 +1,7 @@
 import sys, os
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
-from datetime import date, timedelta
+from datetime import date
 
 import pandas as pd
 import streamlit as st
@@ -13,7 +13,6 @@ from utils import (
     load_thyself_checkin, save_thyself_checkin_df,
     load_thyself_patterns, save_thyself_patterns_df,
     load_thyself_gratitude, save_thyself_gratitude_df,
-    load_thyself_mood, save_thyself_mood_df,
     load_thyself_weekly, save_thyself_weekly_df,
     clean_text,
 )
@@ -38,7 +37,6 @@ st.markdown(
 checkin_df = load_thyself_checkin()
 patterns_df = load_thyself_patterns()
 gratitude_df = load_thyself_gratitude()
-mood_df = load_thyself_mood()
 weekly_df = load_thyself_weekly()
 
 
@@ -256,120 +254,6 @@ if st.button("Save", use_container_width=True, key="save_gratitude"):
         st.rerun()
     else:
         st.warning("Write something before saving.")
-
-
-# =========================================================
-# SECTION 5 — MOOD & BODY CHECK
-# =========================================================
-st.markdown('<div class="section-title">Mood & Body</div>', unsafe_allow_html=True)
-
-MOOD_OPTIONS = [
-    "Calm", "Anxious", "Heavy", "Light", "Tight", "Numb",
-    "Tired", "Alive", "Okay", "Restless", "Grounded", "Foggy",
-]
-
-today_mood = mood_df[mood_df["date"].astype(str) == today_str]
-existing_morning_word = clean_text(today_mood.iloc[0]["morning_word"]) if not today_mood.empty else ""
-existing_evening_word = clean_text(today_mood.iloc[0]["evening_word"]) if not today_mood.empty else ""
-try:
-    existing_morning_tension = int(float(today_mood.iloc[0]["morning_tension"])) if not today_mood.empty else 5
-except (ValueError, TypeError):
-    existing_morning_tension = 5
-try:
-    existing_evening_tension = int(float(today_mood.iloc[0]["evening_tension"])) if not today_mood.empty else 5
-except (ValueError, TypeError):
-    existing_evening_tension = 5
-
-morning_index = MOOD_OPTIONS.index(existing_morning_word) if existing_morning_word in MOOD_OPTIONS else 0
-evening_index = MOOD_OPTIONS.index(existing_evening_word) if existing_evening_word in MOOD_OPTIONS else 0
-
-mood_cols = st.columns(2)
-with mood_cols[0]:
-    st.markdown(
-        '<div style="font-family:var(--font-display);font-size:12px;'
-        'text-transform:uppercase;letter-spacing:0.12em;color:var(--text2);'
-        'margin-bottom:8px;">Morning</div>',
-        unsafe_allow_html=True,
-    )
-    morning_word = st.selectbox(
-        "One word",
-        MOOD_OPTIONS,
-        index=morning_index,
-        key="thy_morning_word",
-    )
-    morning_tension = st.slider(
-        "Tension",
-        min_value=1, max_value=10,
-        value=max(1, min(10, existing_morning_tension)),
-        key="thy_morning_tension",
-    )
-
-with mood_cols[1]:
-    st.markdown(
-        '<div style="font-family:var(--font-display);font-size:12px;'
-        'text-transform:uppercase;letter-spacing:0.12em;color:var(--text2);'
-        'margin-bottom:8px;">Evening</div>',
-        unsafe_allow_html=True,
-    )
-    evening_word = st.selectbox(
-        "One word",
-        MOOD_OPTIONS,
-        index=evening_index,
-        key="thy_evening_word",
-    )
-    evening_tension = st.slider(
-        "Tension",
-        min_value=1, max_value=10,
-        value=max(1, min(10, existing_evening_tension)),
-        key="thy_evening_tension",
-    )
-
-if st.button("Save mood & body", use_container_width=True, key="save_mood"):
-    new_row = pd.DataFrame([{
-        "date": today_str,
-        "morning_word": morning_word,
-        "morning_tension": int(morning_tension),
-        "evening_word": evening_word,
-        "evening_tension": int(evening_tension),
-    }])
-    others = mood_df[mood_df["date"].astype(str) != today_str]
-    updated = pd.concat([others, new_row], ignore_index=True)
-    with st.spinner("Saving..."):
-        save_thyself_mood_df(updated)
-    st.success("Saved.")
-    st.rerun()
-
-# Last 7 days table
-if not mood_df.empty:
-    recent = mood_df.copy()
-    recent["date_parsed"] = pd.to_datetime(recent["date"], errors="coerce")
-    recent = recent.dropna(subset=["date_parsed"]).sort_values("date_parsed", ascending=False)
-    cutoff = pd.Timestamp(today - timedelta(days=6))
-    recent = recent[recent["date_parsed"] >= cutoff]
-
-    if not recent.empty:
-        st.markdown(
-            '<div style="font-family:var(--font-display);font-size:11px;'
-            'text-transform:uppercase;letter-spacing:0.12em;color:var(--text2);'
-            'margin:24px 0 8px;">Last 7 days</div>',
-            unsafe_allow_html=True,
-        )
-        display = recent[["date", "morning_word", "morning_tension", "evening_word", "evening_tension"]].copy()
-        display.columns = ["Date", "Morning word", "Morning tension", "Evening word", "Evening tension"]
-        st.dataframe(display, use_container_width=True, hide_index=True)
-
-        # 7-day tension trend
-        chart_df = recent.sort_values("date_parsed").set_index("date_parsed")[
-            ["morning_tension", "evening_tension"]
-        ]
-        chart_df.columns = ["Morning", "Evening"]
-        st.markdown(
-            '<div style="font-family:var(--font-display);font-size:11px;'
-            'text-transform:uppercase;letter-spacing:0.12em;color:var(--text2);'
-            'margin:18px 0 8px;">7-day tension trend</div>',
-            unsafe_allow_html=True,
-        )
-        st.line_chart(chart_df)
 
 
 # =========================================================
