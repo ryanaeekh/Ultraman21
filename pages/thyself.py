@@ -81,32 +81,65 @@ st.markdown(streak_html, unsafe_allow_html=True)
 
 st.markdown('<div class="section-title">Daily Check-in</div>', unsafe_allow_html=True)
 
+BODY_OPTIONS = ["Calm", "Anxious", "Heavy", "Light", "Tense", "Numb", "Tired", "Alive", "Okay", "Overwhelmed"]
+
 today_checkin = checkin_df[checkin_df["date"].astype(str) == today_str]
 existing_body = clean_text(today_checkin.iloc[0]["body_feeling"]) if not today_checkin.empty else ""
 existing_fear = clean_text(today_checkin.iloc[0]["fear_driven"]) if not today_checkin.empty else ""
-existing_needs = clean_text(today_checkin.iloc[0]["needs"]) if not today_checkin.empty else ""
 try:
     existing_tension = int(float(today_checkin.iloc[0]["tension_score"])) if not today_checkin.empty else 5
 except (ValueError, TypeError):
     existing_tension = 5
 
-body_feeling = st.text_area(
+body_index = BODY_OPTIONS.index(existing_body) if existing_body in BODY_OPTIONS else 0
+fear_index = 0 if existing_fear == "Yes" else 1  # default No
+
+# Compute previous cumulative score (excluding today)
+def _previous_total(df: pd.DataFrame) -> int:
+    if df.empty or "self_awareness_score" not in df.columns:
+        return 0
+    others = df[df["date"].astype(str) != today_str].copy()
+    if others.empty:
+        return 0
+    others["_d"] = pd.to_datetime(others["date"], errors="coerce")
+    others = others.dropna(subset=["_d"]).sort_values("_d")
+    if others.empty:
+        return 0
+    try:
+        return int(float(others.iloc[-1]["self_awareness_score"]))
+    except (ValueError, TypeError):
+        return 0
+
+
+previous_total = _previous_total(checkin_df)
+try:
+    today_score_val = int(float(today_checkin.iloc[0]["self_awareness_score"])) if not today_checkin.empty else previous_total
+except (ValueError, TypeError):
+    today_score_val = previous_total
+
+st.markdown(
+    f'<div style="display:flex;align-items:baseline;gap:12px;margin-bottom:18px;">'
+    f'<span style="font-family:var(--font-display);font-size:11px;'
+    f'text-transform:uppercase;letter-spacing:0.12em;color:var(--text2);">'
+    f'Self-Awareness Score</span>'
+    f'<span style="font-family:var(--font-display);font-size:28px;font-weight:700;'
+    f'color:var(--accent-2);">{today_score_val}</span>'
+    f'</div>',
+    unsafe_allow_html=True,
+)
+
+body_feeling = st.selectbox(
     "How am I feeling right now, in my body?",
-    value=existing_body,
+    BODY_OPTIONS,
+    index=body_index,
     key="thy_body",
-    height=100,
 )
-fear_driven = st.text_area(
+fear_driven = st.radio(
     "Am I putting others first out of fear today?",
-    value=existing_fear,
+    ["Yes", "No"],
+    index=fear_index,
+    horizontal=True,
     key="thy_fear",
-    height=100,
-)
-needs = st.text_area(
-    "What do I need today?",
-    value=existing_needs,
-    key="thy_needs",
-    height=100,
 )
 tension_score = st.slider(
     "Body tension (morning) — 1 very relaxed, 10 very tense",
@@ -116,12 +149,14 @@ tension_score = st.slider(
 )
 
 if st.button("Save check-in", use_container_width=True, key="save_checkin"):
+    delta = 1 if fear_driven == "Yes" else -1
+    new_score = previous_total + delta
     new_row = pd.DataFrame([{
         "date": today_str,
-        "body_feeling": body_feeling.strip(),
-        "fear_driven": fear_driven.strip(),
-        "needs": needs.strip(),
+        "body_feeling": body_feeling,
+        "fear_driven": fear_driven,
         "tension_score": int(tension_score),
+        "self_awareness_score": int(new_score),
     }])
     others = checkin_df[checkin_df["date"].astype(str) != today_str]
     updated = pd.concat([others, new_row], ignore_index=True)
@@ -262,6 +297,11 @@ if st.button("Save", use_container_width=True, key="save_gratitude"):
 # =========================================================
 st.markdown('<div class="section-title">Mood & Body</div>', unsafe_allow_html=True)
 
+MOOD_OPTIONS = [
+    "Calm", "Anxious", "Heavy", "Light", "Tight", "Numb",
+    "Tired", "Alive", "Okay", "Restless", "Grounded", "Foggy",
+]
+
 today_mood = mood_df[mood_df["date"].astype(str) == today_str]
 existing_morning_word = clean_text(today_mood.iloc[0]["morning_word"]) if not today_mood.empty else ""
 existing_evening_word = clean_text(today_mood.iloc[0]["evening_word"]) if not today_mood.empty else ""
@@ -274,6 +314,9 @@ try:
 except (ValueError, TypeError):
     existing_evening_tension = 5
 
+morning_index = MOOD_OPTIONS.index(existing_morning_word) if existing_morning_word in MOOD_OPTIONS else 0
+evening_index = MOOD_OPTIONS.index(existing_evening_word) if existing_evening_word in MOOD_OPTIONS else 0
+
 mood_cols = st.columns(2)
 with mood_cols[0]:
     st.markdown(
@@ -282,11 +325,11 @@ with mood_cols[0]:
         'margin-bottom:8px;">Morning</div>',
         unsafe_allow_html=True,
     )
-    morning_word = st.text_input(
+    morning_word = st.selectbox(
         "One word",
-        value=existing_morning_word,
+        MOOD_OPTIONS,
+        index=morning_index,
         key="thy_morning_word",
-        max_chars=40,
     )
     morning_tension = st.slider(
         "Tension",
@@ -302,11 +345,11 @@ with mood_cols[1]:
         'margin-bottom:8px;">Evening</div>',
         unsafe_allow_html=True,
     )
-    evening_word = st.text_input(
+    evening_word = st.selectbox(
         "One word",
-        value=existing_evening_word,
+        MOOD_OPTIONS,
+        index=evening_index,
         key="thy_evening_word",
-        max_chars=40,
     )
     evening_tension = st.slider(
         "Tension",
@@ -318,9 +361,9 @@ with mood_cols[1]:
 if st.button("Save mood & body", use_container_width=True, key="save_mood"):
     new_row = pd.DataFrame([{
         "date": today_str,
-        "morning_word": morning_word.strip(),
+        "morning_word": morning_word,
         "morning_tension": int(morning_tension),
-        "evening_word": evening_word.strip(),
+        "evening_word": evening_word,
         "evening_tension": int(evening_tension),
     }])
     others = mood_df[mood_df["date"].astype(str) != today_str]

@@ -66,7 +66,7 @@ BMISSION_MILESTONES_SHEET = "bmission_milestones"
 BMISSION_MILESTONES_COLUMNS = ["milestone", "done"]
 
 THYSELF_CHECKIN_SHEET = "thyself_checkin"
-THYSELF_CHECKIN_COLUMNS = ["date", "body_feeling", "fear_driven", "needs", "tension_score"]
+THYSELF_CHECKIN_COLUMNS = ["date", "body_feeling", "fear_driven", "tension_score", "self_awareness_score"]
 
 THYSELF_PATTERNS_SHEET = "thyself_patterns"
 THYSELF_PATTERNS_COLUMNS = ["date", "pattern_type", "pattern_notes", "trigger"]
@@ -370,7 +370,7 @@ def save_bmission_milestones_df(df: pd.DataFrame) -> None:
 @st.cache_data(ttl=60, show_spinner=False)
 def load_thyself_checkin() -> pd.DataFrame:
     df = load_sheet(THYSELF_CHECKIN_SHEET, THYSELF_CHECKIN_COLUMNS)
-    df = coerce_numeric(df, ["tension_score"])
+    df = coerce_numeric(df, ["tension_score", "self_awareness_score"])
     return df
 
 
