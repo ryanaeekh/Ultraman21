@@ -60,40 +60,6 @@ except (ValueError, TypeError):
 body_index = BODY_OPTIONS.index(existing_body) if existing_body in BODY_OPTIONS else 0
 fear_index = 0 if existing_fear == "Yes" else 1  # default No
 
-# Compute previous cumulative score (excluding today)
-def _previous_total(df: pd.DataFrame) -> int:
-    if df.empty or "self_awareness_score" not in df.columns:
-        return 0
-    others = df[df["date"].astype(str) != today_str].copy()
-    if others.empty:
-        return 0
-    others["_d"] = pd.to_datetime(others["date"], errors="coerce")
-    others = others.dropna(subset=["_d"]).sort_values("_d")
-    if others.empty:
-        return 0
-    try:
-        return int(float(others.iloc[-1]["self_awareness_score"]))
-    except (ValueError, TypeError):
-        return 0
-
-
-previous_total = _previous_total(checkin_df)
-try:
-    today_score_val = int(float(today_checkin.iloc[0]["self_awareness_score"])) if not today_checkin.empty else previous_total
-except (ValueError, TypeError):
-    today_score_val = previous_total
-
-st.markdown(
-    f'<div style="display:flex;align-items:baseline;gap:12px;margin-bottom:18px;">'
-    f'<span style="font-family:var(--font-display);font-size:11px;'
-    f'text-transform:uppercase;letter-spacing:0.12em;color:var(--text2);">'
-    f'Self-Awareness Score</span>'
-    f'<span style="font-family:var(--font-display);font-size:28px;font-weight:700;'
-    f'color:var(--accent-2);">{today_score_val}</span>'
-    f'</div>',
-    unsafe_allow_html=True,
-)
-
 body_feeling = st.selectbox(
     "How am I feeling right now, in my body?",
     BODY_OPTIONS,
@@ -115,14 +81,11 @@ tension_score = st.slider(
 )
 
 if st.button("Save check-in", use_container_width=True, key="save_checkin"):
-    delta = 1 if fear_driven == "Yes" else -1
-    new_score = previous_total + delta
     new_row = pd.DataFrame([{
         "date": today_str,
         "body_feeling": body_feeling,
         "fear_driven": fear_driven,
         "tension_score": int(tension_score),
-        "self_awareness_score": int(new_score),
     }])
     others = checkin_df[checkin_df["date"].astype(str) != today_str]
     updated = pd.concat([others, new_row], ignore_index=True)
