@@ -45,40 +45,6 @@ weekly_df = load_thyself_weekly()
 # =========================================================
 # SECTION 1 — DAILY CHECK-IN
 # =========================================================
-def calc_streak(df: pd.DataFrame) -> int:
-    if df.empty or "date" not in df.columns:
-        return 0
-    parsed = pd.to_datetime(df["date"], errors="coerce").dropna().dt.date
-    if parsed.empty:
-        return 0
-    days = set(parsed)
-    if today in days:
-        cursor = today
-    elif (today - timedelta(days=1)) in days:
-        cursor = today - timedelta(days=1)
-    else:
-        return 0
-    streak = 0
-    while cursor in days:
-        streak += 1
-        cursor -= timedelta(days=1)
-    return streak
-
-
-streak = calc_streak(checkin_df)
-streak_html = (
-    f'<div style="display:inline-block;font-size:13px;font-weight:600;'
-    f'font-family:var(--font-display);padding:6px 16px;border-radius:20px;'
-    f'color:var(--accent);background:var(--accent-soft);'
-    f'border:1px solid var(--border);margin-bottom:16px;">'
-    f'{streak} consecutive {"day" if streak == 1 else "days"} logged</div>'
-) if streak > 0 else (
-    '<div style="display:inline-block;font-size:13px;color:var(--text3);'
-    'padding:6px 16px;border:1px solid var(--border);border-radius:20px;'
-    'margin-bottom:16px;">No active streak.</div>'
-)
-st.markdown(streak_html, unsafe_allow_html=True)
-
 st.markdown('<div class="section-title">Daily Check-in</div>', unsafe_allow_html=True)
 
 BODY_OPTIONS = ["Calm", "Anxious", "Heavy", "Light", "Tense", "Numb", "Tired", "Alive", "Okay", "Overwhelmed"]
