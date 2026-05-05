@@ -33,7 +33,7 @@ if not settings_df.empty and "long_term_goals" in settings_df.columns:
     saved_goals = clean_text(settings_df.loc[0, "long_term_goals"])
 
 # ── Hero ──────────────────────────────────────────────────
-st.markdown(page_header("Ryan", "Your daily operating system"), unsafe_allow_html=True)
+st.markdown(page_header("Ryan Aee", "Your daily operating system"), unsafe_allow_html=True)
 
 pretty_date = today.strftime("%-d %B %Y \u2022 %A") if os.name != "nt" else today.strftime("%#d %B %Y \u2022 %A")
 st.markdown(f'<div style="margin:-4px 0 28px;"><span class="date-pill">{pretty_date}</span></div>', unsafe_allow_html=True)
@@ -43,7 +43,7 @@ st.markdown('''
 <div style="text-align:center;margin:32px auto 28px;max-width:720px;padding:0 16px;">
   <h1 style="color:#000000 !important;font-family:var(--font-display);
              font-size:34px;font-weight:700;letter-spacing:-0.01em;
-             margin:0;line-height:1.25;">The only limits in life are the one you make</h1>
+             margin:0;line-height:1.25;">Before the world. Begin with yourself</h1>
 </div>
 ''', unsafe_allow_html=True)
 
