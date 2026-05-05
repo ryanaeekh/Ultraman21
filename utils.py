@@ -65,6 +65,21 @@ BMISSION_GOALS_COLUMNS = ["goal", "target_date", "status", "notes"]
 BMISSION_MILESTONES_SHEET = "bmission_milestones"
 BMISSION_MILESTONES_COLUMNS = ["milestone", "done"]
 
+THYSELF_CHECKIN_SHEET = "thyself_checkin"
+THYSELF_CHECKIN_COLUMNS = ["date", "body_feeling", "fear_driven", "needs", "tension_score"]
+
+THYSELF_PATTERNS_SHEET = "thyself_patterns"
+THYSELF_PATTERNS_COLUMNS = ["date", "pattern_type", "pattern_notes", "trigger"]
+
+THYSELF_GRATITUDE_SHEET = "thyself_gratitude"
+THYSELF_GRATITUDE_COLUMNS = ["date", "gratitude_note"]
+
+THYSELF_MOOD_SHEET = "thyself_mood"
+THYSELF_MOOD_COLUMNS = ["date", "morning_word", "morning_tension", "evening_word", "evening_tension"]
+
+THYSELF_WEEKLY_SHEET = "thyself_weekly"
+THYSELF_WEEKLY_COLUMNS = ["date", "fear_driven_week", "chose_self", "body_listened"]
+
 EXERCISE_COLUMNS = ["date", "status", "type", "duration", "km", "pace", "notes"]
 
 JOURNAL_COLUMNS = ["date", "time", "session", "entry", "mood", "tags"]
@@ -347,6 +362,78 @@ def save_bmission_milestones_df(df: pd.DataFrame) -> None:
             df[col] = ""
     save_sheet(BMISSION_MILESTONES_SHEET, df[BMISSION_MILESTONES_COLUMNS], BMISSION_MILESTONES_COLUMNS)
     load_bmission_milestones.clear()
+
+
+# =========================================================
+# THYSELF (self-awareness page) LOADERS / SAVERS
+# =========================================================
+@st.cache_data(ttl=60, show_spinner=False)
+def load_thyself_checkin() -> pd.DataFrame:
+    df = load_sheet(THYSELF_CHECKIN_SHEET, THYSELF_CHECKIN_COLUMNS)
+    df = coerce_numeric(df, ["tension_score"])
+    return df
+
+
+def save_thyself_checkin_df(df: pd.DataFrame) -> None:
+    for col in THYSELF_CHECKIN_COLUMNS:
+        if col not in df.columns:
+            df[col] = ""
+    save_sheet(THYSELF_CHECKIN_SHEET, df[THYSELF_CHECKIN_COLUMNS], THYSELF_CHECKIN_COLUMNS)
+    load_thyself_checkin.clear()
+
+
+@st.cache_data(ttl=60, show_spinner=False)
+def load_thyself_patterns() -> pd.DataFrame:
+    return load_sheet(THYSELF_PATTERNS_SHEET, THYSELF_PATTERNS_COLUMNS)
+
+
+def save_thyself_patterns_df(df: pd.DataFrame) -> None:
+    for col in THYSELF_PATTERNS_COLUMNS:
+        if col not in df.columns:
+            df[col] = ""
+    save_sheet(THYSELF_PATTERNS_SHEET, df[THYSELF_PATTERNS_COLUMNS], THYSELF_PATTERNS_COLUMNS)
+    load_thyself_patterns.clear()
+
+
+@st.cache_data(ttl=60, show_spinner=False)
+def load_thyself_gratitude() -> pd.DataFrame:
+    return load_sheet(THYSELF_GRATITUDE_SHEET, THYSELF_GRATITUDE_COLUMNS)
+
+
+def save_thyself_gratitude_df(df: pd.DataFrame) -> None:
+    for col in THYSELF_GRATITUDE_COLUMNS:
+        if col not in df.columns:
+            df[col] = ""
+    save_sheet(THYSELF_GRATITUDE_SHEET, df[THYSELF_GRATITUDE_COLUMNS], THYSELF_GRATITUDE_COLUMNS)
+    load_thyself_gratitude.clear()
+
+
+@st.cache_data(ttl=60, show_spinner=False)
+def load_thyself_mood() -> pd.DataFrame:
+    df = load_sheet(THYSELF_MOOD_SHEET, THYSELF_MOOD_COLUMNS)
+    df = coerce_numeric(df, ["morning_tension", "evening_tension"])
+    return df
+
+
+def save_thyself_mood_df(df: pd.DataFrame) -> None:
+    for col in THYSELF_MOOD_COLUMNS:
+        if col not in df.columns:
+            df[col] = ""
+    save_sheet(THYSELF_MOOD_SHEET, df[THYSELF_MOOD_COLUMNS], THYSELF_MOOD_COLUMNS)
+    load_thyself_mood.clear()
+
+
+@st.cache_data(ttl=60, show_spinner=False)
+def load_thyself_weekly() -> pd.DataFrame:
+    return load_sheet(THYSELF_WEEKLY_SHEET, THYSELF_WEEKLY_COLUMNS)
+
+
+def save_thyself_weekly_df(df: pd.DataFrame) -> None:
+    for col in THYSELF_WEEKLY_COLUMNS:
+        if col not in df.columns:
+            df[col] = ""
+    save_sheet(THYSELF_WEEKLY_SHEET, df[THYSELF_WEEKLY_COLUMNS], THYSELF_WEEKLY_COLUMNS)
+    load_thyself_weekly.clear()
 
 
 # =========================================================
