@@ -219,42 +219,17 @@ pattern_type = st.selectbox(
     PATTERN_OPTIONS,
     key="thy_pattern_type",
 )
-pattern_notes = st.text_area(
-    "Describe what happened — just observe, don't judge",
-    value="",
-    key="thy_pattern_notes",
-    height=140,
-)
-trigger = st.text_input(
-    "What happened just before the feeling shifted? (optional)",
-    value="",
-    key="thy_trigger",
-)
-
-st.markdown(
-    '<div style="margin:12px 0 18px;padding:12px 16px;'
-    'font-style:italic;color:var(--text2);font-size:14px;'
-    'border-left:3px solid var(--accent);background:var(--accent-soft);'
-    'border-radius:6px;">'
-    'What would you say to a friend who did the same thing?</div>',
-    unsafe_allow_html=True,
-)
 
 if st.button("Save pattern entry", use_container_width=True, key="save_pattern"):
-    if pattern_notes.strip():
-        new_row = pd.DataFrame([{
-            "date": today_str,
-            "pattern_type": pattern_type,
-            "pattern_notes": pattern_notes.strip(),
-            "trigger": trigger.strip(),
-        }])
-        updated = pd.concat([patterns_df, new_row], ignore_index=True)
-        with st.spinner("Saving..."):
-            save_thyself_patterns_df(updated)
-        st.success("Pattern logged.")
-        st.rerun()
-    else:
-        st.warning("Add a note before saving.")
+    new_row = pd.DataFrame([{
+        "date": today_str,
+        "pattern_type": pattern_type,
+    }])
+    updated = pd.concat([patterns_df, new_row], ignore_index=True)
+    with st.spinner("Saving..."):
+        save_thyself_patterns_df(updated)
+    st.success("Pattern logged.")
+    st.rerun()
 
 # Past Patterns
 with st.expander("Past Patterns", expanded=False):
@@ -269,9 +244,9 @@ with st.expander("Past Patterns", expanded=False):
         pat_view["_date_parsed"] = pd.to_datetime(pat_view["date"], errors="coerce")
         pat_view = pat_view.dropna(subset=["_date_parsed"]).sort_values("_date_parsed", ascending=False)
 
-        col_widths = [2, 2, 5, 2, 1]
+        col_widths = [3, 4, 2]
         header_cols = st.columns(col_widths)
-        for c, label in zip(header_cols, ["Date", "Pattern Type", "Description", "Trigger", ""]):
+        for c, label in zip(header_cols, ["Date", "Pattern Type", ""]):
             c.markdown(
                 f'<div style="font-family:var(--font-display);font-size:11px;'
                 f'text-transform:uppercase;letter-spacing:0.1em;color:var(--text2);'
@@ -282,8 +257,6 @@ with st.expander("Past Patterns", expanded=False):
         for idx, r in pat_view.iterrows():
             p_date = clean_text(r.get("date", ""))
             p_type = clean_text(r.get("pattern_type", ""))
-            p_notes = clean_text(r.get("pattern_notes", ""))
-            p_trigger = clean_text(r.get("trigger", ""))
 
             row_cols = st.columns(col_widths)
             row_cols[0].markdown(
@@ -294,17 +267,7 @@ with st.expander("Past Patterns", expanded=False):
                 f'<div style="font-size:13px;color:var(--accent);padding:10px 0;">{p_type}</div>',
                 unsafe_allow_html=True,
             )
-            row_cols[2].markdown(
-                f'<div style="font-size:13px;color:var(--text);padding:10px 0;'
-                f'white-space:pre-wrap;line-height:1.5;">{p_notes}</div>',
-                unsafe_allow_html=True,
-            )
-            row_cols[3].markdown(
-                f'<div style="font-size:13px;color:var(--text2);padding:10px 0;'
-                f'white-space:pre-wrap;line-height:1.5;">{p_trigger}</div>',
-                unsafe_allow_html=True,
-            )
-            with row_cols[4]:
+            with row_cols[2]:
                 if st.button("Delete", key=f"del_pat_{idx}", use_container_width=True):
                     save_thyself_patterns_df(patterns_df.drop(idx).reset_index(drop=True))
                     st.rerun()
