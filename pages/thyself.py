@@ -1,7 +1,7 @@
 import sys, os
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
-from datetime import date, timedelta
+from datetime import date
 
 import pandas as pd
 import streamlit as st
@@ -70,7 +70,7 @@ if st.button("Save check-in", use_container_width=True, key="save_checkin"):
     st.success("Check-in saved.")
     st.rerun()
 
-# Past Check-ins (last 7 days)
+# Past Check-ins (all entries)
 with st.expander("Past Check-ins", expanded=False):
     if checkin_df.empty:
         st.markdown(
@@ -81,14 +81,12 @@ with st.expander("Past Check-ins", expanded=False):
     else:
         ci_view = checkin_df.copy()
         ci_view["_date_parsed"] = pd.to_datetime(ci_view["date"], errors="coerce")
-        ci_view = ci_view.dropna(subset=["_date_parsed"])
-        cutoff = pd.Timestamp(today - timedelta(days=6))
-        ci_view = ci_view[ci_view["_date_parsed"] >= cutoff].sort_values("_date_parsed", ascending=False)
+        ci_view = ci_view.dropna(subset=["_date_parsed"]).sort_values("_date_parsed", ascending=False)
 
         if ci_view.empty:
             st.markdown(
                 '<div class="list-row" style="justify-content:center;opacity:0.7;">'
-                'No check-ins in the last 7 days.</div>',
+                'No check-ins yet.</div>',
                 unsafe_allow_html=True,
             )
         else:
