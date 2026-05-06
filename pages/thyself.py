@@ -33,6 +33,41 @@ st.markdown(
     unsafe_allow_html=True,
 )
 
+# ── Daily Reminder (rotating quote) ───────────────────────
+QUOTES = [
+    "Trauma is not what happens to you. It is what happens inside you as a result of what happens to you. — Gabor Maté",
+    "The attempt to escape from pain creates more pain. — Gabor Maté",
+    "Authenticity is not a luxury. It is a survival imperative. — Gabor Maté",
+    "Safety is not the absence of threat. It is the presence of connection. — Gabor Maté",
+    "When the body says no, the cost is often paid in disease. — Gabor Maté",
+    "Healing begins when we stop abandoning ourselves. — Gabor Maté",
+    "The greatest damage done by neglect, trauma or emotional loss is not the immediate pain they inflict but the long-term distortions they induce. — Gabor Maté",
+    "Recovery is the slow practice of choosing yourself, again and again. — Pete Walker",
+    "You are not a problem to be solved. You are a person to be witnessed. — Pete Walker",
+    "Self-compassion is the antidote to the inner critic. — Pete Walker",
+    "Grieving is the work that lets the past become the past. — Pete Walker",
+    "The fawn response is the survival strategy of pleasing others to stay safe. — Pete Walker",
+    "Healing is non-linear. Setbacks are part of the path. — Pete Walker",
+    "Re-parenting yourself is the quiet, daily work of becoming whole. — Pete Walker",
+    "Three things cannot be long hidden: the sun, the moon, and the truth. — Buddha",
+    "You yourself, as much as anybody in the entire universe, deserve your love and affection. — Buddha",
+    "What you think, you become. What you feel, you attract. What you imagine, you create. — Buddha",
+    "Pain is inevitable. Suffering is optional. — Buddha",
+    "Peace comes from within. Do not seek it without. — Buddha",
+    "The mind is everything. What you think, you become. — Buddha",
+]
+
+quote_today = QUOTES[today.toordinal() % len(QUOTES)]
+
+st.markdown(
+    f'<div style="margin:0 0 28px;padding:24px 20px;'
+    f'border-top:1px solid var(--border);border-bottom:1px solid var(--border);'
+    f'text-align:center;font-style:italic;font-size:16px;line-height:1.7;'
+    f'color:var(--text);font-family:var(--font-display);opacity:0.92;">'
+    f'{quote_today}</div>',
+    unsafe_allow_html=True,
+)
+
 # ── Load all data once ────────────────────────────────────
 checkin_df = load_thyself_checkin()
 patterns_df = load_thyself_patterns()
@@ -163,45 +198,7 @@ if st.button("Save", use_container_width=True, key="save_gratitude"):
 
 
 # =========================================================
-# SECTION 3 — DAILY REMINDER
-# =========================================================
-QUOTES = [
-    "Trauma is not what happens to you. It is what happens inside you as a result of what happens to you. — Gabor Maté",
-    "The attempt to escape from pain creates more pain. — Gabor Maté",
-    "Authenticity is not a luxury. It is a survival imperative. — Gabor Maté",
-    "Safety is not the absence of threat. It is the presence of connection. — Gabor Maté",
-    "When the body says no, the cost is often paid in disease. — Gabor Maté",
-    "Healing begins when we stop abandoning ourselves. — Gabor Maté",
-    "The greatest damage done by neglect, trauma or emotional loss is not the immediate pain they inflict but the long-term distortions they induce. — Gabor Maté",
-    "Recovery is the slow practice of choosing yourself, again and again. — Pete Walker",
-    "You are not a problem to be solved. You are a person to be witnessed. — Pete Walker",
-    "Self-compassion is the antidote to the inner critic. — Pete Walker",
-    "Grieving is the work that lets the past become the past. — Pete Walker",
-    "The fawn response is the survival strategy of pleasing others to stay safe. — Pete Walker",
-    "Healing is non-linear. Setbacks are part of the path. — Pete Walker",
-    "Re-parenting yourself is the quiet, daily work of becoming whole. — Pete Walker",
-    "Three things cannot be long hidden: the sun, the moon, and the truth. — Buddha",
-    "You yourself, as much as anybody in the entire universe, deserve your love and affection. — Buddha",
-    "What you think, you become. What you feel, you attract. What you imagine, you create. — Buddha",
-    "Pain is inevitable. Suffering is optional. — Buddha",
-    "Peace comes from within. Do not seek it without. — Buddha",
-    "The mind is everything. What you think, you become. — Buddha",
-]
-
-quote_today = QUOTES[today.toordinal() % len(QUOTES)]
-
-st.markdown(
-    f'<div style="margin:32px 0 28px;padding:24px 20px;'
-    f'border-top:1px solid var(--border);border-bottom:1px solid var(--border);'
-    f'text-align:center;font-style:italic;font-size:16px;line-height:1.7;'
-    f'color:var(--text);font-family:var(--font-display);opacity:0.92;">'
-    f'{quote_today}</div>',
-    unsafe_allow_html=True,
-)
-
-
-# =========================================================
-# SECTION 4 — PATTERN TRACKER
+# SECTION 3 — PATTERN TRACKER
 # =========================================================
 st.markdown('<div class="section-title">Pattern Tracker</div>', unsafe_allow_html=True)
 
@@ -274,7 +271,7 @@ with st.expander("Past Patterns", expanded=False):
 
 
 # =========================================================
-# SECTION 5 — WEEKLY REFLECTION
+# SECTION 4 — WEEKLY REFLECTION
 # =========================================================
 st.markdown('<div class="section-title">Weekly Reflection</div>', unsafe_allow_html=True)
 st.caption("Best done on Sundays.")
