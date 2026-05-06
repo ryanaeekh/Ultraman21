@@ -312,58 +312,52 @@ if st.button("Save weekly reflection", use_container_width=True, key="save_weekl
         st.warning("Write something in at least one field before saving.")
 
 # Past Weekly Reflections
-st.markdown('<div class="section-title">Past Weekly Reflections</div>', unsafe_allow_html=True)
+with st.expander("Past Weekly Reflections", expanded=False):
+    if weekly_df.empty:
+        st.markdown(
+            '<div class="list-row" style="justify-content:center;opacity:0.7;">'
+            'No weekly reflections yet.</div>',
+            unsafe_allow_html=True,
+        )
+    else:
+        wk_view = weekly_df.copy()
+        wk_view["_date_parsed"] = pd.to_datetime(wk_view["date"], errors="coerce")
+        wk_view = wk_view.dropna(subset=["_date_parsed"]).sort_values("_date_parsed", ascending=False)
 
-if weekly_df.empty:
-    st.markdown(
-        '<div class="list-row" style="justify-content:center;opacity:0.7;">'
-        'No weekly reflections yet.</div>',
-        unsafe_allow_html=True,
-    )
-else:
-    wk_view = weekly_df.copy()
-    wk_view["_date_parsed"] = pd.to_datetime(wk_view["date"], errors="coerce")
-    wk_view = wk_view.dropna(subset=["_date_parsed"]).sort_values("_date_parsed", ascending=False)
-    wk_view["_date_key"] = wk_view["_date_parsed"].dt.date.astype(str)
-    wk_grouped = wk_view.groupby("_date_key", sort=False)
+        WK_PROMPTS = [
+            ("fear_driven_week", "Where did I put others first from fear this week?"),
+            ("chose_self", "Where did I choose myself this week?"),
+            ("body_listened", "What did my body tell me that I actually listened to?"),
+        ]
 
-    WK_PROMPTS = [
-        ("fear_driven_week", "Where did I put others first from fear this week?"),
-        ("chose_self", "Where did I choose myself this week?"),
-        ("body_listened", "What did my body tell me that I actually listened to?"),
-    ]
-
-    for day_str in wk_view["_date_key"].drop_duplicates().tolist():
-        day_rows = wk_grouped.get_group(day_str)
-        label = day_rows.iloc[0]["_date_parsed"].strftime("%A, %d %B %Y")
-        count = len(day_rows)
-        with st.expander(f"{label}  ({count} {'entry' if count == 1 else 'entries'})"):
-            for idx, r in day_rows.iterrows():
-                row_cols = st.columns([8, 2])
-                with row_cols[0]:
-                    blocks_html = ""
-                    for col, prompt in WK_PROMPTS:
-                        val = clean_text(r.get(col, ""))
-                        if not val:
-                            continue
-                        blocks_html += (
-                            f'<div style="margin-bottom:14px;">'
-                            f'<div style="font-family:var(--font-display);font-size:11px;'
-                            f'text-transform:uppercase;letter-spacing:0.1em;color:var(--accent);'
-                            f'margin-bottom:6px;">{prompt}</div>'
-                            f'<div style="white-space:pre-wrap;font-size:14px;line-height:1.7;'
-                            f'color:var(--text);">{val}</div>'
-                            f'</div>'
-                        )
-                    if not blocks_html:
-                        blocks_html = (
-                            '<div style="color:var(--text3);font-style:italic;">Empty entry.</div>'
-                        )
-                    st.markdown(blocks_html, unsafe_allow_html=True)
-                with row_cols[1]:
-                    if st.button("Delete", key=f"del_wk_{idx}", use_container_width=True):
-                        save_thyself_weekly_df(weekly_df.drop(idx).reset_index(drop=True))
-                        st.rerun()
+        for idx, r in wk_view.iterrows():
+            label = r["_date_parsed"].strftime("%A, %d %B %Y")
+            row_cols = st.columns([8, 2])
+            with row_cols[0]:
+                blocks_html = (
+                    f'<div style="font-family:var(--font-display);font-size:13px;'
+                    f'text-transform:uppercase;letter-spacing:0.1em;color:var(--text2);'
+                    f'margin:8px 0 12px;border-bottom:1px solid var(--border);'
+                    f'padding-bottom:6px;">{label}</div>'
+                )
+                for col, prompt in WK_PROMPTS:
+                    val = clean_text(r.get(col, ""))
+                    if not val:
+                        continue
+                    blocks_html += (
+                        f'<div style="margin-bottom:14px;">'
+                        f'<div style="font-family:var(--font-display);font-size:11px;'
+                        f'text-transform:uppercase;letter-spacing:0.1em;color:var(--accent);'
+                        f'margin-bottom:6px;">{prompt}</div>'
+                        f'<div style="white-space:pre-wrap;font-size:14px;line-height:1.7;'
+                        f'color:var(--text);">{val}</div>'
+                        f'</div>'
+                    )
+                st.markdown(blocks_html, unsafe_allow_html=True)
+            with row_cols[1]:
+                if st.button("Delete", key=f"del_wk_{idx}", use_container_width=True):
+                    save_thyself_weekly_df(weekly_df.drop(idx).reset_index(drop=True))
+                    st.rerun()
 
 
 # ── Footer note ───────────────────────────────────────────
