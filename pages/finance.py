@@ -19,6 +19,8 @@ from utils import (
     load_cpf, save_cpf_df,
     load_medisave, save_medisave_df,
     load_property, save_property_df,
+    load_finance_totals, get_finance_totals, set_finance_totals,
+    add_to_income_total, add_to_expense_total,
     load_settings, clean_text,
     filter_by_exact_date, filter_by_month, month_days,
 )
@@ -37,6 +39,7 @@ def load_all_finance_data():
         "cpf": load_cpf(),
         "medisave": load_medisave(),
         "property": load_property(),
+        "finance_totals": load_finance_totals(),
     }
 
 
@@ -95,6 +98,20 @@ liabilities_df = _data["liabilities"]
 cpf_df = _data["cpf"]
 medisave_df = _data["medisave"]
 property_df = _data["property"]
+finance_totals_df = _data["finance_totals"]
+
+# One-time bootstrap: if the running totals sheet is empty, seed it from the
+# existing finance_df sums so prior history is preserved when the new model
+# takes over.
+if finance_totals_df.empty:
+    bootstrap_income = float(finance_df[finance_df["category"] == "Income"]["amount"].sum()) if not finance_df.empty else 0.0
+    bootstrap_expense = float(finance_df[finance_df["category"] != "Income"]["amount"].sum()) if not finance_df.empty else 0.0
+    set_finance_totals(bootstrap_income, bootstrap_expense)
+    load_all_finance_data.clear()
+    finance_totals_df = load_finance_totals()
+
+income_total, expense_total = get_finance_totals()
+net_cash = income_total - expense_total
 
 gold_sgd_per_gram = fetch_gold_price_sgd_per_gram()
 gold_discount = 0.85
@@ -151,6 +168,7 @@ if st.button("Save Income", use_container_width=True, key="save_inc"):
     if inc_amount > 0:
         new_row = pd.DataFrame([{"date": str(inc_date), "category": "Income", "amount": float(inc_amount)}])
         save_finance_df(pd.concat([finance_df, new_row], ignore_index=True))
+        add_to_income_total(float(inc_amount))
         st.success(f"Income saved: {fmt(inc_amount)}")
         save_and_rerun()
     else:
@@ -169,6 +187,7 @@ if st.button("Save Expense", use_container_width=True, key="save_exp"):
     if exp_amount > 0:
         new_row = pd.DataFrame([{"date": str(exp_date), "category": exp_cat, "amount": float(exp_amount)}])
         save_finance_df(pd.concat([finance_df, new_row], ignore_index=True))
+        add_to_expense_total(float(exp_amount))
         st.success(f"Expense saved: {exp_cat} \u2014 {fmt(exp_amount)}")
         save_and_rerun()
     else:
@@ -197,6 +216,10 @@ with st.expander(f"{day_label} Transactions ({len(today_df)} entries)"):
                 )
             with row_cols[1]:
                 if st.button("Delete", key=f"del_tx_{idx}", use_container_width=True):
+                    if is_income:
+                        add_to_income_total(-amt)
+                    else:
+                        add_to_expense_total(-amt)
                     save_finance_df(finance_df.drop(idx).reset_index(drop=True))
                     save_and_rerun()
     else:
@@ -256,22 +279,24 @@ with st.expander(f"Monthly Recurring ({len(monthly_df)} items)"):
 # ============================================================
 st.markdown('<div class="section-title">\U0001f4b0 Net Worth</div>', unsafe_allow_html=True)
 
-alltime_income = float(finance_df[finance_df["category"] == "Income"]["amount"].sum()) if not finance_df.empty else 0.0
-alltime_expenses = float(finance_df[finance_df["category"] != "Income"]["amount"].sum()) if not finance_df.empty else 0.0
-
 nw_assets_items = float(assets_df["amount"].sum()) if not assets_df.empty else 0.0
-nw_total_assets = nw_assets_items + total_gold_value + alltime_income
+nw_total_assets = nw_assets_items + total_gold_value + net_cash
 
 nw_liab_items = float(liabilities_df["amount"].sum()) if not liabilities_df.empty else 0.0
-nw_total_liabilities = nw_liab_items + alltime_expenses
+nw_total_liabilities = nw_liab_items
 
 nw_net = nw_total_assets - nw_total_liabilities
 
 nw1 = st.columns(3)
 with nw1[0]:
-    st.markdown(metric_card("Total Assets", fmt(nw_total_assets), sub=f"Assets {fmt(nw_assets_items)} + Gold {fmt(total_gold_value)} + Income {fmt(alltime_income)}", color="var(--accent-2)"), unsafe_allow_html=True)
+    st.markdown(metric_card(
+        "Total Assets",
+        fmt(nw_total_assets),
+        sub=f"Assets {fmt(nw_assets_items)} + Gold {fmt(total_gold_value)} + Net Cash {fmt(net_cash)}",
+        color="var(--accent-2)",
+    ), unsafe_allow_html=True)
 with nw1[1]:
-    st.markdown(metric_card("Total Liabilities", fmt(nw_total_liabilities), sub=f"Liabilities {fmt(nw_liab_items)} + Expenses {fmt(alltime_expenses)}", color="var(--neg)"), unsafe_allow_html=True)
+    st.markdown(metric_card("Total Liabilities", fmt(nw_total_liabilities), color="var(--neg)"), unsafe_allow_html=True)
 with nw1[2]:
     nw_color = "var(--accent-2)" if nw_net >= 0 else "var(--neg)"
     st.markdown(metric_card("Net Worth", fmt(nw_net), color=nw_color), unsafe_allow_html=True)

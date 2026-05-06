@@ -59,6 +59,9 @@ CPF_SHEET = "cpf"
 MEDISAVE_SHEET = "medisave"
 PROPERTY_SHEET = "property"
 
+FINANCE_TOTALS_SHEET = "finance_totals"
+FINANCE_TOTALS_COLUMNS = ["income_total", "expense_total"]
+
 BMISSION_GOALS_SHEET = "bmission_goals"
 BMISSION_GOALS_COLUMNS = ["goal", "target_date", "status", "notes"]
 
@@ -336,6 +339,44 @@ def save_property_df(df: pd.DataFrame) -> None:
             df[col] = ""
     save_sheet(PROPERTY_SHEET, df[PROPERTY_COLUMNS], PROPERTY_COLUMNS)
     load_property.clear()
+
+
+@st.cache_data(ttl=60, show_spinner=False)
+def load_finance_totals() -> pd.DataFrame:
+    """Running totals for income and expenses, kept separately from finance_df."""
+    df = load_sheet(FINANCE_TOTALS_SHEET, FINANCE_TOTALS_COLUMNS)
+    df = coerce_numeric(df, ["income_total", "expense_total"])
+    return df
+
+
+def get_finance_totals() -> tuple[float, float]:
+    """Return (income_total, expense_total). Initializes to (0.0, 0.0) on first read."""
+    df = load_finance_totals()
+    if df.empty:
+        return 0.0, 0.0
+    income_total = float(df.iloc[0]["income_total"]) if "income_total" in df.columns else 0.0
+    expense_total = float(df.iloc[0]["expense_total"]) if "expense_total" in df.columns else 0.0
+    return income_total, expense_total
+
+
+def set_finance_totals(income_total: float, expense_total: float) -> None:
+    """Overwrite the running totals row with explicit values."""
+    df = pd.DataFrame([{
+        "income_total": float(income_total),
+        "expense_total": float(expense_total),
+    }])
+    save_sheet(FINANCE_TOTALS_SHEET, df, FINANCE_TOTALS_COLUMNS)
+    load_finance_totals.clear()
+
+
+def add_to_income_total(amount: float) -> None:
+    income_total, expense_total = get_finance_totals()
+    set_finance_totals(income_total + float(amount), expense_total)
+
+
+def add_to_expense_total(amount: float) -> None:
+    income_total, expense_total = get_finance_totals()
+    set_finance_totals(income_total, expense_total + float(amount))
 
 
 @st.cache_data(ttl=60, show_spinner=False)
