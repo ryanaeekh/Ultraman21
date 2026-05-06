@@ -292,7 +292,7 @@ with nw1[0]:
     st.markdown(metric_card(
         "Total Assets",
         fmt(nw_total_assets),
-        sub=f"Assets {fmt(nw_assets_items)} + Gold {fmt(total_gold_value)} + Net Cash {fmt(net_cash)}",
+        sub=f"Assets {fmt(nw_assets_items)} + Gold {fmt(total_gold_value)}",
         color="var(--accent-2)",
     ), unsafe_allow_html=True)
 with nw1[1]:
