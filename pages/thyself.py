@@ -1,7 +1,7 @@
 import sys, os
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
-from datetime import date
+from datetime import date, timedelta
 
 import pandas as pd
 import streamlit as st
@@ -69,6 +69,33 @@ if st.button("Save check-in", use_container_width=True, key="save_checkin"):
         save_thyself_checkin_df(updated)
     st.success("Check-in saved.")
     st.rerun()
+
+# Past Check-ins (last 7 days)
+st.markdown('<div class="section-title">Past Check-ins</div>', unsafe_allow_html=True)
+
+if checkin_df.empty:
+    st.markdown(
+        '<div class="list-row" style="justify-content:center;opacity:0.7;">'
+        'No check-ins yet.</div>',
+        unsafe_allow_html=True,
+    )
+else:
+    ci_view = checkin_df.copy()
+    ci_view["_date_parsed"] = pd.to_datetime(ci_view["date"], errors="coerce")
+    ci_view = ci_view.dropna(subset=["_date_parsed"])
+    cutoff = pd.Timestamp(today - timedelta(days=6))
+    ci_view = ci_view[ci_view["_date_parsed"] >= cutoff].sort_values("_date_parsed", ascending=False)
+
+    if ci_view.empty:
+        st.markdown(
+            '<div class="list-row" style="justify-content:center;opacity:0.7;">'
+            'No check-ins in the last 7 days.</div>',
+            unsafe_allow_html=True,
+        )
+    else:
+        display = ci_view[["date", "body_feeling"]].copy()
+        display.columns = ["Date", "Body Feeling"]
+        st.dataframe(display, use_container_width=True, hide_index=True)
 
 
 # =========================================================
