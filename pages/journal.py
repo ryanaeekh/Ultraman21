@@ -125,88 +125,102 @@ if st.button("Save Entry", use_container_width=True, key="save_journal"):
         st.warning("Write something before saving.")
 
 # Past entries
-_pe_cols = st.columns([6, 4])
-with _pe_cols[0]:
-    st.markdown('<div class="section-title">\U0001f4da Past Entries</div>', unsafe_allow_html=True)
-with _pe_cols[1]:
-    show_all = st.checkbox("Show all", value=False, key="journal_show_all")
-    st.caption("Last 30 days by default" if not show_all else "Showing all entries")
+total_entries = int(len(journal_df))
 
-search = st.text_input("Search", value="", key="journal_search",
-                       placeholder="Search entries and tags...",
-                       label_visibility="collapsed")
-
-if journal_df.empty:
-    st.markdown('<div class="list-row" style="justify-content:center;opacity:0.7;">No entries yet.</div>', unsafe_allow_html=True)
-else:
-    all_entries = journal_df.copy()
-    all_entries["date_parsed"] = pd.to_datetime(all_entries["date"], errors="coerce")
-    all_entries = all_entries.dropna(subset=["date_parsed"]).sort_values("date_parsed", ascending=False)
-
-    if not show_all:
-        cutoff = pd.Timestamp(today - timedelta(days=30))
-        all_entries = all_entries[all_entries["date_parsed"] >= cutoff]
-
-    if search.strip():
-        needle = search.strip().lower()
-        entry_match = all_entries["entry"].fillna("").astype(str).str.lower().str.contains(needle, regex=False)
-        tags_match = all_entries.get("tags", pd.Series([""] * len(all_entries))).fillna("").astype(str).str.lower().str.contains(needle, regex=False)
-        all_entries = all_entries[entry_match | tags_match]
-
-    if all_entries.empty:
-        st.markdown('<div class="list-row" style="justify-content:center;opacity:0.7;">No matching entries.</div>', unsafe_allow_html=True)
+with st.expander(f"Past Entries ({total_entries} total {'entry' if total_entries == 1 else 'entries'})", expanded=False):
+    if journal_df.empty:
+        st.markdown('<div class="list-row" style="justify-content:center;opacity:0.7;">No entries yet.</div>', unsafe_allow_html=True)
     else:
-        all_entries["_date_key"] = all_entries["date_parsed"].dt.date.astype(str)
-        grouped = all_entries.groupby("_date_key")
-        for day_str in sorted(grouped.groups.keys(), reverse=True):
-            day_entries = grouped.get_group(day_str)
-            label = day_entries.iloc[0]["date_parsed"].strftime("%A, %d %B %Y")
-            count = len(day_entries)
-            with st.expander(f"{label}  ({count} {'entry' if count == 1 else 'entries'})"):
-                for idx, r in day_entries.iterrows():
-                    time_str = clean_text(r.get("time", ""))
-                    session_str = clean_text(r.get("session", ""))
-                    mood_str = clean_text(r.get("mood", ""))
-                    tags_str = clean_text(r.get("tags", ""))
-                    body = clean_text(r["entry"])
+        ctrl_cols = st.columns([6, 4])
+        with ctrl_cols[0]:
+            search = st.text_input(
+                "Search",
+                value="",
+                key="journal_search",
+                placeholder="Search entries and tags...",
+                label_visibility="collapsed",
+            )
+        with ctrl_cols[1]:
+            show_all = st.checkbox("Show all", value=False, key="journal_show_all")
+            st.caption("Last 30 days by default" if not show_all else "Showing all entries")
 
-                    meta_parts = []
-                    if time_str:
-                        meta_parts.append(
-                            f'<span style="color:var(--accent);font-weight:600;">{time_str}</span>'
-                        )
-                    if session_str:
-                        meta_parts.append(
-                            f'<span style="color:var(--text2);font-size:13px;'
-                            f'text-transform:uppercase;letter-spacing:0.08em;">{session_str}</span>'
-                        )
-                    if mood_str:
-                        meta_parts.append(
-                            f'<span style="font-size:18px;">{mood_str}</span>'
-                        )
-                    meta_html = " · ".join(meta_parts)
+        all_entries = journal_df.copy()
+        all_entries["date_parsed"] = pd.to_datetime(all_entries["date"], errors="coerce")
+        all_entries = all_entries.dropna(subset=["date_parsed"]).sort_values("date_parsed", ascending=False)
 
-                    badges_html = ""
-                    if tags_str:
-                        badges_html = " ".join(
-                            f'<span style="display:inline-block;padding:2px 10px;'
-                            f'margin:0 4px 4px 0;font-size:11px;border-radius:999px;'
-                            f'background:var(--accent-soft);color:var(--accent-2);'
-                            f'border:1px solid var(--border);">{t.strip()}</span>'
-                            for t in tags_str.split(",") if t.strip()
-                        )
-                        badges_html = f'<div style="margin:6px 0;">{badges_html}</div>'
+        if not show_all:
+            cutoff = pd.Timestamp(today - timedelta(days=30))
+            all_entries = all_entries[all_entries["date_parsed"] >= cutoff]
 
-                    row_cols = st.columns([8, 2])
-                    with row_cols[0]:
-                        st.markdown(
-                            (f'<div style="margin-bottom:6px;">{meta_html}</div>' if meta_html else "")
-                            + badges_html
-                            + f'<div style="white-space:pre-wrap;font-size:15px;line-height:1.85;'
-                            f'color:var(--text);opacity:0.92;margin-bottom:16px;">{body}</div>',
-                            unsafe_allow_html=True,
-                        )
-                    with row_cols[1]:
-                        if st.button("Delete", key=f"del_j_{idx}", use_container_width=True):
-                            save_journal_df(journal_df.drop(idx).reset_index(drop=True))
-                            st.rerun()
+        if search.strip():
+            needle = search.strip().lower()
+            entry_match = all_entries["entry"].fillna("").astype(str).str.lower().str.contains(needle, regex=False)
+            tags_match = all_entries.get("tags", pd.Series([""] * len(all_entries))).fillna("").astype(str).str.lower().str.contains(needle, regex=False)
+            all_entries = all_entries[entry_match | tags_match]
+
+        if all_entries.empty:
+            st.markdown('<div class="list-row" style="justify-content:center;opacity:0.7;">No matching entries.</div>', unsafe_allow_html=True)
+        else:
+            with st.container(height=520):
+                all_entries["_date_key"] = all_entries["date_parsed"].dt.date.astype(str)
+                grouped = all_entries.groupby("_date_key")
+                for day_str in sorted(grouped.groups.keys(), reverse=True):
+                    day_entries = grouped.get_group(day_str)
+                    label = day_entries.iloc[0]["date_parsed"].strftime("%A, %d %B %Y")
+                    count = len(day_entries)
+                    st.markdown(
+                        f'<div style="font-family:var(--font-display);font-size:13px;'
+                        f'text-transform:uppercase;letter-spacing:0.1em;color:var(--text2);'
+                        f'margin:14px 0 8px;border-bottom:1px solid var(--border);'
+                        f'padding-bottom:6px;">{label} '
+                        f'<span style="color:var(--text3);font-size:11px;">'
+                        f'({count} {"entry" if count == 1 else "entries"})</span></div>',
+                        unsafe_allow_html=True,
+                    )
+                    for idx, r in day_entries.iterrows():
+                        time_str = clean_text(r.get("time", ""))
+                        session_str = clean_text(r.get("session", ""))
+                        mood_str = clean_text(r.get("mood", ""))
+                        tags_str = clean_text(r.get("tags", ""))
+                        body = clean_text(r["entry"])
+
+                        meta_parts = []
+                        if time_str:
+                            meta_parts.append(
+                                f'<span style="color:var(--accent);font-weight:600;">{time_str}</span>'
+                            )
+                        if session_str:
+                            meta_parts.append(
+                                f'<span style="color:var(--text2);font-size:13px;'
+                                f'text-transform:uppercase;letter-spacing:0.08em;">{session_str}</span>'
+                            )
+                        if mood_str:
+                            meta_parts.append(
+                                f'<span style="font-size:18px;">{mood_str}</span>'
+                            )
+                        meta_html = " · ".join(meta_parts)
+
+                        badges_html = ""
+                        if tags_str:
+                            badges_html = " ".join(
+                                f'<span style="display:inline-block;padding:2px 10px;'
+                                f'margin:0 4px 4px 0;font-size:11px;border-radius:999px;'
+                                f'background:var(--accent-soft);color:var(--accent-2);'
+                                f'border:1px solid var(--border);">{t.strip()}</span>'
+                                for t in tags_str.split(",") if t.strip()
+                            )
+                            badges_html = f'<div style="margin:6px 0;">{badges_html}</div>'
+
+                        row_cols = st.columns([8, 2])
+                        with row_cols[0]:
+                            st.markdown(
+                                (f'<div style="margin-bottom:6px;">{meta_html}</div>' if meta_html else "")
+                                + badges_html
+                                + f'<div style="white-space:pre-wrap;font-size:15px;line-height:1.85;'
+                                f'color:var(--text);opacity:0.92;margin-bottom:16px;">{body}</div>',
+                                unsafe_allow_html=True,
+                            )
+                        with row_cols[1]:
+                            if st.button("Delete", key=f"del_j_{idx}", use_container_width=True):
+                                save_journal_df(journal_df.drop(idx).reset_index(drop=True))
+                                st.rerun()
