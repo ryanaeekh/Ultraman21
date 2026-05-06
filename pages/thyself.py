@@ -189,8 +189,7 @@ if st.button("Save", use_container_width=True, key="save_gratitude"):
         "date": today_str,
         "gratitude_note": gratitude_choice,
     }])
-    others = gratitude_df[gratitude_df["date"].astype(str) != today_str]
-    updated = pd.concat([others, new_row], ignore_index=True)
+    updated = pd.concat([gratitude_df, new_row], ignore_index=True)
     with st.spinner("Saving..."):
         save_thyself_gratitude_df(updated)
     st.success("Saved.")
