@@ -257,56 +257,57 @@ if st.button("Save pattern entry", use_container_width=True, key="save_pattern")
         st.warning("Add a note before saving.")
 
 # Past Patterns
-st.markdown('<div class="section-title">Past Patterns</div>', unsafe_allow_html=True)
+with st.expander("Past Patterns", expanded=False):
+    if patterns_df.empty:
+        st.markdown(
+            '<div class="list-row" style="justify-content:center;opacity:0.7;">'
+            'No pattern entries yet.</div>',
+            unsafe_allow_html=True,
+        )
+    else:
+        pat_view = patterns_df.copy()
+        pat_view["_date_parsed"] = pd.to_datetime(pat_view["date"], errors="coerce")
+        pat_view = pat_view.dropna(subset=["_date_parsed"]).sort_values("_date_parsed", ascending=False)
 
-if patterns_df.empty:
-    st.markdown(
-        '<div class="list-row" style="justify-content:center;opacity:0.7;">'
-        'No pattern entries yet.</div>',
-        unsafe_allow_html=True,
-    )
-else:
-    pat_view = patterns_df.copy()
-    pat_view["_date_parsed"] = pd.to_datetime(pat_view["date"], errors="coerce")
-    pat_view = pat_view.dropna(subset=["_date_parsed"]).sort_values("_date_parsed", ascending=False)
-    pat_view["_date_key"] = pat_view["_date_parsed"].dt.date.astype(str)
-    grouped = pat_view.groupby("_date_key", sort=False)
+        col_widths = [2, 2, 5, 2, 1]
+        header_cols = st.columns(col_widths)
+        for c, label in zip(header_cols, ["Date", "Pattern Type", "Description", "Trigger", ""]):
+            c.markdown(
+                f'<div style="font-family:var(--font-display);font-size:11px;'
+                f'text-transform:uppercase;letter-spacing:0.1em;color:var(--text2);'
+                f'padding:6px 0;border-bottom:1px solid var(--border);">{label}</div>',
+                unsafe_allow_html=True,
+            )
 
-    for day_str in pat_view["_date_key"].drop_duplicates().tolist():
-        day_rows = grouped.get_group(day_str)
-        label = day_rows.iloc[0]["_date_parsed"].strftime("%A, %d %B %Y")
-        count = len(day_rows)
-        with st.expander(f"{label}  ({count} {'entry' if count == 1 else 'entries'})"):
-            for idx, r in day_rows.iterrows():
-                p_type = clean_text(r.get("pattern_type", ""))
-                p_notes = clean_text(r.get("pattern_notes", ""))
-                p_trigger = clean_text(r.get("trigger", ""))
+        for idx, r in pat_view.iterrows():
+            p_date = clean_text(r.get("date", ""))
+            p_type = clean_text(r.get("pattern_type", ""))
+            p_notes = clean_text(r.get("pattern_notes", ""))
+            p_trigger = clean_text(r.get("trigger", ""))
 
-                row_cols = st.columns([8, 2])
-                with row_cols[0]:
-                    type_html = (
-                        f'<div style="font-family:var(--font-display);font-size:11px;'
-                        f'text-transform:uppercase;letter-spacing:0.1em;color:var(--accent);'
-                        f'margin-bottom:6px;">{p_type}</div>'
-                        if p_type else ""
-                    )
-                    notes_html = (
-                        f'<div style="white-space:pre-wrap;font-size:14px;line-height:1.7;'
-                        f'color:var(--text);margin-bottom:8px;">{p_notes}</div>'
-                        if p_notes else ""
-                    )
-                    trigger_html = (
-                        f'<div style="font-size:13px;color:var(--text2);margin-bottom:14px;">'
-                        f'<span style="font-family:var(--font-display);text-transform:uppercase;'
-                        f'letter-spacing:0.08em;font-size:11px;color:var(--text3);">Trigger</span> '
-                        f'{p_trigger}</div>'
-                        if p_trigger else ""
-                    )
-                    st.markdown(type_html + notes_html + trigger_html, unsafe_allow_html=True)
-                with row_cols[1]:
-                    if st.button("Delete", key=f"del_pat_{idx}", use_container_width=True):
-                        save_thyself_patterns_df(patterns_df.drop(idx).reset_index(drop=True))
-                        st.rerun()
+            row_cols = st.columns(col_widths)
+            row_cols[0].markdown(
+                f'<div style="font-size:13px;color:var(--text);padding:10px 0;">{p_date}</div>',
+                unsafe_allow_html=True,
+            )
+            row_cols[1].markdown(
+                f'<div style="font-size:13px;color:var(--accent);padding:10px 0;">{p_type}</div>',
+                unsafe_allow_html=True,
+            )
+            row_cols[2].markdown(
+                f'<div style="font-size:13px;color:var(--text);padding:10px 0;'
+                f'white-space:pre-wrap;line-height:1.5;">{p_notes}</div>',
+                unsafe_allow_html=True,
+            )
+            row_cols[3].markdown(
+                f'<div style="font-size:13px;color:var(--text2);padding:10px 0;'
+                f'white-space:pre-wrap;line-height:1.5;">{p_trigger}</div>',
+                unsafe_allow_html=True,
+            )
+            with row_cols[4]:
+                if st.button("Delete", key=f"del_pat_{idx}", use_container_width=True):
+                    save_thyself_patterns_df(patterns_df.drop(idx).reset_index(drop=True))
+                    st.rerun()
 
 
 # =========================================================
