@@ -24,7 +24,7 @@ today = date.today()
 today_str = str(today)
 
 # ── Header ────────────────────────────────────────────────
-st.markdown(page_header("Know Thyself", "The examined life"), unsafe_allow_html=True)
+st.markdown(page_header("Self-Actualisation", "The examined life"), unsafe_allow_html=True)
 st.markdown(
     '<div style="margin:-12px 0 28px;font-size:12px;color:var(--text3);">'
     'Resource: <a href="https://thewisdomoftrauma.com/" target="_blank" '
