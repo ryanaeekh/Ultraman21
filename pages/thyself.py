@@ -80,7 +80,16 @@ weekly_df = load_thyself_weekly()
 # =========================================================
 st.markdown('<div class="section-title">Daily Check-in</div>', unsafe_allow_html=True)
 
-BODY_OPTIONS = ["\U0001f974", "\U0001f635", "\U0001f627", "\U0001f610", "\U0001f634", "\U0001f60f", "\U0001f60c", "\U0001f600"]
+BODY_OPTIONS = [
+    "\U0001f974 Down",
+    "\U0001f635 Overwhelmed",
+    "\U0001f627 Fear",
+    "\U0001f610 Nothing",
+    "\U0001f634 Tired",
+    "\U0001f60f Chill",
+    "\U0001f60c Peace",
+    "\U0001f600 Happy",
+]
 
 today_checkin = checkin_df[checkin_df["date"].astype(str) == today_str]
 existing_body = clean_text(today_checkin.iloc[0]["body_feeling"]) if not today_checkin.empty else ""
