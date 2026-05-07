@@ -1,7 +1,7 @@
 import sys, os
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
-from datetime import date, datetime, timedelta
+from datetime import date, datetime, timedelta, timezone
 
 import pandas as pd
 import streamlit as st
@@ -106,7 +106,7 @@ tags_input = st.text_input("Tags", value="", key="journal_tags",
 if st.button("Save Entry", use_container_width=True, key="save_journal"):
     trimmed = entry.strip()
     if trimmed:
-        now_time = datetime.now().strftime("%H:%M")
+        now_time = datetime.now(timezone(timedelta(hours=8))).strftime("%H:%M")
         clean_tags = ", ".join(t.strip() for t in tags_input.split(",") if t.strip())
         new_row = pd.DataFrame([{
             "date": today_str,
