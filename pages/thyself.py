@@ -134,33 +134,29 @@ with st.expander(f"Past Check-ins ({total_checkins} total {'entry' if total_chec
                 unsafe_allow_html=True,
             )
         else:
-            col_widths = [4, 4, 2]
-            header_cols = st.columns(col_widths)
-            for c, label in zip(header_cols, ["Date", "Body Feeling", ""]):
-                c.markdown(
-                    f'<div style="font-family:var(--font-display);font-size:11px;'
-                    f'text-transform:uppercase;letter-spacing:0.1em;color:var(--text2);'
-                    f'padding:6px 0;border-bottom:1px solid var(--border);">{label}</div>',
-                    unsafe_allow_html=True,
-                )
-
             with st.container(height=400):
                 for idx, r in ci_view.iterrows():
-                    c_date = r["_date_parsed"].strftime("%a, %d %b %Y")
+                    c_date = r["_date_parsed"].strftime("%A, %d %B %Y")
                     c_feel = clean_text(r.get("body_feeling", ""))
 
-                    row_cols = st.columns(col_widths)
-                    row_cols[0].markdown(
-                        f'<div style="font-size:13px;color:var(--text);padding:10px 0;'
-                        f'border-bottom:1px solid var(--border);">{c_date}</div>',
-                        unsafe_allow_html=True,
-                    )
-                    row_cols[1].markdown(
-                        f'<div style="font-size:13px;color:var(--text);padding:10px 0;'
-                        f'border-bottom:1px solid var(--border);">{c_feel}</div>',
-                        unsafe_allow_html=True,
-                    )
-                    with row_cols[2]:
+                    row_cols = st.columns([8, 2])
+                    with row_cols[0]:
+                        st.markdown(
+                            f'<div style="padding:14px 18px;margin-bottom:10px;'
+                            f'border:1px solid var(--border);border-radius:var(--radius-md);'
+                            f'background:var(--card-bg, rgba(255,255,255,0.02));'
+                            f'box-shadow:var(--shadow);">'
+                            f'<div style="font-family:var(--font-display);font-size:12px;'
+                            f'text-transform:uppercase;letter-spacing:0.1em;color:var(--accent);'
+                            f'margin-bottom:8px;">{c_date}</div>'
+                            f'<span style="display:inline-block;padding:4px 14px;'
+                            f'font-size:13px;border-radius:999px;'
+                            f'background:var(--accent-soft);color:var(--accent-2);'
+                            f'border:1px solid var(--border);">{c_feel}</span>'
+                            f'</div>',
+                            unsafe_allow_html=True,
+                        )
+                    with row_cols[1]:
                         if st.button("Delete", key=f"del_ci_{idx}", use_container_width=True):
                             save_thyself_checkin_df(checkin_df.drop(idx).reset_index(drop=True))
                             st.rerun()
