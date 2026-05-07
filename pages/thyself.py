@@ -1,7 +1,7 @@
 import sys, os
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
-from datetime import date
+from datetime import date, timedelta
 
 import pandas as pd
 import streamlit as st
@@ -105,8 +105,10 @@ if st.button("Save check-in", use_container_width=True, key="save_checkin"):
     st.success("Check-in saved.")
     st.rerun()
 
-# Past Check-ins (all entries)
-with st.expander("Past Check-ins", expanded=False):
+# Past Check-ins (last 30 days by default, "Show all" to expand)
+total_checkins = int(len(checkin_df))
+
+with st.expander(f"Past Check-ins ({total_checkins} total {'entry' if total_checkins == 1 else 'entries'})", expanded=False):
     if checkin_df.empty:
         st.markdown(
             '<div class="list-row" style="justify-content:center;opacity:0.7;">'
@@ -114,20 +116,57 @@ with st.expander("Past Check-ins", expanded=False):
             unsafe_allow_html=True,
         )
     else:
+        show_all_ci = st.checkbox("Show all", value=False, key="checkin_show_all")
+        st.caption("Last 30 days by default" if not show_all_ci else "Showing all entries")
+
         ci_view = checkin_df.copy()
         ci_view["_date_parsed"] = pd.to_datetime(ci_view["date"], errors="coerce")
         ci_view = ci_view.dropna(subset=["_date_parsed"]).sort_values("_date_parsed", ascending=False)
 
+        if not show_all_ci:
+            cutoff = pd.Timestamp(today - timedelta(days=30))
+            ci_view = ci_view[ci_view["_date_parsed"] >= cutoff]
+
         if ci_view.empty:
             st.markdown(
                 '<div class="list-row" style="justify-content:center;opacity:0.7;">'
-                'No check-ins yet.</div>',
+                'No check-ins in this range.</div>',
                 unsafe_allow_html=True,
             )
         else:
-            display = ci_view[["date", "body_feeling"]].copy()
-            display.columns = ["Date", "Body Feeling"]
-            st.dataframe(display, use_container_width=True, hide_index=True)
+            col_widths = [4, 4, 2]
+            header_cols = st.columns(col_widths)
+            for c, label in zip(header_cols, ["Date", "Body Feeling", ""]):
+                c.markdown(
+                    f'<div style="font-family:var(--font-display);font-size:11px;'
+                    f'text-transform:uppercase;letter-spacing:0.1em;color:var(--text2);'
+                    f'padding:6px 0;border-bottom:1px solid var(--border);">{label}</div>',
+                    unsafe_allow_html=True,
+                )
+
+            with st.container(height=400):
+                for idx, r in ci_view.iterrows():
+                    c_date = r["_date_parsed"].strftime("%a, %d %b %Y")
+                    c_feel = clean_text(r.get("body_feeling", ""))
+
+                    row_cols = st.columns(col_widths)
+                    row_cols[0].markdown(
+                        f'<div style="font-size:13px;color:var(--text);padding:10px 0;">{c_date}</div>',
+                        unsafe_allow_html=True,
+                    )
+                    row_cols[1].markdown(
+                        f'<div style="padding:6px 0;">'
+                        f'<span style="display:inline-block;padding:3px 12px;'
+                        f'font-size:13px;border-radius:999px;'
+                        f'background:var(--accent-soft);color:var(--accent-2);'
+                        f'border:1px solid var(--border);">{c_feel}</span>'
+                        f'</div>',
+                        unsafe_allow_html=True,
+                    )
+                    with row_cols[2]:
+                        if st.button("Delete", key=f"del_ci_{idx}", use_container_width=True):
+                            save_thyself_checkin_df(checkin_df.drop(idx).reset_index(drop=True))
+                            st.rerun()
 
 
 # =========================================================
@@ -243,8 +282,10 @@ for i, opt in enumerate(PATTERN_OPTIONS):
             unsafe_allow_html=True,
         )
 
-# Past Patterns
-with st.expander("Past Patterns", expanded=False):
+# Past Patterns (last 30 days by default, "Show all" to expand)
+total_patterns = int(len(patterns_df))
+
+with st.expander(f"Past Patterns ({total_patterns} total {'entry' if total_patterns == 1 else 'entries'})", expanded=False):
     if patterns_df.empty:
         st.markdown(
             '<div class="list-row" style="justify-content:center;opacity:0.7;">'
@@ -252,37 +293,57 @@ with st.expander("Past Patterns", expanded=False):
             unsafe_allow_html=True,
         )
     else:
+        show_all_pat = st.checkbox("Show all", value=False, key="patterns_show_all")
+        st.caption("Last 30 days by default" if not show_all_pat else "Showing all entries")
+
         pat_view = patterns_df.copy()
         pat_view["_date_parsed"] = pd.to_datetime(pat_view["date"], errors="coerce")
         pat_view = pat_view.dropna(subset=["_date_parsed"]).sort_values("_date_parsed", ascending=False)
 
-        col_widths = [3, 4, 2]
-        header_cols = st.columns(col_widths)
-        for c, label in zip(header_cols, ["Date", "Pattern Type", ""]):
-            c.markdown(
-                f'<div style="font-family:var(--font-display);font-size:11px;'
-                f'text-transform:uppercase;letter-spacing:0.1em;color:var(--text2);'
-                f'padding:6px 0;border-bottom:1px solid var(--border);">{label}</div>',
-                unsafe_allow_html=True,
-            )
+        if not show_all_pat:
+            cutoff = pd.Timestamp(today - timedelta(days=30))
+            pat_view = pat_view[pat_view["_date_parsed"] >= cutoff]
 
-        for idx, r in pat_view.iterrows():
-            p_date = clean_text(r.get("date", ""))
-            p_type = clean_text(r.get("pattern_type", ""))
+        if pat_view.empty:
+            st.markdown(
+                '<div class="list-row" style="justify-content:center;opacity:0.7;">'
+                'No pattern entries in this range.</div>',
+                unsafe_allow_html=True,
+            )
+        else:
+            col_widths = [4, 4, 2]
+            header_cols = st.columns(col_widths)
+            for c, label in zip(header_cols, ["Date", "Pattern Type", ""]):
+                c.markdown(
+                    f'<div style="font-family:var(--font-display);font-size:11px;'
+                    f'text-transform:uppercase;letter-spacing:0.1em;color:var(--text2);'
+                    f'padding:6px 0;border-bottom:1px solid var(--border);">{label}</div>',
+                    unsafe_allow_html=True,
+                )
 
-            row_cols = st.columns(col_widths)
-            row_cols[0].markdown(
-                f'<div style="font-size:13px;color:var(--text);padding:10px 0;">{p_date}</div>',
-                unsafe_allow_html=True,
-            )
-            row_cols[1].markdown(
-                f'<div style="font-size:13px;color:var(--accent);padding:10px 0;">{p_type}</div>',
-                unsafe_allow_html=True,
-            )
-            with row_cols[2]:
-                if st.button("Delete", key=f"del_pat_{idx}", use_container_width=True):
-                    save_thyself_patterns_df(patterns_df.drop(idx).reset_index(drop=True))
-                    st.rerun()
+            with st.container(height=400):
+                for idx, r in pat_view.iterrows():
+                    p_date = r["_date_parsed"].strftime("%a, %d %b %Y")
+                    p_type = clean_text(r.get("pattern_type", ""))
+
+                    row_cols = st.columns(col_widths)
+                    row_cols[0].markdown(
+                        f'<div style="font-size:13px;color:var(--text);padding:10px 0;">{p_date}</div>',
+                        unsafe_allow_html=True,
+                    )
+                    row_cols[1].markdown(
+                        f'<div style="padding:6px 0;">'
+                        f'<span style="display:inline-block;padding:3px 12px;'
+                        f'font-size:13px;border-radius:999px;'
+                        f'background:var(--accent-soft);color:var(--accent-2);'
+                        f'border:1px solid var(--border);">{p_type}</span>'
+                        f'</div>',
+                        unsafe_allow_html=True,
+                    )
+                    with row_cols[2]:
+                        if st.button("Delete", key=f"del_pat_{idx}", use_container_width=True):
+                            save_thyself_patterns_df(patterns_df.drop(idx).reset_index(drop=True))
+                            st.rerun()
 
 
 # =========================================================
