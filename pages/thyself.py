@@ -151,16 +151,13 @@ with st.expander(f"Past Check-ins ({total_checkins} total {'entry' if total_chec
 
                     row_cols = st.columns(col_widths)
                     row_cols[0].markdown(
-                        f'<div style="font-size:13px;color:var(--text);padding:10px 0;">{c_date}</div>',
+                        f'<div style="font-size:13px;color:var(--text);padding:10px 0;'
+                        f'border-bottom:1px solid var(--border);">{c_date}</div>',
                         unsafe_allow_html=True,
                     )
                     row_cols[1].markdown(
-                        f'<div style="padding:6px 0;">'
-                        f'<span style="display:inline-block;padding:3px 12px;'
-                        f'font-size:13px;border-radius:999px;'
-                        f'background:var(--accent-soft);color:var(--accent-2);'
-                        f'border:1px solid var(--border);">{c_feel}</span>'
-                        f'</div>',
+                        f'<div style="font-size:13px;color:var(--text);padding:10px 0;'
+                        f'border-bottom:1px solid var(--border);">{c_feel}</div>',
                         unsafe_allow_html=True,
                     )
                     with row_cols[2]:
@@ -328,16 +325,13 @@ with st.expander(f"Past Patterns ({total_patterns} total {'entry' if total_patte
 
                     row_cols = st.columns(col_widths)
                     row_cols[0].markdown(
-                        f'<div style="font-size:13px;color:var(--text);padding:10px 0;">{p_date}</div>',
+                        f'<div style="font-size:13px;color:var(--text);padding:10px 0;'
+                        f'border-bottom:1px solid var(--border);">{p_date}</div>',
                         unsafe_allow_html=True,
                     )
                     row_cols[1].markdown(
-                        f'<div style="padding:6px 0;">'
-                        f'<span style="display:inline-block;padding:3px 12px;'
-                        f'font-size:13px;border-radius:999px;'
-                        f'background:var(--accent-soft);color:var(--accent-2);'
-                        f'border:1px solid var(--border);">{p_type}</span>'
-                        f'</div>',
+                        f'<div style="font-size:13px;color:var(--text);padding:10px 0;'
+                        f'border-bottom:1px solid var(--border);">{p_type}</div>',
                         unsafe_allow_html=True,
                     )
                     with row_cols[2]:
