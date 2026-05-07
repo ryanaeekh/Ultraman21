@@ -870,7 +870,7 @@ _PAGES = {
     "Finance": "pages/finance.py",
     "Exercise": "pages/exercise.py",
     "Journal": "pages/journal.py",
-    "Thyself": "pages/thyself.py",
+    "InnerWork": "pages/thyself.py",
     "Insights": "pages/insights.py",
     "Weekly Review": "pages/weekly_review.py",
     "News": "pages/news.py",

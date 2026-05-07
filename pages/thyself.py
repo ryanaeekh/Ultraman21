@@ -6,7 +6,7 @@ from datetime import date, timedelta
 import pandas as pd
 import streamlit as st
 
-st.set_page_config(page_title="Thyself", page_icon="\U0001f9d8", layout="wide", initial_sidebar_state="collapsed")
+st.set_page_config(page_title="InnerWork", page_icon="\U0001f9d8", layout="wide", initial_sidebar_state="collapsed")
 
 from theme import inject_theme, nav_menu, page_header
 from utils import (
@@ -18,7 +18,7 @@ from utils import (
 )
 
 inject_theme()
-nav_menu("Thyself")
+nav_menu("InnerWork")
 
 today = date.today()
 today_str = str(today)
