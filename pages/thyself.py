@@ -201,14 +201,7 @@ if st.button("Save", use_container_width=True, key="save_gratitude"):
 # =========================================================
 st.markdown('<div class="section-title">Pattern Tracker</div>', unsafe_allow_html=True)
 
-PATTERN_OPTIONS = [
-    "People pleasing",
-    "Suppressing emotion",
-    "Overworking",
-    "Isolating",
-    "Seeking approval",
-    "Other",
-]
+PATTERN_OPTIONS = ["People pleasing", "Overthinking", "Suppressing emotion", "Seeking Approval", "Give in to addiction"]
 
 pattern_type = st.selectbox(
     "Pattern noticed",
@@ -226,6 +219,29 @@ if st.button("Save pattern entry", use_container_width=True, key="save_pattern")
         save_thyself_patterns_df(updated)
     st.success("Pattern logged.")
     st.rerun()
+
+# Scoreboard — total count per pattern type
+pattern_series = (
+    patterns_df["pattern_type"].astype(str).str.strip()
+    if not patterns_df.empty else pd.Series(dtype=str)
+)
+score_cols = st.columns(len(PATTERN_OPTIONS))
+for i, opt in enumerate(PATTERN_OPTIONS):
+    count = int((pattern_series == opt).sum())
+    with score_cols[i]:
+        st.markdown(
+            f'<div style="padding:14px 12px;border:1px solid var(--border);'
+            f'border-radius:var(--radius-md);background:var(--accent-soft);'
+            f'text-align:center;margin-top:14px;min-height:96px;'
+            f'display:flex;flex-direction:column;justify-content:center;">'
+            f'<div style="font-family:var(--font-display);font-size:11px;'
+            f'text-transform:uppercase;letter-spacing:0.1em;color:var(--text2);'
+            f'margin-bottom:6px;line-height:1.3;">{opt}</div>'
+            f'<div style="font-family:var(--font-display);font-size:22px;'
+            f'font-weight:700;color:var(--accent-2);">{count}</div>'
+            f'</div>',
+            unsafe_allow_html=True,
+        )
 
 # Past Patterns
 with st.expander("Past Patterns", expanded=False):
