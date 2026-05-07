@@ -105,10 +105,8 @@ if st.button("Save check-in", use_container_width=True, key="save_checkin"):
     st.success("Check-in saved.")
     st.rerun()
 
-# Past Check-ins (last 30 entries, grouped by date)
-total_checkins = int(len(checkin_df))
-
-with st.expander(f"Past Check-ins ({total_checkins} total {'entry' if total_checkins == 1 else 'entries'})", expanded=False):
+# Past Check-ins (all entries)
+with st.expander("Past Check-ins", expanded=False):
     if checkin_df.empty:
         st.markdown(
             '<div class="list-row" style="justify-content:center;opacity:0.7;">'
@@ -119,7 +117,6 @@ with st.expander(f"Past Check-ins ({total_checkins} total {'entry' if total_chec
         ci_view = checkin_df.copy()
         ci_view["_date_parsed"] = pd.to_datetime(ci_view["date"], errors="coerce")
         ci_view = ci_view.dropna(subset=["_date_parsed"]).sort_values("_date_parsed", ascending=False)
-        ci_view = ci_view.head(30)
 
         if ci_view.empty:
             st.markdown(
@@ -128,40 +125,9 @@ with st.expander(f"Past Check-ins ({total_checkins} total {'entry' if total_chec
                 unsafe_allow_html=True,
             )
         else:
-            with st.container(height=520):
-                ci_view["_date_key"] = ci_view["_date_parsed"].dt.date.astype(str)
-                grouped = ci_view.groupby("_date_key")
-                for day_str in sorted(grouped.groups.keys(), reverse=True):
-                    day_entries = grouped.get_group(day_str)
-                    label = day_entries.iloc[0]["_date_parsed"].strftime("%A, %d %B %Y")
-                    count = len(day_entries)
-                    st.markdown(
-                        f'<div style="font-family:var(--font-display);font-size:13px;'
-                        f'text-transform:uppercase;letter-spacing:0.1em;color:var(--text2);'
-                        f'margin:14px 0 8px;border-bottom:1px solid var(--border);'
-                        f'padding-bottom:6px;">{label} '
-                        f'<span style="color:var(--text3);font-size:11px;">'
-                        f'({count} {"entry" if count == 1 else "entries"})</span></div>',
-                        unsafe_allow_html=True,
-                    )
-                    for idx, r in day_entries.iterrows():
-                        body_str = clean_text(r.get("body_feeling", ""))
-
-                        row_cols = st.columns([8, 2])
-                        with row_cols[0]:
-                            st.markdown(
-                                f'<div style="margin-bottom:16px;">'
-                                f'<span style="display:inline-block;padding:4px 14px;'
-                                f'font-size:13px;border-radius:999px;'
-                                f'background:var(--accent-soft);color:var(--accent-2);'
-                                f'border:1px solid var(--border);">{body_str}</span>'
-                                f'</div>',
-                                unsafe_allow_html=True,
-                            )
-                        with row_cols[1]:
-                            if st.button("Delete", key=f"del_ci_{idx}", use_container_width=True):
-                                save_thyself_checkin_df(checkin_df.drop(idx).reset_index(drop=True))
-                                st.rerun()
+            display = ci_view[["date", "body_feeling"]].copy()
+            display.columns = ["Date", "Body Feeling"]
+            st.dataframe(display, use_container_width=True, hide_index=True)
 
 
 # =========================================================
@@ -277,10 +243,8 @@ for i, opt in enumerate(PATTERN_OPTIONS):
             unsafe_allow_html=True,
         )
 
-# Past Patterns (all entries, grouped by date)
-total_patterns = int(len(patterns_df))
-
-with st.expander(f"Past Patterns ({total_patterns} total {'entry' if total_patterns == 1 else 'entries'})", expanded=False):
+# Past Patterns
+with st.expander("Past Patterns", expanded=False):
     if patterns_df.empty:
         st.markdown(
             '<div class="list-row" style="justify-content:center;opacity:0.7;">'
@@ -292,47 +256,33 @@ with st.expander(f"Past Patterns ({total_patterns} total {'entry' if total_patte
         pat_view["_date_parsed"] = pd.to_datetime(pat_view["date"], errors="coerce")
         pat_view = pat_view.dropna(subset=["_date_parsed"]).sort_values("_date_parsed", ascending=False)
 
-        if pat_view.empty:
-            st.markdown(
-                '<div class="list-row" style="justify-content:center;opacity:0.7;">'
-                'No pattern entries yet.</div>',
+        col_widths = [3, 4, 2]
+        header_cols = st.columns(col_widths)
+        for c, label in zip(header_cols, ["Date", "Pattern Type", ""]):
+            c.markdown(
+                f'<div style="font-family:var(--font-display);font-size:11px;'
+                f'text-transform:uppercase;letter-spacing:0.1em;color:var(--text2);'
+                f'padding:6px 0;border-bottom:1px solid var(--border);">{label}</div>',
                 unsafe_allow_html=True,
             )
-        else:
-            with st.container(height=520):
-                pat_view["_date_key"] = pat_view["_date_parsed"].dt.date.astype(str)
-                grouped = pat_view.groupby("_date_key")
-                for day_str in sorted(grouped.groups.keys(), reverse=True):
-                    day_entries = grouped.get_group(day_str)
-                    label = day_entries.iloc[0]["_date_parsed"].strftime("%A, %d %B %Y")
-                    count = len(day_entries)
-                    st.markdown(
-                        f'<div style="font-family:var(--font-display);font-size:13px;'
-                        f'text-transform:uppercase;letter-spacing:0.1em;color:var(--text2);'
-                        f'margin:14px 0 8px;border-bottom:1px solid var(--border);'
-                        f'padding-bottom:6px;">{label} '
-                        f'<span style="color:var(--text3);font-size:11px;">'
-                        f'({count} {"entry" if count == 1 else "entries"})</span></div>',
-                        unsafe_allow_html=True,
-                    )
-                    for idx, r in day_entries.iterrows():
-                        p_type = clean_text(r.get("pattern_type", ""))
 
-                        row_cols = st.columns([8, 2])
-                        with row_cols[0]:
-                            st.markdown(
-                                f'<div style="margin-bottom:16px;">'
-                                f'<span style="display:inline-block;padding:4px 14px;'
-                                f'font-size:13px;border-radius:999px;'
-                                f'background:var(--accent-soft);color:var(--accent-2);'
-                                f'border:1px solid var(--border);">{p_type}</span>'
-                                f'</div>',
-                                unsafe_allow_html=True,
-                            )
-                        with row_cols[1]:
-                            if st.button("Delete", key=f"del_pat_{idx}", use_container_width=True):
-                                save_thyself_patterns_df(patterns_df.drop(idx).reset_index(drop=True))
-                                st.rerun()
+        for idx, r in pat_view.iterrows():
+            p_date = clean_text(r.get("date", ""))
+            p_type = clean_text(r.get("pattern_type", ""))
+
+            row_cols = st.columns(col_widths)
+            row_cols[0].markdown(
+                f'<div style="font-size:13px;color:var(--text);padding:10px 0;">{p_date}</div>',
+                unsafe_allow_html=True,
+            )
+            row_cols[1].markdown(
+                f'<div style="font-size:13px;color:var(--accent);padding:10px 0;">{p_type}</div>',
+                unsafe_allow_html=True,
+            )
+            with row_cols[2]:
+                if st.button("Delete", key=f"del_pat_{idx}", use_container_width=True):
+                    save_thyself_patterns_df(patterns_df.drop(idx).reset_index(drop=True))
+                    st.rerun()
 
 
 # =========================================================
