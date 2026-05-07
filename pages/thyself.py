@@ -134,32 +134,36 @@ with st.expander(f"Past Check-ins ({total_checkins} total {'entry' if total_chec
                 unsafe_allow_html=True,
             )
         else:
-            with st.container(height=400):
-                for idx, r in ci_view.iterrows():
-                    c_date = r["_date_parsed"].strftime("%A, %d %B %Y")
-                    c_feel = clean_text(r.get("body_feeling", ""))
+            display_ci = ci_view.copy()
+            display_ci["Date"] = display_ci["_date_parsed"].dt.strftime("%a, %d %b %Y")
+            display_ci["Body Feeling"] = display_ci["body_feeling"].astype(str).map(clean_text)
+            st.dataframe(
+                display_ci[["Date", "Body Feeling"]],
+                use_container_width=True,
+                hide_index=True,
+                height=400,
+            )
 
-                    row_cols = st.columns([8, 2])
-                    with row_cols[0]:
-                        st.markdown(
-                            f'<div style="padding:14px 18px;margin-bottom:10px;'
-                            f'border:1px solid var(--border);border-radius:var(--radius-md);'
-                            f'background:var(--card-bg, rgba(255,255,255,0.02));'
-                            f'box-shadow:var(--shadow);">'
-                            f'<div style="font-family:var(--font-display);font-size:12px;'
-                            f'text-transform:uppercase;letter-spacing:0.1em;color:var(--accent);'
-                            f'margin-bottom:8px;">{c_date}</div>'
-                            f'<span style="display:inline-block;padding:4px 14px;'
-                            f'font-size:13px;border-radius:999px;'
-                            f'background:var(--accent-soft);color:var(--accent-2);'
-                            f'border:1px solid var(--border);">{c_feel}</span>'
-                            f'</div>',
-                            unsafe_allow_html=True,
-                        )
-                    with row_cols[1]:
-                        if st.button("Delete", key=f"del_ci_{idx}", use_container_width=True):
-                            save_thyself_checkin_df(checkin_df.drop(idx).reset_index(drop=True))
-                            st.rerun()
+            del_options = [
+                (f'{r["_date_parsed"].strftime("%a, %d %b %Y")} — {clean_text(r.get("body_feeling", ""))}', idx)
+                for idx, r in ci_view.iterrows()
+            ]
+            del_labels = [opt[0] for opt in del_options]
+            del_map = dict(del_options)
+
+            del_cols = st.columns([8, 2])
+            with del_cols[0]:
+                selected_label = st.selectbox(
+                    "Select entry to delete",
+                    del_labels,
+                    key="checkin_delete_select",
+                    label_visibility="collapsed",
+                )
+            with del_cols[1]:
+                if st.button("Delete", key="checkin_delete_btn", use_container_width=True):
+                    target_idx = del_map[selected_label]
+                    save_thyself_checkin_df(checkin_df.drop(target_idx).reset_index(drop=True))
+                    st.rerun()
 
 
 # =========================================================
