@@ -80,16 +80,17 @@ weekly_df = load_thyself_weekly()
 # =========================================================
 st.markdown('<div class="section-title">Daily Check-in</div>', unsafe_allow_html=True)
 
-BODY_OPTIONS = ["Calm", "Anxious", "Heavy", "Light", "Tense", "Numb", "Tired", "Alive", "Okay", "Overwhelmed"]
+BODY_OPTIONS = ["\U0001f974", "\U0001f635", "\U0001f627", "\U0001f610", "\U0001f634", "\U0001f60f", "\U0001f60c", "\U0001f600"]
 
 today_checkin = checkin_df[checkin_df["date"].astype(str) == today_str]
 existing_body = clean_text(today_checkin.iloc[0]["body_feeling"]) if not today_checkin.empty else ""
 body_index = BODY_OPTIONS.index(existing_body) if existing_body in BODY_OPTIONS else 0
 
-body_feeling = st.selectbox(
+body_feeling = st.radio(
     "How am I feeling right now, in my body?",
     BODY_OPTIONS,
     index=body_index,
+    horizontal=True,
     key="thy_body",
 )
 
