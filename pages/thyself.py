@@ -346,32 +346,18 @@ with st.expander(f"Past Patterns ({total_patterns} total {'entry' if total_patte
 st.markdown('<div class="section-title">Weekly Reflection</div>', unsafe_allow_html=True)
 st.caption("Best done on Sundays.")
 
-fear_driven_week = st.text_area(
-    "Where did I put others first from fear this week?",
+followed_self = st.text_area(
+    "Have I followed what I truly want this week?",
     value="",
-    key="thy_week_fear",
-    height=120,
-)
-chose_self = st.text_area(
-    "Where did I choose myself this week?",
-    value="",
-    key="thy_week_self",
-    height=120,
-)
-body_listened = st.text_area(
-    "What did my body tell me that I actually listened to?",
-    value="",
-    key="thy_week_body",
+    key="thy_week_followed",
     height=120,
 )
 
 if st.button("Save weekly reflection", use_container_width=True, key="save_weekly"):
-    if any(t.strip() for t in (fear_driven_week, chose_self, body_listened)):
+    if followed_self.strip():
         new_row = pd.DataFrame([{
             "date": today_str,
-            "fear_driven_week": fear_driven_week.strip(),
-            "chose_self": chose_self.strip(),
-            "body_listened": body_listened.strip(),
+            "followed_self": followed_self.strip(),
         }])
         updated = pd.concat([weekly_df, new_row], ignore_index=True)
         with st.spinner("Saving..."):
@@ -379,7 +365,7 @@ if st.button("Save weekly reflection", use_container_width=True, key="save_weekl
         st.success("Reflection saved.")
         st.rerun()
     else:
-        st.warning("Write something in at least one field before saving.")
+        st.warning("Write something before saving.")
 
 # Past Weekly Reflections
 with st.expander("Past Weekly Reflections", expanded=False):
@@ -395,9 +381,7 @@ with st.expander("Past Weekly Reflections", expanded=False):
         wk_view = wk_view.dropna(subset=["_date_parsed"]).sort_values("_date_parsed", ascending=False)
 
         WK_PROMPTS = [
-            ("fear_driven_week", "Where did I put others first from fear this week?"),
-            ("chose_self", "Where did I choose myself this week?"),
-            ("body_listened", "What did my body tell me that I actually listened to?"),
+            ("followed_self", "Have I followed what I truly want this week?"),
         ]
 
         for idx, r in wk_view.iterrows():

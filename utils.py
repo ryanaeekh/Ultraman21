@@ -81,7 +81,7 @@ THYSELF_MOOD_SHEET = "thyself_mood"
 THYSELF_MOOD_COLUMNS = ["date", "morning_word", "morning_tension", "evening_word", "evening_tension"]
 
 THYSELF_WEEKLY_SHEET = "thyself_weekly"
-THYSELF_WEEKLY_COLUMNS = ["date", "fear_driven_week", "chose_self", "body_listened"]
+THYSELF_WEEKLY_COLUMNS = ["date", "followed_self"]
 
 EXERCISE_COLUMNS = ["date", "status", "type", "duration", "km", "pace", "notes"]
 
