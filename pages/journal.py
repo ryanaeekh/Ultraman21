@@ -84,7 +84,7 @@ st.markdown(
     unsafe_allow_html=True,
 )
 
-st.radio("MOOD", ["\U0001f614", "\U0001f610", "\U0001f642", "\U0001f60a", "\U0001f525"],
+st.radio("MOOD", ["\U0001f311", "\U0001f635", "\U0001f611", "\U0001f60f", "\U0001f60c", "\U0001f603", "\U0001f525"],
          horizontal=True, key="mood_select")
 
 st.radio("SESSION", ["Morning", "Noon", "Night"],
