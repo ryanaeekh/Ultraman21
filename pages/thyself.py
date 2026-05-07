@@ -308,36 +308,36 @@ with st.expander(f"Past Patterns ({total_patterns} total {'entry' if total_patte
                 unsafe_allow_html=True,
             )
         else:
-            col_widths = [4, 4, 2]
-            header_cols = st.columns(col_widths)
-            for c, label in zip(header_cols, ["Date", "Pattern Type", ""]):
-                c.markdown(
-                    f'<div style="font-family:var(--font-display);font-size:11px;'
-                    f'text-transform:uppercase;letter-spacing:0.1em;color:var(--text2);'
-                    f'padding:6px 0;border-bottom:1px solid var(--border);">{label}</div>',
-                    unsafe_allow_html=True,
+            display_pat = pat_view.copy()
+            display_pat["Date"] = display_pat["_date_parsed"].dt.strftime("%a, %d %b %Y")
+            display_pat["Pattern Type"] = display_pat["pattern_type"].astype(str).map(clean_text)
+            st.dataframe(
+                display_pat[["Date", "Pattern Type"]],
+                use_container_width=True,
+                hide_index=True,
+                height=400,
+            )
+
+            del_options = [
+                (f'{r["_date_parsed"].strftime("%a, %d %b %Y")} — {clean_text(r.get("pattern_type", ""))}', idx)
+                for idx, r in pat_view.iterrows()
+            ]
+            del_labels = [opt[0] for opt in del_options]
+            del_map = dict(del_options)
+
+            del_cols = st.columns([8, 2])
+            with del_cols[0]:
+                selected_label = st.selectbox(
+                    "Select entry to delete",
+                    del_labels,
+                    key="patterns_delete_select",
+                    label_visibility="collapsed",
                 )
-
-            with st.container(height=400):
-                for idx, r in pat_view.iterrows():
-                    p_date = r["_date_parsed"].strftime("%a, %d %b %Y")
-                    p_type = clean_text(r.get("pattern_type", ""))
-
-                    row_cols = st.columns(col_widths)
-                    row_cols[0].markdown(
-                        f'<div style="font-size:13px;color:var(--text);padding:10px 0;'
-                        f'border-bottom:1px solid var(--border);">{p_date}</div>',
-                        unsafe_allow_html=True,
-                    )
-                    row_cols[1].markdown(
-                        f'<div style="font-size:13px;color:var(--text);padding:10px 0;'
-                        f'border-bottom:1px solid var(--border);">{p_type}</div>',
-                        unsafe_allow_html=True,
-                    )
-                    with row_cols[2]:
-                        if st.button("Delete", key=f"del_pat_{idx}", use_container_width=True):
-                            save_thyself_patterns_df(patterns_df.drop(idx).reset_index(drop=True))
-                            st.rerun()
+            with del_cols[1]:
+                if st.button("Delete", key="patterns_delete_btn", use_container_width=True):
+                    target_idx = del_map[selected_label]
+                    save_thyself_patterns_df(patterns_df.drop(target_idx).reset_index(drop=True))
+                    st.rerun()
 
 
 # =========================================================
