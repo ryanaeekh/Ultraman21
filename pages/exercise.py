@@ -133,3 +133,123 @@ else:
         )
     rows_html += '</tbody></table>'
     st.markdown(rows_html, unsafe_allow_html=True)
+
+
+# ── 12 Week Training Plan ─────────────────────────────────
+st.markdown(
+    '<div class="section-title" style="margin-top:36px;">\U0001f5d3️ 12 Week Training Plan</div>',
+    unsafe_allow_html=True,
+)
+
+
+def _plan_table(rows, headers):
+    html = '<table class="day-table" style="margin-top:8px;"><thead><tr>'
+    for h in headers:
+        html += f'<th>{h}</th>'
+    html += '</tr></thead><tbody>'
+    for row in rows:
+        html += '<tr>' + ''.join(f'<td>{c}</td>' for c in row) + '</tr>'
+    html += '</tbody></table>'
+    return html
+
+
+# Expander 1 — Weekly Structure
+with st.expander("Weekly Structure", expanded=False):
+    week_rows = [
+        ("Monday", "\U0001f3c3 Run", "25–30 min"),
+        ("Tuesday", "\U0001f4aa Strength", "40–45 min"),
+        ("Wednesday", "\U0001f3c3 Run", "25–30 min"),
+        ("Thursday", "\U0001f4aa Strength", "40–45 min"),
+        ("Friday", "\U0001f3c3 Run", "25–30 min"),
+        ("Saturday", "\U0001f4aa Strength", "40–45 min"),
+        ("Sunday", "\U0001f634 Full Rest", "—"),
+    ]
+    st.markdown(_plan_table(week_rows, ["Day", "Focus", "Duration"]), unsafe_allow_html=True)
+
+
+# Expander 2 — Running Plan
+with st.expander("Running Plan", expanded=False):
+    phases = [
+        ("Phase 1", "Weeks 1–4", "3 km", "Comfortable pace, build habit"),
+        ("Phase 2", "Weeks 5–8", "4 km", "Slightly faster, build endurance"),
+        ("Phase 3", "Weeks 9–12", "5 km", "Steady and strong, maintain and push"),
+    ]
+    phase_cols = st.columns(3)
+    for col, (phase, weeks, dist, desc) in zip(phase_cols, phases):
+        with col:
+            st.markdown(
+                f'<div style="padding:18px 16px;border:1px solid var(--border);'
+                f'border-radius:var(--radius-md);background:var(--accent-soft);'
+                f'box-shadow:var(--shadow);min-height:180px;'
+                f'display:flex;flex-direction:column;justify-content:space-between;">'
+                f'<div>'
+                f'<div style="font-family:var(--font-display);font-size:11px;'
+                f'text-transform:uppercase;letter-spacing:0.12em;color:var(--accent);'
+                f'margin-bottom:6px;">{phase}</div>'
+                f'<div style="font-family:var(--font-display);font-size:13px;'
+                f'color:var(--text2);margin-bottom:10px;">{weeks}</div>'
+                f'<div style="font-family:var(--font-display);font-size:26px;'
+                f'font-weight:700;color:var(--accent-2);margin-bottom:8px;">{dist}</div>'
+                f'</div>'
+                f'<div style="font-size:13px;color:var(--text);line-height:1.5;'
+                f'opacity:0.88;">{desc}</div>'
+                f'</div>',
+                unsafe_allow_html=True,
+            )
+
+
+# Expander 3 — Strength Training
+with st.expander("Strength Training", expanded=False):
+    upper_tab, lower_tab, full_tab = st.tabs([
+        "Monday · Upper Body",
+        "Thursday · Lower Body",
+        "Saturday · Full Body Core",
+    ])
+
+    warmup_html = (
+        '<div style="padding:10px 14px;margin:4px 0 10px;'
+        'border-left:3px solid var(--accent);background:var(--accent-soft);'
+        'border-radius:var(--radius-md);font-size:13px;color:var(--text2);">'
+        'Warm-up: 5 minutes light cardio + dynamic stretches before starting.'
+        '</div>'
+    )
+
+    with upper_tab:
+        st.markdown(warmup_html, unsafe_allow_html=True)
+        upper_rows = [
+            ("Push ups", "3 × 12–15"),
+            ("Wide push ups", "3 × 12"),
+            ("Diamond push ups", "3 × 10"),
+            ("Pike push ups", "3 × 10"),
+            ("Tricep dips", "3 × 12"),
+            ("Plank", "3 × 45 sec"),
+            ("Side plank", "2 × 30 sec each side"),
+        ]
+        st.markdown(_plan_table(upper_rows, ["Exercise", "Sets × Reps"]), unsafe_allow_html=True)
+
+    with lower_tab:
+        st.markdown(warmup_html, unsafe_allow_html=True)
+        lower_rows = [
+            ("Squats", "3 × 15"),
+            ("Lunges", "3 × 12 each leg"),
+            ("Bulgarian split squats", "3 × 10 each leg"),
+            ("Glute bridges", "3 × 15"),
+            ("Calf raises", "3 × 20"),
+            ("Wall sit", "3 × 45 sec"),
+            ("Leg raises", "3 × 15"),
+        ]
+        st.markdown(_plan_table(lower_rows, ["Exercise", "Sets × Reps"]), unsafe_allow_html=True)
+
+    with full_tab:
+        st.markdown(warmup_html, unsafe_allow_html=True)
+        full_rows = [
+            ("Squats", "3 × 15"),
+            ("Push ups", "3 × 12"),
+            ("Lunges", "3 × 10 each leg"),
+            ("Plank", "3 × 60 sec"),
+            ("Mountain climbers", "3 × 20"),
+            ("Glute bridges", "3 × 15"),
+            ("Crunches", "3 × 20"),
+            ("Superman hold", "3 × 30 sec"),
+        ]
+        st.markdown(_plan_table(full_rows, ["Exercise", "Sets × Reps"]), unsafe_allow_html=True)
