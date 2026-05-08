@@ -9,7 +9,10 @@ import streamlit as st
 st.set_page_config(page_title="Exercise", page_icon="\U0001f3c3", layout="wide", initial_sidebar_state="collapsed")
 
 from theme import inject_theme, nav_menu, page_header, metric_card
-from utils import load_exercise, save_exercise_df, filter_by_exact_date
+from utils import (
+    load_exercise, save_exercise_df, filter_by_exact_date,
+    load_strength_log, save_strength_log_df,
+)
 
 inject_theme()
 nav_menu("Exercise")
@@ -84,6 +87,112 @@ st.markdown(
     f'<span class="glow-badge">Pace \u00b7 {pace_text}</span></div>',
     unsafe_allow_html=True,
 )
+
+# \u2500\u2500 Strength Training Log \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500
+st.markdown(
+    '<div class="section-title" style="margin-top:8px;">\U0001f4aa Strength Training Log</div>',
+    unsafe_allow_html=True,
+)
+
+strength_log_df = load_strength_log()
+today_str = str(date.today())
+
+STRENGTH_DAYS = [
+    ("Monday \u2014 Upper Body", "Monday", [
+        "Warm up 5 min",
+        "Push ups 3x12-15",
+        "Wide push ups 3x12",
+        "Diamond push ups 3x10",
+        "Pike push ups 3x10",
+        "Tricep dips 3x12",
+        "Plank 3x45sec",
+        "Side plank 2x30sec each",
+        "Cool down 5 min stretch",
+    ]),
+    ("Thursday \u2014 Lower Body", "Thursday", [
+        "Warm up 5 min",
+        "Squats 3x15",
+        "Lunges 3x12 each",
+        "Bulgarian split squats 3x10 each",
+        "Glute bridges 3x15",
+        "Calf raises 3x20",
+        "Wall sit 3x45sec",
+        "Leg raises 3x15",
+        "Cool down 5 min stretch",
+    ]),
+    ("Saturday \u2014 Full Body Core", "Saturday", [
+        "Warm up 5 min",
+        "Squats 3x15",
+        "Push ups 3x12",
+        "Lunges 3x10 each",
+        "Plank 3x60sec",
+        "Mountain climbers 3x20",
+        "Glute bridges 3x15",
+        "Crunches 3x20",
+        "Superman hold 3x30sec",
+        "Cool down 5 min stretch",
+    ]),
+]
+
+for _label, _day_key, _exercises in STRENGTH_DAYS:
+    with st.expander(_label, expanded=False):
+        _existing = strength_log_df[
+            (strength_log_df["date"].astype(str) == today_str)
+            & (strength_log_df["day"].astype(str) == _day_key)
+        ]
+        _done_set = set(
+            _existing[
+                _existing["completed"].astype(str).str.lower().isin(["yes", "true", "1"])
+            ]["exercise"].astype(str).tolist()
+        )
+
+        _checks = []
+        for _i, _ex in enumerate(_exercises):
+            _val = st.checkbox(
+                _ex,
+                value=(_ex in _done_set),
+                key=f"strength_{_day_key}_{_i}",
+            )
+            _checks.append((_ex, _val))
+
+        _done_count = sum(1 for _, c in _checks if c)
+        _total = len(_checks)
+        st.markdown(
+            f'<div style="margin:8px 0 12px;padding:10px 14px;'
+            f'border:1px solid var(--border);border-radius:var(--radius-md);'
+            f'background:var(--accent-soft);text-align:center;'
+            f'font-family:var(--font-display);font-size:13px;color:var(--text2);'
+            f'letter-spacing:0.06em;">'
+            f'<span style="color:var(--accent-2);font-weight:700;font-size:16px;">'
+            f'{_done_count}/{_total}</span> completed</div>',
+            unsafe_allow_html=True,
+        )
+
+        if st.button(
+            f"Save {_day_key} log",
+            use_container_width=True,
+            key=f"save_strength_{_day_key}",
+        ):
+            _others = strength_log_df[
+                ~(
+                    (strength_log_df["date"].astype(str) == today_str)
+                    & (strength_log_df["day"].astype(str) == _day_key)
+                )
+            ]
+            _new_rows = pd.DataFrame([
+                {
+                    "date": today_str,
+                    "day": _day_key,
+                    "exercise": _ex,
+                    "completed": "Yes" if _c else "No",
+                }
+                for _ex, _c in _checks
+            ])
+            _updated = pd.concat([_others, _new_rows], ignore_index=True)
+            with st.spinner("Saving..."):
+                save_strength_log_df(_updated)
+            st.success(f"{_day_key} log saved.")
+            st.rerun()
 
 notes = st.text_input("Notes", key="ex_notes", placeholder="How did it feel?")
 

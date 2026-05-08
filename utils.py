@@ -85,6 +85,9 @@ THYSELF_WEEKLY_COLUMNS = ["date", "followed_self"]
 
 EXERCISE_COLUMNS = ["date", "status", "type", "duration", "km", "pace", "notes"]
 
+STRENGTH_LOG_SHEET = "strength_log"
+STRENGTH_LOG_COLUMNS = ["date", "day", "exercise", "completed"]
+
 JOURNAL_COLUMNS = ["date", "time", "session", "entry", "mood", "tags"]
 
 SETTINGS_COLUMNS = [
@@ -475,6 +478,19 @@ def save_thyself_weekly_df(df: pd.DataFrame) -> None:
             df[col] = ""
     save_sheet(THYSELF_WEEKLY_SHEET, df[THYSELF_WEEKLY_COLUMNS], THYSELF_WEEKLY_COLUMNS)
     load_thyself_weekly.clear()
+
+
+@st.cache_data(ttl=60, show_spinner=False)
+def load_strength_log() -> pd.DataFrame:
+    return load_sheet(STRENGTH_LOG_SHEET, STRENGTH_LOG_COLUMNS)
+
+
+def save_strength_log_df(df: pd.DataFrame) -> None:
+    for col in STRENGTH_LOG_COLUMNS:
+        if col not in df.columns:
+            df[col] = ""
+    save_sheet(STRENGTH_LOG_SHEET, df[STRENGTH_LOG_COLUMNS], STRENGTH_LOG_COLUMNS)
+    load_strength_log.clear()
 
 
 # =========================================================
