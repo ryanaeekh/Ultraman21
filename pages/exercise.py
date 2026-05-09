@@ -135,7 +135,8 @@ STRENGTH_DAYS = [
 ]
 
 for _label, _day_key, _exercises in STRENGTH_DAYS:
-    with st.expander(_label, expanded=False):
+    with st.expander(_label, expanded=(_day_key == "Monday")):
+        st.write(f"DEBUG: {len(_exercises)} exercises to render")
         _existing = strength_log_df[
             (strength_log_df["date"].astype(str) == today_str)
             & (strength_log_df["day"].astype(str) == _day_key)
