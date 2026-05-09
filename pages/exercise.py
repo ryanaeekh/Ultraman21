@@ -116,17 +116,18 @@ with btn_cols[1]:
         else:
             st.warning("No session found for this date.")
 
-# \u2500\u2500 Strength Training Log \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500
+# ── Strength Training Log ─────────────────────────────────
 st.markdown(
     '<div class="section-title" style="margin-top:8px;">\U0001f4aa Strength Training Log</div>',
     unsafe_allow_html=True,
 )
 
 strength_log_df = load_strength_log()
-today_str = str(date.today())
+today = date.today()
+today_str = str(today)
 
 STRENGTH_DAYS = [
-    ("Monday \u2014 Upper Body", "Monday", [
+    ("Monday — Upper Body", "Monday", [
         "Warm up 5 min",
         "Push ups 3x12-15",
         "Wide push ups 3x12",
@@ -137,7 +138,7 @@ STRENGTH_DAYS = [
         "Side plank 2x30sec each",
         "Cool down 5 min stretch",
     ]),
-    ("Thursday \u2014 Lower Body", "Thursday", [
+    ("Thursday — Lower Body", "Thursday", [
         "Warm up 5 min",
         "Squats 3x15",
         "Lunges 3x12 each",
@@ -148,7 +149,7 @@ STRENGTH_DAYS = [
         "Leg raises 3x15",
         "Cool down 5 min stretch",
     ]),
-    ("Saturday \u2014 Full Body Core", "Saturday", [
+    ("Saturday — Full Body Core", "Saturday", [
         "Warm up 5 min",
         "Squats 3x15",
         "Push ups 3x12",
@@ -163,8 +164,7 @@ STRENGTH_DAYS = [
 ]
 
 for _label, _day_key, _exercises in STRENGTH_DAYS:
-    with st.expander(_label, expanded=(_day_key == "Monday")):
-        st.write(f"DEBUG: {len(_exercises)} exercises to render")
+    with st.expander(_label, expanded=False):
         _existing = strength_log_df[
             (strength_log_df["date"].astype(str) == today_str)
             & (strength_log_df["day"].astype(str) == _day_key)
@@ -223,27 +223,159 @@ for _label, _day_key, _exercises in STRENGTH_DAYS:
             st.success(f"{_day_key} log saved.")
             st.rerun()
 
-# ── Last 7 Sessions ───────────────────────────────────────
-st.markdown('<div class="section-title">\U0001f4dc Last 7 Sessions</div>', unsafe_allow_html=True)
-if exercise_df.empty:
-    st.markdown('<div class="list-row" style="justify-content:center;opacity:0.7;">No sessions yet.</div>', unsafe_allow_html=True)
-else:
-    recent = exercise_df.copy()
-    recent["date"] = pd.to_datetime(recent["date"], errors="coerce")
-    recent = recent.dropna(subset=["date"]).sort_values("date", ascending=False).head(7)
-    rows_html = '<table class="day-table"><thead><tr><th>Date</th><th>Type</th><th>Duration</th><th>Distance</th><th>Pace</th></tr></thead><tbody>'
-    for _, r in recent.iterrows():
-        d = r["date"].strftime("%d %b")
-        pace_val = r.get("pace", "")
-        pace_val = pace_val if (isinstance(pace_val, str) and pace_val.strip()) else "\u2014"
-        rows_html += (
-            f'<tr><td>{d}</td><td>{r.get("type","")}</td>'
-            f'<td>{float(r.get("duration",0)):.0f} min</td>'
-            f'<td>{float(r.get("km",0)):.2f} km</td>'
-            f'<td>{pace_val}</td></tr>'
-        )
-    rows_html += '</tbody></table>'
-    st.markdown(rows_html, unsafe_allow_html=True)
+# ── Past Sessions (InnerWork style) ─────────────────────
+total_sessions = int(len(exercise_df)) + int(len(strength_log_df["date"].unique())) if not strength_log_df.empty else int(len(exercise_df))
+
+with st.expander(f"Past Sessions ({total_sessions} total)", expanded=False):
+    if exercise_df.empty and strength_log_df.empty:
+        st.markdown('<div class="list-row" style="justify-content:center;opacity:0.7;">No sessions yet.</div>', unsafe_allow_html=True)
+    else:
+        ctrl_cols = st.columns([6, 4])
+        with ctrl_cols[0]:
+            search = st.text_input(
+                "Search",
+                value="",
+                key="exercise_search",
+                placeholder="Search type, day, notes...",
+                label_visibility="collapsed",
+            )
+        with ctrl_cols[1]:
+            show_all = st.checkbox("Show all", value=False, key="exercise_show_all")
+            st.caption("Last 30 days by default" if not show_all else "Showing all sessions")
+
+        # Build unified session list (cardio + strength)
+        unified = []
+
+        # Cardio rows
+        if not exercise_df.empty:
+            cardio = exercise_df.copy()
+            cardio["date_parsed"] = pd.to_datetime(cardio["date"], errors="coerce")
+            cardio = cardio.dropna(subset=["date_parsed"])
+            for idx, r in cardio.iterrows():
+                unified.append({
+                    "date_parsed": r["date_parsed"],
+                    "date_str": r["date_parsed"].strftime("%Y-%m-%d"),
+                    "kind": "cardio",
+                    "type": str(r.get("type", "")),
+                    "duration": float(r.get("duration", 0) or 0),
+                    "km": float(r.get("km", 0) or 0),
+                    "pace": str(r.get("pace", "")).strip(),
+                    "notes": str(r.get("notes", "")).strip(),
+                    "idx": idx,
+                })
+
+        # Strength rows (group by date+day)
+        if not strength_log_df.empty:
+            sl = strength_log_df.copy()
+            sl["date_parsed"] = pd.to_datetime(sl["date"], errors="coerce")
+            sl = sl.dropna(subset=["date_parsed"])
+            grouped = sl.groupby(["date_parsed", "day"])
+            for (dp, day), group in grouped:
+                done = group[group["completed"].astype(str).str.lower().isin(["yes", "true", "1"])]
+                unified.append({
+                    "date_parsed": dp,
+                    "date_str": dp.strftime("%Y-%m-%d"),
+                    "kind": "strength",
+                    "day": str(day),
+                    "done_count": len(done),
+                    "total_count": len(group),
+                    "exercises": group[["exercise", "completed"]].values.tolist(),
+                })
+
+        # Filter by date
+        if not show_all:
+            cutoff = pd.Timestamp(today - timedelta(days=30))
+            unified = [u for u in unified if u["date_parsed"] >= cutoff]
+
+        # Search filter
+        if search.strip():
+            needle = search.strip().lower()
+            def _match(u):
+                if u["kind"] == "cardio":
+                    return needle in u["type"].lower() or needle in u["notes"].lower()
+                return needle in u["day"].lower()
+            unified = [u for u in unified if _match(u)]
+
+        if not unified:
+            st.markdown('<div class="list-row" style="justify-content:center;opacity:0.7;">No matching sessions.</div>', unsafe_allow_html=True)
+        else:
+            unified.sort(key=lambda x: x["date_parsed"], reverse=True)
+
+            with st.container(height=520):
+                # Group by date string
+                from itertools import groupby
+                for day_str, items in groupby(unified, key=lambda x: x["date_str"]):
+                    items = list(items)
+                    label = items[0]["date_parsed"].strftime("%A, %d %B %Y")
+                    count = len(items)
+                    st.markdown(
+                        f'<div style="font-family:var(--font-display);font-size:13px;'
+                        f'text-transform:uppercase;letter-spacing:0.1em;color:var(--text2);'
+                        f'margin:14px 0 8px;border-bottom:1px solid var(--border);'
+                        f'padding-bottom:6px;">{label} '
+                        f'<span style="color:var(--text3);font-size:11px;">'
+                        f'({count} {"session" if count == 1 else "sessions"})</span></div>',
+                        unsafe_allow_html=True,
+                    )
+                    for item in items:
+                        if item["kind"] == "cardio":
+                            pace_val = item["pace"] if item["pace"] else "—"
+                            meta_html = (
+                                f'<span style="color:var(--accent);font-weight:600;">{item["type"]}</span>'
+                                f' · <span style="color:var(--text2);">{item["duration"]:.0f} min</span>'
+                                f' · <span style="color:var(--text2);">{item["km"]:.2f} km</span>'
+                                f' · <span style="color:var(--text2);">{pace_val}</span>'
+                            )
+                            body_html = ""
+                            if item["notes"]:
+                                body_html = (
+                                    f'<div style="white-space:pre-wrap;font-size:14px;line-height:1.6;'
+                                    f'color:var(--text);opacity:0.88;margin-top:6px;">{item["notes"]}</div>'
+                                )
+                            row_cols = st.columns([8, 2])
+                            with row_cols[0]:
+                                st.markdown(
+                                    f'<div style="margin-bottom:4px;">{meta_html}</div>{body_html}'
+                                    f'<div style="margin-bottom:14px;"></div>',
+                                    unsafe_allow_html=True,
+                                )
+                            with row_cols[1]:
+                                if st.button("Delete", key=f"del_cardio_{item['idx']}", use_container_width=True):
+                                    save_exercise_df(exercise_df.drop(item["idx"]).reset_index(drop=True))
+                                    st.rerun()
+                        else:
+                            pct = int(100 * item["done_count"] / item["total_count"]) if item["total_count"] else 0
+                            meta_html = (
+                                f'<span style="color:var(--accent);font-weight:600;">\U0001f4aa {item["day"]}</span>'
+                                f' · <span style="color:var(--accent-2);font-weight:700;">{item["done_count"]}/{item["total_count"]} done</span>'
+                                f' <span style="color:var(--text3);">({pct}%)</span>'
+                            )
+                            ex_lines = ""
+                            for ex_name, completed in item["exercises"]:
+                                done = str(completed).lower() in ["yes", "true", "1"]
+                                tick = "✅" if done else "⬜"
+                                color = "var(--text)" if done else "var(--text3)"
+                                ex_lines += (
+                                    f'<div style="font-size:13px;color:{color};margin:2px 0;">'
+                                    f'{tick} {ex_name}</div>'
+                                )
+                            row_cols = st.columns([8, 2])
+                            with row_cols[0]:
+                                st.markdown(
+                                    f'<div style="margin-bottom:6px;">{meta_html}</div>'
+                                    f'<div style="padding-left:8px;margin-bottom:14px;">{ex_lines}</div>',
+                                    unsafe_allow_html=True,
+                                )
+                            with row_cols[1]:
+                                if st.button("Delete", key=f"del_str_{item['date_str']}_{item['day']}", use_container_width=True):
+                                    keep = strength_log_df[
+                                        ~(
+                                            (strength_log_df["date"].astype(str) == item["date_str"])
+                                            & (strength_log_df["day"].astype(str) == item["day"])
+                                        )
+                                    ]
+                                    save_strength_log_df(keep.reset_index(drop=True))
+                                    st.rerun()
 
 
 # ── 12 Week Training Plan ─────────────────────────────────
