@@ -23,6 +23,8 @@ SHEETS = {
     "exercise": ["date", "status", "type", "duration", "km", "pace", "notes"],
     "journal": ["date", "entry"],
     "settings": ["long_term_goals", "daily_income_target", "hourly_rate_target", "daily_budget", "monthly_budget", "checklist_items", "expense_categories"],
+    "strength_log": ["date", "day", "exercise", "completed"],
+    "bmission_goals": ["goal", "target_date", "status", "notes"],
 }
 
 SCOPES = [

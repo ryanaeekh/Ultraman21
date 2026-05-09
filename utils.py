@@ -25,6 +25,8 @@ MONTHLY_EXPENSES_FILE = DATA_DIR / "monthly_expenses.csv"
 EXERCISE_FILE         = DATA_DIR / "exercise.csv"
 JOURNAL_FILE          = DATA_DIR / "journal.csv"
 SETTINGS_FILE         = DATA_DIR / "settings.csv"
+STRENGTH_LOG_FILE     = DATA_DIR / "strength_log.csv"
+BMISSION_GOALS_FILE   = DATA_DIR / "bmission_goals.csv"
 
 
 # =========================================================
