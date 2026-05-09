@@ -88,6 +88,34 @@ st.markdown(
     unsafe_allow_html=True,
 )
 
+# Notes (moved here, above strength log)
+notes = st.text_input("Notes", key="ex_notes", placeholder="How did it feel?")
+
+btn_cols = st.columns(2)
+with btn_cols[0]:
+    if st.button("Save Session", use_container_width=True, key="save_ex"):
+        new_row = pd.DataFrame([{
+            "date": str(sel_date),
+            "status": "Done",
+            "type": ex_type,
+            "duration": float(duration),
+            "km": float(km),
+            "pace": f"{pace:.2f}" if pace > 0 else "",
+            "notes": notes.strip(),
+        }])
+        save_exercise_df(pd.concat([exercise_df, new_row], ignore_index=True))
+        st.success("Session saved.")
+        st.rerun()
+with btn_cols[1]:
+    if st.button("Delete Session", use_container_width=True, key="del_ex"):
+        matched = filter_by_exact_date(exercise_df, sel_date)
+        if not matched.empty:
+            save_exercise_df(exercise_df.drop(matched.index).reset_index(drop=True))
+            st.success(f"Session on {sel_date} deleted.")
+            st.rerun()
+        else:
+            st.warning("No session found for this date.")
+
 # \u2500\u2500 Strength Training Log \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500
 st.markdown(
     '<div class="section-title" style="margin-top:8px;">\U0001f4aa Strength Training Log</div>',
@@ -194,55 +222,6 @@ for _label, _day_key, _exercises in STRENGTH_DAYS:
                 save_strength_log_df(_updated)
             st.success(f"{_day_key} log saved.")
             st.rerun()
-
-# Today's strength summary
-_today_strength = strength_log_df[strength_log_df["date"].astype(str) == today_str]
-if not _today_strength.empty:
-    _done_today = _today_strength[
-        _today_strength["completed"].astype(str).str.lower().isin(["yes", "true", "1"])
-    ]
-    _summary_html = '<div class="card" style="margin-top:14px;"><div class="section-title">\U0001f4ca Today\'s Strength</div>'
-    for _day in _today_strength["day"].unique():
-        _day_rows = _today_strength[_today_strength["day"] == _day]
-        _day_done = _day_rows[
-            _day_rows["completed"].astype(str).str.lower().isin(["yes", "true", "1"])
-        ]
-        _summary_html += (
-            f'<div style="display:flex;justify-content:space-between;padding:8px 0;'
-            f'border-bottom:1px solid var(--border);">'
-            f'<span style="color:var(--text);">{_day}</span>'
-            f'<span style="color:var(--accent-2);font-weight:700;">'
-            f'{len(_day_done)}/{len(_day_rows)} done</span></div>'
-        )
-    _summary_html += '</div>'
-    st.markdown(_summary_html, unsafe_allow_html=True)
-
-notes = st.text_input("Notes", key="ex_notes", placeholder="How did it feel?")
-
-btn_cols = st.columns(2)
-with btn_cols[0]:
-    if st.button("Save Session", use_container_width=True, key="save_ex"):
-        new_row = pd.DataFrame([{
-            "date": str(sel_date),
-            "status": "Done",
-            "type": ex_type,
-            "duration": float(duration),
-            "km": float(km),
-            "pace": f"{pace:.2f}" if pace > 0 else "",
-            "notes": notes.strip(),
-        }])
-        save_exercise_df(pd.concat([exercise_df, new_row], ignore_index=True))
-        st.success("Session saved.")
-        st.rerun()
-with btn_cols[1]:
-    if st.button("Delete Session", use_container_width=True, key="del_ex"):
-        matched = filter_by_exact_date(exercise_df, sel_date)
-        if not matched.empty:
-            save_exercise_df(exercise_df.drop(matched.index).reset_index(drop=True))
-            st.success(f"Session on {sel_date} deleted.")
-            st.rerun()
-        else:
-            st.warning("No session found for this date.")
 
 # ── Last 7 Sessions ───────────────────────────────────────
 st.markdown('<div class="section-title">\U0001f4dc Last 7 Sessions</div>', unsafe_allow_html=True)
