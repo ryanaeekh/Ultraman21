@@ -1,0 +1,494 @@
+# v3 Strategy Specification
+
+Status: RESEARCH PHASE COMPLETE / BUILD PHASE READY (provisional pending Hurst/Ooi/Pedersen firsthand reading by 2026-05-16)
+Started: 2026-04-18
+Instrument class: Binance USDT-M perpetual futures
+
+## Source Tier Policy
+- Tier A: peer-reviewed finance journals; institutional quant shops with >10yr live track record; central bank working papers; CME/Binance/Coinbase/Kaiko market structure data
+- Tier B: asset manager research notes without disclosed track record; SSRN preprints from Tier-A-published authors; exchange research blogs; practitioner books from authors with verified track record
+- Tier C: blogs, social media, LLM output — context only, never justification
+- Lock rule: every locked decision needs >=1 Tier A citation OR >=2 independent Tier B citations from non-cross-citing organizations
+- Path: Tier A for strategy archetype and core hypothesis; Tier B acceptable for parameterization within the archetype
+
+## Decisions Log
+- 2026-04-18: Layer 1 LOCKED — universe = BTC/ETH/SOL/XRP/DOGE Binance USDT-M perps, long+short
+- 2026-04-18: No-AI-shopping rule established. Only Claude (this session) participates in v3 research conversation. Output from other LLMs is Tier C, never used as justification for locked decisions.
+- 2026-04-18: Layer 2 LOCKED (provisional) — archetype = trend-following / time-series momentum, single archetype, no hybrids
+- 2026-04-18: Hybrid lock-out clause established. No filters, overlays, or additional archetypes in Layers 3-7.
+- 2026-04-18: Layer 3 LOCKED (provisional) — timeframe = 4-hour bars (240min), UTC-aligned, evaluated on bar close
+- 2026-04-18: Layer 4 LOCKED (provisional) — Component A = vol-adjusted momentum (Moskowitz canonical), Component B = no filter, lookback = blended 180/540/1440 bars
+- 2026-04-18: ADX consciously abandoned. v2 ADX filter not carried into v3. Future reintroduction attempts rejected by reference to Layer 4 lock.
+- 2026-04-18: Pre-registration discipline established. Layer 4 may be reopened only for external research, substrate bugs, or infeasibility — never for backtest result disappointment.
+- 2026-04-18: Layer 5 LOCKED (provisional) — entry: dead-zone 0.25 SD; exit: signal-flip only; stop: 3×ATR(240) hard stop
+- 2026-04-18: Stop-loss deviation from AQR pure literature documented and justified by perp liquidation substrate risk; not curve-fitting
+- 2026-04-18: Layer 6 LOCKED (provisional) — sizing: vol-targeting 15% per-position; leverage: uniform 5x; concurrent cap: 5
+- 2026-04-18: Vol-targeting chosen over fixed-fractional 1-2% rule with reasoned push-back resolution. Trader articulated correct framing: trend's edge is in fat-tail winners, not win rate.
+- 2026-04-18: Concurrent cap reasoning showed curve-fitting framing concern; reasoning corrected in lock disclosure for future-self audit reference.
+- 2026-04-18: Layer 7 LOCKED (provisional) — walk-forward: rolling 24m/5m × 6 periods; per-instrument: v2 PF criteria; portfolio gate: strict bundle (Sharpe ≥0.5, DD ≤35%, ≥3 of 5 ROBUST/MARGINAL); paper trading: 90 days OR 30 trades.
+- 2026-04-18: Sharpe expectation alignment committed: trader internalizes Sharpe 0.5-0.8 IS success for v3. Private hope for Sharpe ~1.0 disclosed and explicitly resolved against curve-fitting risk.
+- 2026-04-18: Pre-registration meta-discipline established: Layer 7 gates cannot be lowered, reinterpreted, or replaced because v3 fails to meet them. Gate failure = v3 doesn't ship as specified.
+- 2026-04-18: RESEARCH PHASE COMPLETE. Build phase begins. Build sequence: (1) funding SimulationModule, (2) parity harness, (3) strategy implementation per Layers 4-6, then (4) walk-forward validation per Layer 7.
+
+## Open Questions
+- Layer 6: concurrent-position cap given 5-instrument universe and 3-5 management bandwidth
+- Layer 6: whether DOGE gets reduced sizing due to fat-tail return distribution
+- Pre-lock verification: empirically confirm each instrument's Binance USDT-M launch date via API
+- Layer 4: implementation style within trend-following (MA-cross vs Donchian breakout vs Keltner/Bollinger breakout)
+- Provisional Layer 2 lock pending firsthand reading of Hurst/Ooi/Pedersen by 2026-05-16
+- Trader psychology: confirm tolerance for 35-45% win rate and 25-40% max drawdown before live capital deployment
+- Layer 4: trend indicator selection (MA-cross vs Donchian vs Keltner vs Bollinger vs other) at 4-hour timeframe
+- Layer 4: indicator lookback windows specified in 4-hour bar units
+- Layer 6: position sizing methodology
+- Layer 6: leverage selection (uniform 5x vs vol-scaled per instrument)
+- Layer 6: DOGE-specific size adjustment for tail risk
+- Implementation: slippage model for stop fills during liquidation cascades, calibrate before backtest trust
+- Implementation: validate DOGE position size stability empirically at first backtest
+- Build: funding SimulationModule architecture (extend FXRolloverInterestModule pattern)
+- Build: parity harness — deterministic position reconciliation between backtest and Binance demo
+- Build: data ingestion pipeline for Binance USDT-M historical bars + funding rates
+- Build: NautilusTrader streaming indicator implementation for vol-adjusted momentum + ATR
+- Build: empirical liquidation-distance check (3×ATR < liquidation at 5x leverage, per instrument)
+- Build: DOGE position size stability empirical check at first backtest
+
+## Research Log
+Reading notes captured per source as research phase progresses. Each entry: source citation, date read, key takeaways, questions raised, how it influenced spec decisions.
+
+### Pending reading list (Layer 2 archetype confirmation)
+- [ ] Hurst, Ooi, Pedersen — "A Century of Evidence on Trend-Following Investing" (AQR, 2017) — Tier A — DEADLINE 2026-05-16
+- [ ] Moskowitz, Ooi, Pedersen — "Time Series Momentum" (JFE 2012) — Tier A — recommended within 8 weeks
+- [ ] Liu, Tsyvinski, Wu — "Common Risk Factors in Cryptocurrency" (RFS 2022) — Tier A — recommended within 8 weeks
+- [ ] (Optional, Layer 4) Faith — Way of the Turtle (2007) — Tier B — read if advocating breakout-style implementation at Layer 4
+
+## Layer 1 — Universe and Instrument
+Status: LOCKED 2026-04-18
+
+### Decision
+Five Binance USDT-M perpetual futures: BTCUSDT-PERP, ETHUSDT-PERP, SOLUSDT-PERP, XRPUSDT-PERP, DOGEUSDT-PERP. Long and short directions enabled.
+
+### Selection rule
+Top 5 instruments by Binance USDT-M perpetual open interest as of April 2026, excluding stablecoins and exchange tokens (BNB explicitly excluded due to reflexivity with venue business performance and tail-risk concentration with custody venue).
+
+### Justification
+1. Cross-instrument validation is the methodological standard for time-series momentum / trend-following strategies (Moskowitz/Ooi/Pedersen 2012 JFE "Time Series Momentum"; Hurst/Ooi/Pedersen "A Century of Evidence on Trend-Following Investing" — Tier A). Single-instrument or three-instrument tests are weaker evidence than five-instrument panels.
+2. Common factor structure across cryptocurrency returns documented in Liu/Tsyvinski/Wu 2022 (Review of Financial Studies — Tier A) supports panel testing on crypto assets specifically.
+3. Five instruments span four distinct return-generating processes (institutional macro asset, smart-contract platform, high-throughput L1, payments rail, pure memecoin) — deliberate heterogeneity provides stronger cross-validation than five instruments from the same archetype.
+4. CoinGlass 2025 Annual Report (Tier B) confirms BTC/ETH as dominant institutional perp OI, and SOL/XRP as institutional-grade following 2025 CME futures launches and spot ETF approvals. DOGE included as the largest-OI memecoin perp on Binance.
+5. Capital and operational fit: $14.8k USD account at 5x leverage with 2% per-trade risk supports up to 3 concurrent positions comfortably; 5 concurrent firings represents the operational ceiling acknowledged at Layer 1 lock time. Layer 6 must define concurrent-position cap explicitly.
+6. Continuity with v2 baseline preserved on three instruments (BTC/ETH/SOL); two new instruments (XRP/DOGE) added to strengthen panel beyond v2.
+
+### Constraints to carry forward
+- Walk-forward window bounded by DOGEUSDT-PERP launch (~May 2021), giving ~5 years of common history through April 2026.
+- DOGE return distribution has known fat-tail behavior (memecoin-specific funding rate spikes, social-media-driven gaps); funding-rate SimulationModule and stop-loss model must be stress-tested on DOGE specifically before any live capital.
+- BNB explicitly excluded; if v3 ever expands universe, exchange tokens remain excluded by rule.
+- Verify Binance USDT-M launch dates for each instrument empirically (via API kline history) before locking the walk-forward window.
+
+### Open questions deferred
+- Layer 6: concurrent-position cap, position sizing per instrument, whether DOGE gets reduced sizing due to tail behavior.
+- Layer 7: walk-forward window structure given 5-year common history.
+
+## Layer 2 — Strategy Archetype
+Status: LOCKED 2026-04-18 (provisional pending firsthand reading; see Decision-quality disclosure)
+
+### Decision
+Trend-following / time-series momentum. Single archetype, no hybrids, no overlays. Long and short directional positions taken based on the established directional trend per instrument.
+
+### Justification
+1. Strongest cross-asset evidence base in quantitative finance. Time-series momentum documented across 58 instruments and decades of data (Moskowitz/Ooi/Pedersen 2012 *Journal of Financial Economics* — Tier A). Extended to 137 years across 67 markets with positive returns in every decade (Hurst/Ooi/Pedersen "A Century of Evidence on Trend-Following Investing", AQR — Tier A).
+2. Crypto-specific validation. Momentum factor documented as significant in cryptocurrency returns alongside size and network effects (Liu/Tsyvinski/Wu 2022 *Review of Financial Studies* "Common Risk Factors in Cryptocurrency" — Tier A). Note: their sample is largely spot, predates the perp era; v3 application extends Tier A crypto momentum evidence to perp by analogy.
+3. Structural fit with crypto market behavior. Crypto's defining feature is sustained directional regimes (multi-quarter bull/bear cycles); trend-following monetizes these directly rather than fighting them.
+4. Long-and-short capability of perp architecture is a force multiplier for trend specifically. Trend-following gains roughly double its addressable opportunity set when shorts are enabled (Hurst/Ooi/Pedersen show the bulk of trend's risk-adjusted returns historically come from short-side trades during bear regimes).
+5. Continuity with v2 archetype (EMA 20/100 + ADX was a textbook trend-following implementation). The v2 OVERFIT classifications on BTC/SOL were driven by Period 6 (2025+) regime weakness — consistent with known trend-following pain (low-vol regimes) rather than evidence against the archetype.
+
+### Decision-quality disclosure
+At Layer 2 lock time, the trader had not personally read the primary sources cited above. The decision was made via delegated trust to the tier system: AQR, *JFE*, and *RFS* were treated as institutionally credible enough that their consensus on time-series momentum could anchor a Layer 2 lock without firsthand reading. This is a known epistemic risk — if the cited papers misrepresent the underlying evidence (or are misrepresented to the trader by the AI assistant participating in research conversation), there is no independent check at lock time.
+
+Mitigation committed at lock: trader will read Hurst/Ooi/Pedersen "A Century of Evidence" in full by 2026-05-16. Reading notes captured in Research Log section. If reading reveals significant divergence from the justification above, Layer 2 is reopened and re-locked or replaced. The lock is provisional until firsthand reading is complete.
+
+### Hybrid lock-out
+No additional archetypes, filters, overlays, or "improvements" may be added to v3 in subsequent layers. This includes:
+- Mean-reversion entry timing on top of trend signals (rejected: v1 confluence pattern)
+- Volatility-breakout as a separate signal alongside MA-based trend (rejected: same archetype, two implementations create curve-fitting surface)
+- Carry/funding-rate overlays (rejected at Layer 2; possible v3.5 research extension if v3 succeeds)
+- Cross-sectional momentum overlays (rejected: universe too small)
+- Confluence scoring across multiple trend indicators (rejected: v1 21-point pattern)
+
+If during Layers 3-7 the trader feels strong temptation to add a second archetype or filter, the correct response is to reopen Layer 2 and reconsider the archetype, not to slip a hybrid in via Layer 4 or 5. Hybrid attempts caught in subsequent layers will be rejected by reference to this lock.
+
+### Implementation style deferred to Layer 4
+Whether the trend implementation is moving-average-based (e.g., EMA cross), breakout-based (e.g., Donchian channel, Keltner channel), or volatility-bands-based (e.g., Bollinger breakout) is a Layer 4 question. All three are within the trend-following archetype per Hurst/Ooi/Pedersen classification. The Layer 2 lock does not pre-commit to any specific implementation.
+
+### Targets to validate at Layer 7
+Per managed-futures literature on diversified trend-following systems:
+- Sharpe ratio: target 0.7-1.2 on the 5-instrument panel
+- Max drawdown: tolerate up to 25-40% (literature norm for trend strategies)
+- Win rate: expect 35-45% (low win rate is structural, not a bug)
+- Average holding period: 30-90 days
+- Walk-forward classification: ROBUST or MARGINAL on at least 2 of 5 instruments to authorize live trading
+
+These are provisional targets carried into Layer 7 for formal acceptance gate definition. Subject to revision based on what crypto perp literature specifically supports.
+
+## Layer 3 — Timeframe
+Status: LOCKED 2026-04-18 (provisional pending firsthand reading of Layer 2 sources)
+
+### Decision
+4-hour bars (240-minute) for signal generation across all five instruments. Bar timestamps aligned to UTC: 00:00, 04:00, 08:00, 12:00, 16:00, 20:00. Signals evaluated on bar close.
+
+### Justification
+1. Tier A literature locates time-series momentum at the daily-to-monthly horizon (Moskowitz/Ooi/Pedersen 2012 JFE — monthly signals; Hurst/Ooi/Pedersen — explicitly avoids sub-daily due to microstructure noise). Crypto-specific extension (Liu/Tsyvinski/Wu 2022 RFS) tests at weekly and daily frequencies. 4-hour is an extension by analogy, NOT directly supported by Tier A literature.
+2. v2 walk-forward fragility was driven by thin per-period trade counts on daily-equivalent signal density. 4-hour roughly doubles signal generation per instrument vs daily, addressing the v2 sample-size weakness directly. Estimated 40-75 signals/year across the 5-instrument panel = ~200-375 trades over 5 years of walk-forward = ~30-60 trades per validation period (assuming 6 periods).
+3. Funding cost per trade is bearable. 4-hour bars produce 3-21 day holding periods. Median funding cost estimate ~0.2-0.4% per trade, well below trend-following winner sizes (5-15%). Funding cost analysis to be empirically validated by the funding-rate SimulationModule before any backtest results are trusted.
+4. Operational fit confirmed by trader's direct experience. ~3 years of BTC perpetual futures trading experience on 4h-and-shorter timeframes. 6 candle closes per day per instrument is manageable as decision-support during rideshare driving shifts via Tailscale + Termius mobile access. Phone alerts on bar close are operationally tested.
+5. Crypto practitioner consensus. Most published crypto trend strategies (CoinGlass research, Glassnode insights, exchange-published quant pieces) operate on 4-hour bars. Tier C signal on its own, used here only as sanity check that the chosen timeframe matches working crypto quant practice.
+
+### Decision-quality disclosure
+Mixed basis. The literature-extension reasoning (extending daily Tier A evidence to 4-hour by analogy) is delegated trust to the AI assistant participating in research conversation; the trader has not personally read the cited sources at lock time. The operational-fit reasoning (4-hour bars manageable for manual decision-support during driving shifts) is grounded in trader's ~3 years of direct BTC perp trading experience and is firsthand. The funding-cost-per-trade reasoning is theoretical estimate, to be empirically validated by funding-rate SimulationModule before trust.
+
+Mitigation committed at lock: same Hurst/Ooi/Pedersen reading deadline (2026-05-16). Additionally, if 4-hour produces walk-forward OVERFIT classifications across most or all of the panel at Layer 7 validation, Layer 3 reopens for reconsideration with daily bars as the most likely fallback.
+
+### Rejected alternatives
+- 1-hour bars: insufficient Tier A support, signal-to-noise degraded by microstructure, holds collapse to hours, funding cost stops covering trend cost meaningfully.
+- Daily bars: stronger Tier A backing but estimated 20-40 signals/year across panel = 100-200 trades over 5 years = ~15-30 per period. Borderline thin for walk-forward; reopens v2 sample-density fragility. Reserved as Layer 3 fallback if 4-hour fails validation.
+- Weekly bars: Tier A backing in equity literature but only 10-20 trades/year on the panel. Statistically insufficient for 5-year walk-forward validation.
+- Multi-timeframe testing with selection by walk-forward result: rejected as curve-fitting dressed as research. Pick one timeframe on principled grounds, validate. Multi-timeframe selection is only available as a reopen-Layer-3 move if validation fails.
+
+### Constraints to carry forward
+- All indicator periods, lookback windows, and parameter values defined in Layer 4 must be specified in *4-hour bar units*, not days or hours, to prevent unit-conversion errors.
+- Funding cost estimate (0.2-0.4% per trade median) is theoretical until SimulationModule empirically validates against actual Binance USDT-M historical funding rate data on each of the 5 instruments. Validation required before any backtest result is trusted.
+- DOGE-specific funding rate spikes during memecoin squeezes may push DOGE per-trade funding cost meaningfully above the panel median. To be measured empirically and addressed at Layer 6 (sizing) if material.
+
+### Open questions deferred
+- Layer 4: which trend indicator(s) at 4-hour timeframe (MA-cross, Donchian breakout, Keltner, etc.)
+- Layer 4: indicator lookback windows in 4-hour bar units
+- Layer 7: walk-forward period structure given 4-hour bar density (e.g., 6 periods of 10 months each = 1500-2000 bars per period per instrument)
+
+## Layer 4 — Indicators
+Status: LOCKED 2026-04-18 (provisional pending firsthand reading deepening of Layer 2 sources)
+
+### Decision
+
+**Component A — Trend signal generator: Volatility-Adjusted Momentum (Moskowitz canonical signal).**
+
+Signal calculation per instrument per 4-hour bar:
+- Compute past-N-bar log return
+- Compute past-N-bar realized volatility (standard deviation of log returns)
+- Signal value = past-N return / past-N volatility
+- Long if signal > 0; Short if signal < 0
+- Threshold dead-zone around 0 deferred to Layer 5
+
+**Component B — Regime filter: NONE.**
+
+No filter applied. Every signal is taken. Diversification across the 5-instrument panel is the literature-aligned defense against chop, not a regime filter.
+
+**Lookback period N: BLENDED.**
+
+Three parallel signal computations averaged:
+- N1 = 180 bars (~30 days) — short trend horizon
+- N2 = 540 bars (~90 days) — medium trend horizon
+- N3 = 1,440 bars (~240 days / ~8 months) — long trend horizon
+
+Final signal = (signal_N1 + signal_N2 + signal_N3) / 3
+
+Long if blended signal > 0, Short if < 0.
+
+### Justification
+
+1. **Vol-adjusted momentum is the seminal Tier A signal definition** (Moskowitz/Ooi/Pedersen 2012 *Journal of Financial Economics* "Time Series Momentum"). It is the most directly literature-supported single-signal trend implementation available. Vol-adjustment makes signal magnitude comparable across heterogeneous instruments (BTC's signal and DOGE's signal are on the same scale), which is essential for the 5-instrument panel.
+
+2. **No filter is the literature-aligned choice** (Hurst/Ooi/Pedersen "A Century of Evidence on Trend-Following Investing" — AQR 2017 — Tier A). The AQR team running $130B+ in trend strategies does not filter for regime. Their answer to chop is panel diversification. v2's ADX filter contributed to BTC/SOL OVERFIT classification by adding a parameter that worked in periods 1-5 and failed in period 6.
+
+3. **Blended lookback is the literature-aligned parameter choice** (Hurst/Ooi/Pedersen). They use a 1m/3m/12m blend specifically to reduce single-lookback parameter sensitivity. Translating to 4-hour bars: 180/540/1440 bars maps to roughly 30/90/240 days, the same proportional structure.
+
+4. **Single trend signal, no confluence** — enforced by Layer 2 hybrid lock-out. v1's 21-point confluence pattern is rejected. Vol-adjusted momentum alone generates direction; nothing else gates or modifies that direction.
+
+5. **Departure from v2 acknowledged.** v2 used MA-cross + ADX filter. v3 uses vol-adjusted momentum + no filter. This is a deliberate upgrade to the canonical Tier A signal definition, accepting loss of v2 operational familiarity in exchange for stronger evidence base. ADX is consciously abandoned; future v1/v2 nostalgia attempts to reintroduce ADX are rejected by reference to this lock.
+
+### Decision-quality disclosure
+
+Component A (vol-adjusted momentum): **Reasoned.** Trader stated intent to try AQR-aligned methodology rather than continuing v2 MA-cross. The choice is informed by Layer 2 reading of Hurst/Ooi/Pedersen.
+
+Component B (no filter): **Reasoned.** Trader explicitly chose the literature-aligned no-filter position over v2's ADX continuity. This is the harder psychological choice and was made consciously.
+
+Lookback N (blended 180/540/1440): **Delegated trust** to AI assistant's claim that this mirrors Hurst/Ooi/Pedersen 1m/3m/12m blend methodology. Trader has not personally verified the AQR paper's exact lookback construction at lock time. To be confirmed during second-pass reading by 2026-05-16.
+
+### Pre-registration discipline (binding for v3)
+
+The Layer 4 spec is now locked under pre-registration discipline. This means:
+
+**Layer 4 may be reopened only for these reasons:**
+1. New external research evidence (new paper, new methodology, new asset-class-specific finding) — NOT from backtest results
+2. Substrate implementation bug discovered (funding miscalculated, indicator divergence, look-ahead found) — fix the bug, do not change Layer 4
+3. Implementation infeasibility (e.g., 1,440-bar lookback exceeds NautilusTrader memory limits) — change spec to feasible nearest equivalent, document reason
+
+**Layer 4 may NOT be reopened for these reasons:**
+- Walk-forward result disappointment ("MA-cross would have been better, let me try")
+- Per-instrument result chasing ("DOGE keeps stopping out, let me change for DOGE only")
+- Parameter sweeps to find best lookback
+- "Just trying one more thing" rationalization
+- Adding ADX or any other filter to rescue a poor result
+
+**If at Layer 7 validation the locked spec fails acceptance gates:**
+1. Accept v3 does not ship as currently specified
+2. OR identify substrate bug, fix, re-run with same spec
+3. OR reopen with new external research justification (documented in Decisions Log), re-run, gates unchanged
+4. NEVER swap components, sweep parameters, lower gates, or cherry-pick instruments to manufacture a pass
+
+This discipline is the difference between v3 and v1/v2. It is binding.
+
+### Constraints to carry forward
+
+- Implementation must use NautilusTrader's streaming indicator framework, NOT pandas approximations. Vol-adjusted momentum is computable from rolling log returns and rolling standard deviation; both are streaming-safe.
+- Warm-up period: 1,440 bars (~240 days = ~8 months). No signal can fire on any instrument until 1,440 bars of history are available. Walk-forward window effectively shortens to ~4.3 years from 5-year DOGE-bounded common history.
+- The 8-month warm-up means the strategy generates no signals before approximately January 2022 (1,440 bars from May 2021 DOGE launch). Layer 7 walk-forward periods must account for this.
+- Vol calculation method (population vs sample stdev, log returns vs simple returns) to be specified at implementation time. Default: log returns, sample stdev. Lock at first implementation commit.
+
+### Open questions deferred
+
+- Layer 5: dead-zone threshold around signal=0 (e.g., abs(signal) > X required to trigger entry, prevents entries on near-zero signal)
+- Layer 5: stop-loss methodology (ATR-based, time-based, signal-reversal-based)
+- Layer 5: take-profit methodology (or none — let trend run until signal flips)
+- Layer 6: position sizing (volatility-targeting, fixed fractional, Kelly-fraction)
+- Layer 6: concurrent-position cap (max 5 from universe, but operational ceiling discussed at Layer 1)
+- Layer 7: walk-forward window structure given 8-month warm-up + 4.3-year usable history
+
+## Layer 5 — Entry/Exit Logic
+Status: LOCKED 2026-04-18 (provisional pending firsthand reading deepening of Layer 2 sources)
+
+### Decision
+
+**Entry trigger (5.1):** Dead-zone threshold at 0.25 standard deviations of the historical signal distribution.
+- Long entry: blended signal > +0.25 × signal_SD
+- Short entry: blended signal < -0.25 × signal_SD
+- Flat (no entry, no exit if currently in position): -0.25 × signal_SD ≤ blended signal ≤ +0.25 × signal_SD
+
+The signal_SD is computed as the rolling 1,440-bar standard deviation of the blended signal value, refreshed each bar.
+
+**Exit logic (5.2):** Signal-flip exit only.
+- Long position closed when blended signal crosses below -0.25 × signal_SD (full reverse to short threshold)
+- Short position closed when blended signal crosses above +0.25 × signal_SD
+- Position immediately reversed (close + open opposite direction) on full signal flip
+- No take-profit, no time stop, no trailing stop
+- Winners may give back 30-50% of peak favorable excursion before exit; this is structural
+
+**Stop loss (5.3):** Hard stop at 3 × ATR(240) from entry price.
+- ATR computed on 240-bar (~40-day) lookback at 4-hour timeframe
+- Long stop: entry_price - 3 × ATR
+- Short stop: entry_price + 3 × ATR
+- Stop is fixed at entry, does NOT trail
+- Stop fires immediately on intra-bar touch (NautilusTrader stop-market order)
+- If stop fires, position closes and remains flat until next signal entry per 5.1
+
+### Justification
+
+1. **Dead-zone (5.1) is principled noise defense for 4-hour signals.** Moskowitz/Ooi/Pedersen do not use a dead-zone at monthly timeframes (Tier A). At 4-hour timeframes, signal-to-noise is worse and near-zero signals fire whipsaw entries during regime transitions. 0.25 SD is a standard practitioner threshold (Carver "Systematic Trading" Tier B; common in AQR practitioner notes), single parameter, low curve-fitting surface. The threshold scales with the signal's own volatility, so it adapts across instruments without per-instrument tuning.
+
+2. **Signal-flip-only exit (5.2) is literature-aligned.** Hurst/Ooi/Pedersen and Moskowitz et al. exit on signal reversal; they do not use take-profits or trailing stops. The AQR paper specifically documents that trailing stops reduce returns more than they reduce drawdown — the mechanism is that trailing stops convert giving-back-profit (uncomfortable but recoverable on next trend) into realized loss (locked-in suboptimal exit). The blended 180/540/1440 signal naturally requires multi-horizon trend reversal to flip, so signal-flip IS a robust trend-reversal exit, not arbitrary.
+
+3. **Hard stop at 3×ATR (5.3) is a deviation from pure literature, justified by perp substrate.** AQR's commodity futures portfolios run unlevered or low-levered with no auto-liquidation risk; they hold through arbitrary drawdowns until signal flip. v3 runs Binance USDT-M perp at up to 5x leverage on a $14.8k account, where a ~20% adverse move triggers exchange liquidation regardless of strategy logic. The 3×ATR(240) stop caps single-trade loss at approximately 6-9% of position notional in normal volatility regimes, well below liquidation distance, while leaving room for normal noise. The stop protects against substrate failure (forced liquidation), not against signal failure. 3×ATR is the Turtle system's stop distance (Faith Way of the Turtle, Tier B) and a managed-futures practitioner standard.
+
+### Decision-quality disclosure
+
+5.1 (dead-zone 0.25 SD): **Reasoned.** Trader correctly identified the threshold as based on signal volatility and accepted the noise-defense justification.
+
+5.2 (signal-flip exit only): **Reasoned, with stronger justification than literature.** Trader cited perp-specific stop-hunting / liquidity-hunt failure mode for trailing stops, drawn from ~3 years BTC perp trading experience. This is firsthand operational reasoning that strengthens the literature case for not using trailing stops on crypto perp specifically.
+
+5.3 (3×ATR hard stop): **Mixed.** Trader's operational rule "never trade without a stop-loss" is firsthand discretionary trading experience, not crypto-perp-specific reasoning. The formal justification (deviation from AQR justified by perp liquidation substrate risk) is delegated to AI assistant's framing. The lock is correct on both grounds — firsthand rule plus delegated technical rationale converge on the same decision — but the trader has not personally derived the substrate-risk argument.
+
+### Pre-registration discipline (Layer 5 binding)
+
+Same rules as Layer 4. Layer 5 may be reopened ONLY for:
+1. New external research evidence
+2. Substrate implementation bug
+3. Implementation infeasibility
+
+Layer 5 may NOT be reopened for:
+- Backtest result disappointment ("trailing stop would have helped on this trade")
+- Per-instrument parameter chasing ("DOGE needs a wider stop")
+- "Just trying tighter stops to see if Sharpe improves"
+- Adding take-profit because winners gave back too much in backtest
+
+If Layer 7 validation fails, refer to Layer 4 reopening rules — apply same discipline to Layer 5.
+
+### Constraints to carry forward
+
+- Stop-loss orders must use NautilusTrader's STOP_MARKET order type with reduce_only=True flag (Binance Futures supports this; verified in Layer 0 architecture check).
+- Stop fills may slip past the trigger price during liquidation cascades on crypto perp. The funding-rate SimulationModule must include a slippage model that accounts for this (e.g., stop fills at trigger ± 0.1-0.3% in normal vol, larger during high-vol events). Slippage model must be calibrated empirically before backtest results are trusted.
+- Signal_SD calculation requires a separate 1,440-bar rolling buffer. Total memory per instrument: 1,440 bars × signal value + 240 bars for ATR. Verify NautilusTrader streaming indicator framework can hold both without memory issues.
+- Position reversal on signal flip is two operations (close existing, open opposite). Must be atomic from a strategy-logic perspective; partial-fill handling for the close-then-open pair must not leave the strategy in an inconsistent state. Implementation detail to verify at first integration test.
+- ATR calculation uses Wilder's method (per v2 lesson: NautilusTrader-direct streaming, NOT pandas approximation).
+
+### Open questions deferred
+
+- Layer 6: position sizing (volatility-targeting vs fixed fractional vs Kelly fraction)
+- Layer 6: leverage selection per instrument (uniform 5x vs vol-scaled per instrument)
+- Layer 6: concurrent-position cap (max 5 from universe, max 3-5 manageable from Layer 1)
+- Layer 6: DOGE-specific position size adjustment for memecoin tail risk
+- Layer 7: walk-forward window structure given full Layer 4+5 spec
+
+## Layer 6 — Risk and Sizing
+Status: LOCKED 2026-04-18 (provisional pending firsthand reading deepening of Layer 2 sources)
+
+### Decision
+
+**Sizing methodology (6.1):** Volatility targeting at 15% annualized per-position vol target.
+
+Position size calculation per instrument per entry:
+- instrument_vol_annualized = realized_volatility(returns, lookback=240 bars) × sqrt(2190)
+  (where 2190 = 4-hour bars per year: 365 × 24 / 4)
+- target_notional = (0.15 / instrument_vol_annualized) × account_equity
+- position_size = target_notional / instrument_price
+- Margin required = target_notional / leverage = target_notional / 5
+
+If multiple positions open simultaneously, target_notional is computed from current account equity at entry time (not equity at strategy start). Equity reflects realized PnL from closed trades plus unrealized PnL from open positions.
+
+**Leverage (6.2):** Uniform 5x leverage across all 5 instruments.
+
+Set via Binance USDT-M futures leverage parameter at venue setup. Same leverage applies to all instruments regardless of vol or signal strength. Per-instrument size differentiation is handled by vol-targeting in 6.1, not by leverage.
+
+**Concurrent position cap (6.3):** Cap at 5 (all 5 instruments may hold positions concurrently).
+
+No selection rule applied if more than 3 instruments fire signals simultaneously. All firing signals are taken, sized per 6.1.
+
+### Justification
+
+1. **Vol-targeting (6.1) is the canonical Tier A sizing method for trend-following** (Moskowitz/Ooi/Pedersen 2012 JFE; Hurst/Ooi/Pedersen). The methodology equalizes vol contribution across heterogeneous instruments — DOGE's natural high vol does not dominate portfolio risk because its position size is automatically reduced. 15% per-position target is a conservative practitioner value (institutional managed-futures typically targets 10-20% per position; 15% is the middle of that range).
+
+2. **Vol-targeting fits trend-following's return distribution structure**, where edge comes from fat-tail winners rather than win rate. Fixed-fractional R-based sizing (the "1-2% per trade" rule from Van Tharp / Turtles) is designed for discretionary traders thinking in R:R terms with independent trades; it caps winner upside in ways that strip trend-following's structural edge. Vol-targeting plus the Layer 5 hard stop (3×ATR) produces approximately 1.5% per-trade dollar-risk as a side effect, while correctly handling portfolio-level vol contribution that the 1-2% rule does not.
+
+3. **Uniform 5x leverage (6.2)** avoids redundant per-instrument adjustment. Vol-targeting in 6.1 already produces per-instrument size differentiation; vol-scaled leverage would double-count, introducing an extra parameter and reducing backtest-to-live auditability. 5x is conservative for crypto perp (Binance allows up to 25-50x on most instruments); leaves margin headroom before liquidation. Combined with 3×ATR hard stop, single-trade liquidation risk is structurally bounded.
+
+4. **Concurrent cap of 5 (6.3)** is consistent with vol-targeting bounding portfolio vol independently of position count. With 5 positions at 15% per-position vol target and assuming 0.5-0.8 average correlation across crypto instruments, expected portfolio vol is approximately 25-30% annualized (lower than 5 × 15% = 75% naive sum due to correlation). This is within standard managed-futures portfolio vol ranges. Capping at fewer positions (e.g., 3) without principled selection rule throws away diversification benefit. Layer 1 noted operational ceiling of 3-5 manageable positions; vol-targeting keeps individual position sizes small enough that 5 concurrent remains operationally viable per trader's confirmation.
+
+### Decision-quality disclosure
+
+6.1 (vol-targeting 15%): **Reasoned with strong push-back resolved.** Trader initially pushed back citing the universal "1-2% per trade" discretionary rule. After explanation of why trend-following's fat-tail return distribution makes R-based sizing structurally suboptimal (and why vol-targeting produces equivalent per-trade dollar risk while correctly handling portfolio vol contribution), trader articulated the correct underlying reason: "Trend-following's edge is in fat-tail winners, not in win rate." This is the exact correct framing. Lock is reasoned.
+
+6.2 (uniform 5x): **Mixed.** Trader cited backtest auditability as the reason ("easier for backtest to give proper result"). This is a real side-benefit but not the primary reason. The primary reason is that vol-targeting in 6.1 already differentiates per-instrument; adding vol-scaled leverage would double-count and introduce extra parameters. Trader has the right intuition (uniform = cleaner) but not the full reasoning chain.
+
+6.3 (cap at 5): **Delegated, with framing concern flagged.** Trader cited "same better backtest result" as the reason for cap-at-5 over cap-at-3. This is curve-fitting framing — picking based on which option produces better backtest numbers, which is the failure pattern explicitly forbidden by Layer 4 pre-registration discipline. The correct underlying reason is that vol-targeting bounds portfolio vol independently of position count, so capping artificially throws away diversification with no risk benefit. Trader's reasoning is incorrect even though the conclusion (cap at 5) is correct. Future-self should re-read this disclosure if the temptation to "tune for better backtest" reappears in subsequent layers or in result interpretation.
+
+### Pre-registration discipline (Layer 6 binding)
+
+Same rules as Layer 4. Layer 6 may be reopened ONLY for:
+1. New external research evidence
+2. Substrate implementation bug
+3. Implementation infeasibility
+
+Layer 6 may NOT be reopened for:
+- Backtest result disappointment ("3% per-position vol target would have produced better Sharpe")
+- Per-instrument tuning ("DOGE needs lower vol target")
+- Reducing concurrent cap because of operational anxiety after a bad week
+- Adjusting leverage to "make the numbers work"
+
+### Constraints to carry forward
+
+- Vol calculation for sizing uses 240-bar (40-day) realized vol of log returns, annualized by sqrt(2190). Same vol calculation used for sizing AND for stop-loss (3×ATR uses ATR(240)) — both reference the same 240-bar window for consistency.
+- Annualization factor 2190 = 365 × 24 / 4 (4-hour bars per year). NOT 252 × 6 (which assumes trading-day weekday-only convention from equities). Crypto trades 24/7/365.
+- Position size at entry uses current account equity (cash + unrealized PnL of open positions). Implementation must query NautilusTrader's portfolio.equity() at entry, not use a stale value.
+- DOGE-specific tail risk note: at 15% target vol with 3×ATR stop, DOGE position will be naturally smaller than BTC position (because DOGE vol is higher). No DOGE-specific exception is needed; vol-targeting handles it automatically. Empirically validate this is true at first backtest — if DOGE vol estimates are unstable enough that vol-targeting produces wildly varying position sizes, may need to floor or cap DOGE size separately. Document at first backtest.
+- Liquidation distance check: at 5x leverage, liquidation triggers at approximately 20% adverse price move. 3×ATR stop at typical crypto 4h ATR (~2-4% of price) = 6-12% adverse move. Stop fires well before liquidation. Verify per-instrument that 3×ATR is always less than liquidation distance — if not, reduce leverage or widen ATR multiplier. Implementation check, not a Layer 6 reopening.
+
+### Open questions deferred
+
+- Layer 7: walk-forward window structure given full Layer 4+5+6 spec
+- Layer 7: per-instrument acceptance gate (ROBUST/MARGINAL/OVERFIT thresholds)
+- Layer 7: portfolio-level acceptance gate (Sharpe, max DD, profit factor minimums)
+- Layer 7: paper-trading validation period before live capital
+- Implementation: empirically validate DOGE position size stability at first backtest
+
+## Layer 7 — Walk-Forward Gates
+Status: LOCKED 2026-04-18 (provisional pending firsthand reading deepening of Layer 2 sources)
+
+### Decision
+
+**Walk-forward window structure (7.1):** Rolling window.
+- Train window: 24 months (~4,380 4-hour bars)
+- Test window: 5 months (~915 4-hour bars)
+- Total periods: 6 (rolling forward in 5-month increments)
+- Total span: 24 months train + (5 × 6) months test = 54 months from first signal availability
+- First signal date: ~January 2022 (DOGE launch May 2021 + 8-month warm-up)
+- Walk-forward span: ~Jan 2022 - July 2026 (extends past current date; partial Period 6 acceptable)
+
+**Per-instrument classification gates (7.2):** v2 carryover, PF-based.
+- ROBUST: Profit Factor > 1.3 in ≥4 of 6 periods AND no period with PF < 0.7
+- MARGINAL: Profit Factor > 1.0 in ≥4 of 6 periods AND no period with PF < 0.5
+- OVERFIT: Any other case where INSUFFICIENT_SAMPLE does not apply
+- INSUFFICIENT_SAMPLE: <30 trades in any single test period
+
+**Portfolio-level acceptance bundle (7.3):** Strict bundle. ALL three gates must pass to authorize live capital.
+- Gate A: Portfolio Sharpe ≥ 0.5 across the full 30-month aggregated test window
+- Gate B: Maximum drawdown ≤ 35% across the full 30-month aggregated test window
+- Gate C: ≥3 of 5 instruments classify as ROBUST or MARGINAL per 7.2
+
+**Paper trading validation (7.4):** 90 days minimum, OR 30 paper trades minimum, whichever is longer.
+- Acceptance: paper trading P&L must match backtest run on the same calendar period within ±20% (slippage and execution variance acceptable; >20% divergence indicates substrate bug)
+- Bug found in paper trading: fix substrate, re-run paper trading from day zero, do NOT modify Layer 1-6 spec
+- Paper trading divergence with no identifiable bug: v3 does not ship; reopen substrate investigation
+
+### Justification
+
+1. **Rolling window (7.1) is regime-robust** for trend-following on crypto where regimes shift dramatically (2022 LUNA/FTX bear, 2023 chop, 2024 ETF bull, etc.). Expanding window dilutes recent regimes with old data; rolling forces validation that the strategy works in *recent* regimes specifically. v2's BTC/SOL OVERFIT classification was driven by Period 6 (2025+) failure under expanding window — exactly what rolling would have flagged earlier in development.
+
+2. **PF-based classification (7.2)** carried from v2 methodology unchanged. Profit factor is less sensitive to outlier trades than Sharpe ratio (a single fat-tail winner doesn't inflate PF the way it inflates Sharpe). For trend-following with structurally fat-tailed return distributions, PF is the more robust per-period metric. v2's classification thresholds (PF > 1.3 for ROBUST, PF > 1.0 for MARGINAL) are literature-honest gates derived from managed-futures practitioner standards. Keeping v2 thresholds preserves direct comparability between v2 and v3 classification results.
+
+3. **Strict bundle (7.3)** corrects the v2 mistake of treating 1-of-3 ROBUST as panel validation. ≥3 of 5 instruments must validate to demonstrate panel-level edge rather than single-instrument luck. Sharpe ≥0.5 is realistic for retail single-strategy crypto perp implementation (institutional Hurst/Ooi/Pedersen achieves ~1.0 on a fully-diversified 67-market 4-asset-class portfolio; retail single-strategy 5-perp version naturally lower due to costs, correlation, and concentration). DD ≤35% is the upper end of literature-norm trend-following drawdown — anything higher is unshippable for the trader's $14.8k capital base regardless of Sharpe.
+
+4. **90-day OR 30-trade paper trading (7.4)** is gated on trade-count not just calendar time, ensuring sufficient sample to validate execution divergence from backtest. 90 days at 4-hour bars on 5 instruments produces approximately 15-25 trades; the 30-trade floor extends paper trading if signal density is unusually low. ±20% backtest-vs-paper divergence is the bug detection threshold — within this, normal slippage and execution variance is accepted.
+
+### Decision-quality disclosure
+
+7.1 (rolling window): **Reasoned.** Trader correctly identified that recent regimes must be tested without dilution from old data.
+
+7.2 (PF classification kept from v2): **Delegated.** Trader cited "better quality" without engaging with why PF is preferred over Sharpe for per-period classification, or why specific thresholds (PF > 1.3 for ROBUST) were chosen. Lock is on the v2 carryover decision; the underlying PF-vs-Sharpe and threshold-selection reasoning was not personally derived at lock time.
+
+7.3 (strict bundle ≥3 of 5): **Reasoned for ≥3 floor.** Trader identified "better quality trade" as the reason for the strict bundle over weaker alternatives, which captures the core idea (fewer false-positive ships).
+
+7.3 (Sharpe ≥0.5 gate with private expectation alignment): **REQUIRES PSYCHOLOGICAL COMMITMENT, not just lock acceptance.** Trader disclosed at lock time hoping for Sharpe ~1.0 internally despite locking gate at ≥0.5. Resolution: gate stays at ≥0.5; trader explicitly commits to internalizing that Sharpe 0.5-0.8 IS success for v3. This is a psychological commitment, not a technical one. If at Layer 7 validation v3 produces Sharpe in the 0.5-0.8 range with all other gates passing, that result is a PASS and v3 ships. The temptation to "improve" v3 to chase Sharpe ≥1.0 must be recognized as p-hacking and refused. Future-self should re-read this paragraph if disappointment with sub-1.0 Sharpe results creates pressure to reopen Layer 4-6.
+
+7.4 (90 days OR 30 trades): **Reasoned with useful refinement.** Trader independently noted the gate should depend on trade count not just calendar time; this refinement was added to the lock language and improves the original recommendation.
+
+### Pre-registration discipline (Layer 7 binding — and meta-binding for all prior layers)
+
+Layer 7 is the layer that ENFORCES discipline on all prior layers. The gates locked here are the criteria that determine whether v3 ships or doesn't ship. They cannot be:
+- Lowered because results are close-but-not-quite ("Sharpe 0.45 is basically 0.5")
+- Reinterpreted to manufacture a pass ("technically the drawdown was 36% but if we exclude the FTX week...")
+- Selectively applied per-instrument ("BTC failed but ETH passed, ship ETH-only" — already explicitly forbidden, repeated here)
+- Replaced with different gates because the new gates make v3 look better
+
+If v3 fails any of Gates A, B, or C at Layer 7 validation:
+1. v3 does not ship as currently specified.
+2. The next move is one of: (a) accept v3 doesn't work, retire the project; (b) identify substrate bug, fix, re-run; (c) reopen Layer 1-6 with new external research justification, re-run validation against THESE SAME GATES (not new gates).
+3. The gates do not change because v3 missed them. Changing gates because results disappoint is the highest-order curve-fitting move and is forbidden.
+
+### Constraints to carry forward to implementation
+
+- Walk-forward must use TRUE rolling window — train data does NOT include test data, no overlap, no leakage. NautilusTrader supports this natively via BacktestNode with separate run configs per period.
+- Rebalance / signal recomputation happens on every 4-hour bar close within both train and test periods. No "warm-up only on train, then run forever" — each test period is independent of prior test periods for validation purposes (though the strategy state continues to evolve in live trading).
+- PF calculation per period uses gross profit / gross loss (Wilder's standard PF). Validate calculation against a hand-checked sample period before trusting any classification result.
+- Sharpe calculation uses 4-hour bar returns annualized by sqrt(2190) (matching Layer 6 vol annualization convention). Risk-free rate = 0 (standard for crypto strategies).
+- Drawdown calculation is peak-to-trough on the cumulative equity curve, computed at 4-hour bar resolution.
+- Paper trading must run on Binance demo (futures testnet merged into demo per Binance integration docs verified at architecture viability check), using the SAME strategy code as the backtest, NOT a separate "paper trading" branch. Backtest-to-live code parity is structural via NautilusTrader and must not be broken.
+
+### What happens after Layer 7 lock — research phase exit criteria
+
+Research phase ENDS when this Layer 7 lock commits. Build phase begins.
+
+Build phase has three sequential milestones before any backtest result is trusted:
+
+1. **Funding-rate SimulationModule built and validated** against hand-calculated funding cost on a known position (e.g., hold 0.1 BTC long for 30 days at known historical funding rates → reconcile to the dollar).
+
+2. **Backtest-to-paper parity harness built and validated** — deterministic strategy (e.g., hold 0.1 BTC long for 14 days) run through both backtest and Binance demo paper trading, P&L reconciled within ±20%.
+
+3. **Strategy implementation built per Layers 4-6 spec** — vol-adjusted momentum signal, blended lookback, 0.25 SD dead-zone, signal-flip exit, 3×ATR hard stop, 15% vol-targeting, 5x leverage, cap-5 concurrent.
+
+Only after all three milestones land cleanly does walk-forward validation per Layer 7 commence. Skipping milestones to "just see how the strategy performs" is forbidden — untrusted substrate produces untrusted results.
+
+### Open questions remaining post-research-phase
+
+- Build phase: funding SimulationModule architecture (extends FXRolloverInterestModule pattern)
+- Build phase: parity harness instrument selection (BTC suggested as cleanest first test)
+- Build phase: data ingestion pipeline for Binance USDT-M historical bars + funding rates
+- Build phase: NautilusTrader streaming indicator implementation for vol-adjusted momentum + ATR
+- Build phase: per-instrument backtest validation that 3×ATR stop is always less than liquidation distance at 5x leverage
+- Build phase: DOGE position size stability empirical check at first backtest
+- Future research: if v3 ships and runs profitably for 6+ months, possible v3.5 extensions (carry overlay, expanded universe, etc.) but these are explicitly post-v3-ship considerations
