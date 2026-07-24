@@ -908,14 +908,21 @@ def nav_menu(current: str = ""):
 
 
 # ── HTML Helper Functions ───────────────────────────────────────────
-def metric_card(label: str, value: str, sub: str = "", color: str = "") -> str:
-    """Return HTML string for a trading-dashboard metric card."""
-    color_style = f' style="color:{color}"' if color else ""
+def metric_card(label: str, value: str, sub: str = "", color: str = "", compact: bool = False) -> str:
+    """Return HTML string for a trading-dashboard metric card.
+
+    compact=True renders a smaller variant (28px value, reduced padding) for
+    dense rows of total/summary cards, without affecting the default size
+    used elsewhere.
+    """
+    card_style = ' style="padding:18px 20px;"' if compact else ""
+    value_style = f"font-size:28px;color:{color};" if compact and color else "font-size:28px;" if compact else (f"color:{color};" if color else "")
+    value_attr = f' style="{value_style}"' if value_style else ""
     sub_html = f'<div class="metric-sub">{sub}</div>' if sub else ""
     return (
-        f'<div class="card metric-card">'
+        f'<div class="card metric-card"{card_style}>'
         f'<div class="metric-label">{label}</div>'
-        f'<div class="metric-value"{color_style}>{value}</div>'
+        f'<div class="metric-value"{value_attr}>{value}</div>'
         f'{sub_html}'
         f'</div>'
     )

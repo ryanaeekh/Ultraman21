@@ -151,12 +151,12 @@ today_net = today_income - today_expense
 
 cols = st.columns(3)
 with cols[0]:
-    st.markdown(metric_card("Income", fmt(today_income), color="var(--accent-2)"), unsafe_allow_html=True)
+    st.markdown(metric_card("Income", fmt(today_income), color="var(--accent-2)", compact=True), unsafe_allow_html=True)
 with cols[1]:
-    st.markdown(metric_card("Expenses", fmt(today_expense), color="var(--neg)"), unsafe_allow_html=True)
+    st.markdown(metric_card("Expenses", fmt(today_expense), color="var(--neg)", compact=True), unsafe_allow_html=True)
 with cols[2]:
     net_color = "var(--accent-2)" if today_net >= 0 else "var(--neg)"
-    st.markdown(metric_card("Net", fmt(today_net), color=net_color), unsafe_allow_html=True)
+    st.markdown(metric_card("Net", fmt(today_net), color=net_color, compact=True), unsafe_allow_html=True)
 
 st.markdown('<div style="height:18px;"></div>', unsafe_allow_html=True)
 
@@ -173,12 +173,12 @@ mtd_net = mtd_income - mtd_expense
 
 cols = st.columns(3)
 with cols[0]:
-    st.markdown(metric_card("Income", fmt(mtd_income), color="var(--accent-2)"), unsafe_allow_html=True)
+    st.markdown(metric_card("Income", fmt(mtd_income), color="var(--accent-2)", compact=True), unsafe_allow_html=True)
 with cols[1]:
-    st.markdown(metric_card("Expenses", fmt(mtd_expense), color="var(--neg)"), unsafe_allow_html=True)
+    st.markdown(metric_card("Expenses", fmt(mtd_expense), color="var(--neg)", compact=True), unsafe_allow_html=True)
 with cols[2]:
     net_color = "var(--accent-2)" if mtd_net >= 0 else "var(--neg)"
-    st.markdown(metric_card("Net", fmt(mtd_net), color=net_color), unsafe_allow_html=True)
+    st.markdown(metric_card("Net", fmt(mtd_net), color=net_color, compact=True), unsafe_allow_html=True)
 
 # ============================================================
 # 2 — LOG INCOME
@@ -257,14 +257,7 @@ st.markdown('<div style="height:18px;"></div>', unsafe_allow_html=True)
 # ============================================================
 st.markdown('<div class="section-title">\U0001f4c5 Month Summary</div>', unsafe_allow_html=True)
 
-st.markdown(
-    '<div class="card metric-card" style="padding:18px 20px;">'
-    '<div class="metric-label">Fixed (Recurring)</div>'
-    f'<div class="metric-value" style="font-size:28px;color:var(--neg);">{fmt(month_fixed)}</div>'
-    f'<div class="metric-sub">{fmt(month_fixed/days)}/day</div>'
-    '</div>',
-    unsafe_allow_html=True,
-)
+st.markdown(metric_card("Fixed (Recurring)", fmt(month_fixed), sub=f"{fmt(month_fixed/days)}/day", color="var(--neg)", compact=True), unsafe_allow_html=True)
 
 # ============================================================
 # 5 — MONTHLY RECURRING
@@ -323,12 +316,13 @@ with nw1[0]:
         fmt(nw_total_assets),
         sub=f"Assets {fmt(nw_assets_items)} + Gold {fmt(total_gold_value)}",
         color="var(--accent-2)",
+        compact=True,
     ), unsafe_allow_html=True)
 with nw1[1]:
-    st.markdown(metric_card("Total Liabilities", fmt(nw_total_liabilities), color="var(--neg)"), unsafe_allow_html=True)
+    st.markdown(metric_card("Total Liabilities", fmt(nw_total_liabilities), color="var(--neg)", compact=True), unsafe_allow_html=True)
 with nw1[2]:
     nw_color = "var(--accent-2)" if nw_net >= 0 else "var(--neg)"
-    st.markdown(metric_card("Net Worth", fmt(nw_net), color=nw_color), unsafe_allow_html=True)
+    st.markdown(metric_card("Net Worth", fmt(nw_net), color=nw_color, compact=True), unsafe_allow_html=True)
 
 # ============================================================
 # 7 — ASSETS
