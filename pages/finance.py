@@ -257,7 +257,14 @@ st.markdown('<div style="height:18px;"></div>', unsafe_allow_html=True)
 # ============================================================
 st.markdown('<div class="section-title">\U0001f4c5 Month Summary</div>', unsafe_allow_html=True)
 
-st.markdown(metric_card("Fixed (Recurring)", fmt(month_fixed), sub=f"{fmt(month_fixed/days)}/day", color="var(--neg)"), unsafe_allow_html=True)
+st.markdown(
+    '<div class="card metric-card" style="padding:18px 20px;">'
+    '<div class="metric-label">Fixed (Recurring)</div>'
+    f'<div class="metric-value" style="font-size:28px;color:var(--neg);">{fmt(month_fixed)}</div>'
+    f'<div class="metric-sub">{fmt(month_fixed/days)}/day</div>'
+    '</div>',
+    unsafe_allow_html=True,
+)
 
 # ============================================================
 # 5 — MONTHLY RECURRING
