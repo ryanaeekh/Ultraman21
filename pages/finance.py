@@ -185,8 +185,13 @@ with cols[2]:
 # ============================================================
 st.markdown('<div class="section-title">\U0001f4b5 Log Income</div>', unsafe_allow_html=True)
 inc_date = st.date_input("Date", value=today, key="inc_date")
-inc_amount = st.number_input("Amount", min_value=0.0, step=10.0, format="%.2f", value=None, placeholder="0.00", key="inc_amount")
-if st.button("Save Income", use_container_width=True, key="save_inc"):
+inc_amount_col, inc_save_col = st.columns([1, 1])
+with inc_amount_col:
+    inc_amount = st.number_input("Amount", min_value=0.0, step=10.0, format="%.2f", value=None, placeholder="0.00", key="inc_amount")
+with inc_save_col:
+    st.markdown('<div style="height:28px;"></div>', unsafe_allow_html=True)
+    inc_save_clicked = st.button("Save Income", use_container_width=True, key="save_inc")
+if inc_save_clicked:
     if inc_amount and inc_amount > 0:
         new_row = pd.DataFrame([{"date": str(inc_date), "category": "Income", "amount": float(inc_amount)}])
         save_finance_df(pd.concat([finance_df, new_row], ignore_index=True))
@@ -207,8 +212,13 @@ exp_cat = st.selectbox("Category", categories_default, key="exp_cat")
 exp_cat_custom = ""
 if exp_cat == "Other":
     exp_cat_custom = st.text_input("Custom category name", key="exp_cat_custom", placeholder="e.g. Gifts")
-exp_amount = st.number_input("Amount", min_value=0.0, step=1.0, format="%.2f", value=None, placeholder="0.00", key="exp_amount")
-if st.button("Save Expense", use_container_width=True, key="save_exp"):
+exp_amount_col, exp_save_col = st.columns([1, 1])
+with exp_amount_col:
+    exp_amount = st.number_input("Amount", min_value=0.0, step=1.0, format="%.2f", value=None, placeholder="0.00", key="exp_amount")
+with exp_save_col:
+    st.markdown('<div style="height:28px;"></div>', unsafe_allow_html=True)
+    exp_save_clicked = st.button("Save Expense", use_container_width=True, key="save_exp")
+if exp_save_clicked:
     final_cat = exp_cat_custom.strip() if exp_cat == "Other" else exp_cat
     if exp_cat == "Other" and not final_cat:
         st.warning("Enter a custom category name.")
