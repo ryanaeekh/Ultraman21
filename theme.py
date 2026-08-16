@@ -176,7 +176,7 @@ h1, h2, h3 {
 /* ─── Buttons ────────────────────────────────────── */
 div.stButton > button {
     font-family: var(--font-body) !important;
-    background: linear-gradient(135deg, #00E5C0 0%, #14F5D4 100%) !important;
+    background: var(--accent) !important;
     color: #0F172A !important;
     border: none !important;
     border-radius: 10px !important;
@@ -185,7 +185,7 @@ div.stButton > button {
     font-size: 15px !important;
     letter-spacing: 0.02em !important;
     transition: all 0.25s ease !important;
-    box-shadow: 0 6px 20px rgba(0,229,192,0.25), 0 2px 8px rgba(0,0,0,0.3) !important;
+    box-shadow: 0 6px 20px rgba(79,124,130,0.25), 0 2px 8px rgba(0,0,0,0.3) !important;
     cursor: pointer !important;
 }
 div.stButton > button:hover {
@@ -291,7 +291,7 @@ div[data-testid="stMarkdownContainer"] li {
 /* ─── Form Submit ────────────────────────────────── */
 div[data-testid="stFormSubmitButton"] button {
     font-family: var(--font-body) !important;
-    background: linear-gradient(135deg, #00E5C0 0%, #14F5D4 100%) !important;
+    background: var(--accent) !important;
     color: #0F172A !important;
     border: none !important;
     border-radius: 10px !important;
@@ -299,7 +299,7 @@ div[data-testid="stFormSubmitButton"] button {
     font-weight: 600 !important;
     font-size: 15px !important;
     letter-spacing: 0.02em !important;
-    box-shadow: 0 6px 20px rgba(0,229,192,0.25), 0 2px 8px rgba(0,0,0,0.3) !important;
+    box-shadow: 0 6px 20px rgba(79,124,130,0.25), 0 2px 8px rgba(0,0,0,0.3) !important;
     transition: all 0.25s ease !important;
     cursor: pointer !important;
 }
