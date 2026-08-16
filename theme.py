@@ -207,9 +207,10 @@ div[data-testid="stForm"] {
 textarea, select,
 div[data-testid="stTextInput"] input,
 div[data-testid="stNumberInput"] input,
-div[data-testid="stTextArea"] textarea {
+div[data-testid="stTextArea"] textarea,
+div[data-testid="stDateInput"] input {
     font-family: var(--font-body) !important;
-    background: var(--bg2) !important;
+    background: #1E2A3A !important;
     color: var(--text) !important;
     border: none !important;
     border-bottom: 2px solid transparent !important;
@@ -254,7 +255,7 @@ div[data-testid="stSelectbox"] > div > div {
 }
 /* Ensure selectbox selected value text is visible */
 div[data-testid="stSelectbox"] [data-baseweb="select"] > div {
-    background: var(--bg2) !important;
+    background: #1E2A3A !important;
     color: var(--text) !important;
 }
 div[data-testid="stSelectbox"] [data-baseweb="select"] > div > div {
