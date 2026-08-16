@@ -222,10 +222,10 @@ div[data-testid="stDateInput"] input {
 div[data-testid="stSelectbox"] > div > div {
     font-family: var(--font-body) !important;
     color: var(--text) !important;
+    border-bottom: 2px solid transparent !important;
 }
 input:focus, textarea:focus {
     border-bottom-color: var(--accent) !important;
-    background: #135058 !important;
     box-shadow: none !important;
     outline: none !important;
 }
@@ -251,9 +251,6 @@ label, .stSelectbox label, .stTextInput label, .stNumberInput label, .stTextArea
     color: var(--text2) !important;
 }
 
-div[data-testid="stSelectbox"] > div > div {
-    border-bottom: 2px solid transparent !important;
-}
 /* Ensure selectbox selected value text is visible */
 div[data-testid="stSelectbox"] [data-baseweb="select"] > div {
     background: #1E2A3A !important;
