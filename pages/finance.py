@@ -151,12 +151,12 @@ today_net = today_income - today_expense
 
 cols = st.columns(3)
 with cols[0]:
-    st.markdown(metric_card("Income", fmt(today_income), color="var(--accent-2)", value_size=11, pad="4px 8px"), unsafe_allow_html=True)
+    st.markdown(metric_card("Income", fmt(today_income), color="var(--accent-2)", value_size=22, pad="12px 16px"), unsafe_allow_html=True)
 with cols[1]:
-    st.markdown(metric_card("Expenses", fmt(today_expense), color="var(--neg)", value_size=11, pad="4px 8px"), unsafe_allow_html=True)
+    st.markdown(metric_card("Expenses", fmt(today_expense), color="var(--neg)", value_size=22, pad="12px 16px"), unsafe_allow_html=True)
 with cols[2]:
     net_color = "var(--accent-2)" if today_net >= 0 else "var(--neg)"
-    st.markdown(metric_card("Net", fmt(today_net), color=net_color, value_size=11, pad="4px 8px"), unsafe_allow_html=True)
+    st.markdown(metric_card("Net", fmt(today_net), color=net_color, value_size=22, pad="12px 16px"), unsafe_allow_html=True)
 
 st.markdown('<div style="height:18px;"></div>', unsafe_allow_html=True)
 
@@ -173,12 +173,12 @@ mtd_net = mtd_income - mtd_expense
 
 cols = st.columns(3)
 with cols[0]:
-    st.markdown(metric_card("Income", fmt(mtd_income), color="var(--accent-2)", value_size=11, pad="4px 8px"), unsafe_allow_html=True)
+    st.markdown(metric_card("Income", fmt(mtd_income), color="var(--accent-2)", value_size=22, pad="12px 16px"), unsafe_allow_html=True)
 with cols[1]:
-    st.markdown(metric_card("Expenses", fmt(mtd_expense), color="var(--neg)", value_size=11, pad="4px 8px"), unsafe_allow_html=True)
+    st.markdown(metric_card("Expenses", fmt(mtd_expense), color="var(--neg)", value_size=22, pad="12px 16px"), unsafe_allow_html=True)
 with cols[2]:
     net_color = "var(--accent-2)" if mtd_net >= 0 else "var(--neg)"
-    st.markdown(metric_card("Net", fmt(mtd_net), color=net_color, value_size=11, pad="4px 8px"), unsafe_allow_html=True)
+    st.markdown(metric_card("Net", fmt(mtd_net), color=net_color, value_size=22, pad="12px 16px"), unsafe_allow_html=True)
 
 # ============================================================
 # 2 — LOG INCOME
