@@ -908,16 +908,23 @@ def nav_menu(current: str = ""):
 
 
 # ── HTML Helper Functions ───────────────────────────────────────────
-def metric_card(label: str, value: str, sub: str = "", color: str = "", compact: bool = False) -> str:
+def metric_card(label: str, value: str, sub: str = "", color: str = "", compact: bool = False, value_size: int | None = None, pad: str | None = None) -> str:
     """Return HTML string for a trading-dashboard metric card.
 
     compact=True renders a smaller variant (28px value, reduced padding) for
     dense rows of total/summary cards, without affecting the default size
-    used elsewhere.
+    used elsewhere. value_size (px) and pad (CSS padding shorthand) let a
+    caller dial in an even tighter variant on top of that.
     """
-    card_style = ' style="padding:18px 20px;"' if compact else ""
-    value_style = f"font-size:28px;color:{color};" if compact and color else "font-size:28px;" if compact else (f"color:{color};" if color else "")
-    value_attr = f' style="{value_style}"' if value_style else ""
+    fs = value_size if value_size is not None else (28 if compact else None)
+    card_pad = pad if pad is not None else ("18px 20px" if compact else None)
+    card_style = f' style="padding:{card_pad};"' if card_pad else ""
+    value_parts = []
+    if fs is not None:
+        value_parts.append(f"font-size:{fs}px;")
+    if color:
+        value_parts.append(f"color:{color};")
+    value_attr = f' style="{"".join(value_parts)}"' if value_parts else ""
     sub_html = f'<div class="metric-sub">{sub}</div>' if sub else ""
     return (
         f'<div class="card metric-card"{card_style}>'
