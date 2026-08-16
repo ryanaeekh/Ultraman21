@@ -140,10 +140,6 @@ month_label = today.strftime("%B %Y")
 # ============================================================
 # 1a — TODAY SUMMARY
 # ============================================================
-st.markdown(
-    '<style>.st-key-view_date { max-width: 220px; }</style>',
-    unsafe_allow_html=True,
-)
 selected_date = st.date_input("View date", value=today, key="view_date")
 day_label = "Today" if selected_date == today else selected_date.strftime("%d %b %Y")
 st.markdown(f'<div class="section-title">\U0001f4ca {day_label} Summary</div>', unsafe_allow_html=True)
@@ -275,10 +271,10 @@ st.markdown(metric_card("Fixed (Recurring)", fmt(month_fixed), sub=f"{fmt(month_
 st.markdown('<div class="section-title">\U0001f501 Monthly Recurring</div>', unsafe_allow_html=True)
 
 fx_name = st.text_input("Name", key="fx_name", placeholder="e.g. Rent")
-fx_amount = st.number_input("Amount", min_value=0.0, step=10.0, format="%.2f", key="fx_amount")
+fx_amount = st.number_input("Amount", min_value=0.0, step=10.0, format="%.2f", value=None, placeholder="0.00", key="fx_amount")
 if st.button("Add Fixed Expense", use_container_width=True, key="add_fx"):
     name = fx_name.strip()
-    if name and fx_amount > 0:
+    if name and fx_amount and fx_amount > 0:
         new_row = pd.DataFrame([{"name": name, "amount": float(fx_amount)}])
         save_monthly_expenses_df(pd.concat([monthly_df, new_row], ignore_index=True))
         st.success(f"Added {name}: {fmt(fx_amount)}")
@@ -340,10 +336,10 @@ with nw1[2]:
 st.markdown('<div class="section-title">\U0001f3e6 Assets</div>', unsafe_allow_html=True)
 
 asset_name = st.text_input("Name", key="asset_name", placeholder="e.g. Savings Account")
-asset_amount = st.number_input("Amount", min_value=0.0, step=100.0, format="%.2f", key="asset_amount")
+asset_amount = st.number_input("Amount", min_value=0.0, step=100.0, format="%.2f", value=None, placeholder="0.00", key="asset_amount")
 if st.button("Add Asset", use_container_width=True, key="add_asset"):
     name = asset_name.strip()
-    if name and asset_amount > 0:
+    if name and asset_amount and asset_amount > 0:
         new_row = pd.DataFrame([{"name": name, "amount": float(asset_amount)}])
         save_assets_df(pd.concat([assets_df, new_row], ignore_index=True))
         st.success(f"Added {name}: {fmt(asset_amount)}")
@@ -409,12 +405,12 @@ if gold_sgd_per_gram is not None:
     )
 else:
     gold_sgd_per_gram = st.number_input(
-        "Gold price (SGD/g)", min_value=0.0, step=1.0, format="%.2f", key="gold_manual_price"
+        "Gold price (SGD/g)", min_value=0.0, step=1.0, format="%.2f", value=None, placeholder="0.00", key="gold_manual_price"
     )
-gold_weight = st.number_input("Weight (grams)", min_value=0.0, step=1.0, format="%.2f", key="gold_weight")
+gold_weight = st.number_input("Weight (grams)", min_value=0.0, step=1.0, format="%.2f", value=None, placeholder="0.00", key="gold_weight")
 gold_purity = 0.916
-gold_value = gold_weight * (gold_sgd_per_gram * gold_purity) * gold_discount
-if gold_weight > 0 and gold_sgd_per_gram > 0:
+gold_value = (gold_weight or 0) * ((gold_sgd_per_gram or 0) * gold_purity) * gold_discount
+if gold_weight and gold_sgd_per_gram and gold_weight > 0 and gold_sgd_per_gram > 0:
     st.markdown(
         f'<div class="list-row" style="font-weight:700;"><span>Your Gold Value (916)</span>'
         f'<span class="amount">SGD {fmt(gold_value)}</span></div>',
@@ -422,7 +418,7 @@ if gold_weight > 0 and gold_sgd_per_gram > 0:
     )
 
 if st.button("Add Gold", use_container_width=True, key="add_gold_asset"):
-    if gold_weight > 0 and gold_sgd_per_gram > 0:
+    if gold_weight and gold_sgd_per_gram and gold_weight > 0 and gold_sgd_per_gram > 0:
         new_row = pd.DataFrame([{"name": "Gold 916", "weight_grams": float(gold_weight), "purity": 0.916}])
         save_gold_assets_df(pd.concat([gold_assets_df, new_row], ignore_index=True))
         st.success(f"Added Gold 916: {gold_weight:g}g")
@@ -436,10 +432,10 @@ if st.button("Add Gold", use_container_width=True, key="add_gold_asset"):
 st.markdown('<div class="section-title">\U0001f4c9 Liabilities</div>', unsafe_allow_html=True)
 
 liab_name = st.text_input("Name", key="liab_name", placeholder="e.g. Car Loan")
-liab_amount = st.number_input("Amount", min_value=0.0, step=100.0, format="%.2f", key="liab_amount")
+liab_amount = st.number_input("Amount", min_value=0.0, step=100.0, format="%.2f", value=None, placeholder="0.00", key="liab_amount")
 if st.button("Add Liability", use_container_width=True, key="add_liab"):
     name = liab_name.strip()
-    if name and liab_amount > 0:
+    if name and liab_amount and liab_amount > 0:
         new_row = pd.DataFrame([{"name": name, "amount": float(liab_amount)}])
         save_liabilities_df(pd.concat([liabilities_df, new_row], ignore_index=True))
         st.success(f"Added {name}: {fmt(liab_amount)}")
