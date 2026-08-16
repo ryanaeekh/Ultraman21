@@ -873,7 +873,6 @@ _PAGES = {
     "Exercise": "pages/exercise.py",
     "Journal": "pages/journal.py",
     "InnerWork": "pages/thyself.py",
-    "Weekly Review": "pages/weekly_review.py",
     "News": "pages/news.py",
     "B.Mission": "pages/bmission.py",
     "Settings": "pages/settings.py",
