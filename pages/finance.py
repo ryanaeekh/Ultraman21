@@ -137,39 +137,24 @@ month_net = month_income - month_daily_exp - month_fixed
 days = month_days(today.year, today.month)
 month_label = today.strftime("%B %Y")
 
-# ============================================================
-# 1a — TODAY SUMMARY
-# ============================================================
 selected_date = st.date_input("View date", value=today, key="view_date")
 day_label = "Today" if selected_date == today else selected_date.strftime("%d %b %Y")
-st.markdown(f'<div class="section-title">\U0001f4ca {day_label} Summary</div>', unsafe_allow_html=True)
 
 today_df = filter_by_exact_date(finance_df, selected_date)
 today_income = float(today_df[today_df["category"] == "Income"]["amount"].sum()) if not today_df.empty else 0.0
 today_expense = float(today_df[today_df["category"] != "Income"]["amount"].sum()) if not today_df.empty else 0.0
 today_net = today_income - today_expense
 
-cols = st.columns(3)
-with cols[0]:
-    st.markdown(metric_card("Income", fmt(today_income), color="var(--accent-2)", value_size=22, pad="12px 16px"), unsafe_allow_html=True)
-with cols[1]:
-    st.markdown(metric_card("Expenses", fmt(today_expense), color="var(--neg)", value_size=22, pad="12px 16px"), unsafe_allow_html=True)
-with cols[2]:
-    net_color = "var(--accent-2)" if today_net >= 0 else "var(--neg)"
-    st.markdown(metric_card("Net", fmt(today_net), color=net_color, value_size=22, pad="12px 16px"), unsafe_allow_html=True)
-
-st.markdown('<div style="height:18px;"></div>', unsafe_allow_html=True)
-
-# ============================================================
-# 1b — MONTHLY SUMMARY
-# ============================================================
-st.markdown('<div class="section-title">\U0001f4ca Monthly Summary</div>', unsafe_allow_html=True)
-
 mtd_df = filter_by_month(finance_df, selected_date.year, selected_date.month)
 mtd_df = mtd_df[mtd_df["date"] <= selected_date] if not mtd_df.empty else mtd_df
 mtd_income = float(mtd_df[mtd_df["category"] == "Income"]["amount"].sum()) if not mtd_df.empty else 0.0
 mtd_expense = float(mtd_df[mtd_df["category"] != "Income"]["amount"].sum()) if not mtd_df.empty else 0.0
 mtd_net = mtd_income - mtd_expense
+
+# ============================================================
+# 1a — MONTHLY SUMMARY
+# ============================================================
+st.markdown('<div class="section-title">\U0001f4ca Monthly Summary</div>', unsafe_allow_html=True)
 
 cols = st.columns(3)
 with cols[0]:
@@ -179,6 +164,22 @@ with cols[1]:
 with cols[2]:
     net_color = "var(--accent-2)" if mtd_net >= 0 else "var(--neg)"
     st.markdown(metric_card("Net", fmt(mtd_net), color=net_color, value_size=22, pad="12px 16px"), unsafe_allow_html=True)
+
+st.markdown('<div style="height:18px;"></div>', unsafe_allow_html=True)
+
+# ============================================================
+# 1b — TODAY SUMMARY
+# ============================================================
+st.markdown(f'<div class="section-title">\U0001f4ca {day_label} Summary</div>', unsafe_allow_html=True)
+
+cols = st.columns(3)
+with cols[0]:
+    st.markdown(metric_card("Income", fmt(today_income), color="var(--accent-2)", value_size=22, pad="12px 16px"), unsafe_allow_html=True)
+with cols[1]:
+    st.markdown(metric_card("Expenses", fmt(today_expense), color="var(--neg)", value_size=22, pad="12px 16px"), unsafe_allow_html=True)
+with cols[2]:
+    net_color = "var(--accent-2)" if today_net >= 0 else "var(--neg)"
+    st.markdown(metric_card("Net", fmt(today_net), color=net_color, value_size=22, pad="12px 16px"), unsafe_allow_html=True)
 
 # ============================================================
 # 2 — LOG INCOME
