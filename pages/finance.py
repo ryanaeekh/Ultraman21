@@ -260,11 +260,11 @@ with st.expander(f"{day_label} Transactions ({len(today_df)} entries)"):
 st.markdown('<div style="height:18px;"></div>', unsafe_allow_html=True)
 
 # ============================================================
-# 4 — MONTH SUMMARY
+# 4 — MONTHLY FIXED EXPENSE
 # ============================================================
-st.markdown('<div class="section-title">\U0001f4c5 Month Summary</div>', unsafe_allow_html=True)
+st.markdown('<div class="section-title">\U0001f4c5 Monthly Fixed Expense</div>', unsafe_allow_html=True)
 
-st.markdown(metric_card("Fixed (Recurring)", fmt(month_fixed), sub=f"{fmt(month_fixed/days)}/day", color="var(--neg)", compact=True), unsafe_allow_html=True)
+st.markdown(metric_card("Fixed (Recurring)", fmt(month_fixed), sub=f"{fmt(month_fixed/days)}/day", color="var(--neg)", value_size=22, pad="12px 16px"), unsafe_allow_html=True)
 
 # ============================================================
 # 5 — MONTHLY RECURRING
