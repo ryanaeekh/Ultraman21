@@ -323,13 +323,14 @@ with nw1[0]:
         fmt(nw_total_assets),
         sub=f"Assets {fmt(nw_assets_items)} + Gold {fmt(total_gold_value)}",
         color="var(--accent-2)",
-        compact=True,
+        value_size=22,
+        pad="12px 16px",
     ), unsafe_allow_html=True)
 with nw1[1]:
-    st.markdown(metric_card("Total Liabilities", fmt(nw_total_liabilities), color="var(--neg)", compact=True), unsafe_allow_html=True)
+    st.markdown(metric_card("Total Liabilities", fmt(nw_total_liabilities), color="var(--neg)", value_size=22, pad="12px 16px"), unsafe_allow_html=True)
 with nw1[2]:
     nw_color = "var(--accent-2)" if nw_net >= 0 else "var(--neg)"
-    st.markdown(metric_card("Net Worth", fmt(nw_net), color=nw_color, compact=True), unsafe_allow_html=True)
+    st.markdown(metric_card("Net Worth", fmt(nw_net), color=nw_color, value_size=22, pad="12px 16px"), unsafe_allow_html=True)
 
 # ============================================================
 # 7 — ASSETS
