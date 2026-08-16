@@ -470,54 +470,42 @@ with st.expander(f"Liabilities ({len(liabilities_df)} items)"):
 # ============================================================
 st.markdown('<div class="section-title">\U0001f3e2 CPF</div>', unsafe_allow_html=True)
 
-current_cpf = float(cpf_df.iloc[0]["amount"]) if not cpf_df.empty else 0.0
-
-st.markdown(
-    f'<div class="list-row"><span>CPF Account</span>'
-    f'<span class="amount">{fmt(current_cpf)}</span></div>',
-    unsafe_allow_html=True,
-)
-cpf_amount = st.number_input("Update Amount", min_value=0.0, step=100.0, format="%.2f", value=current_cpf, key="cpf_amount")
+cpf_amount = st.number_input("Update Amount", min_value=0.0, step=100.0, format="%.2f", value=None, placeholder="0.00", key="cpf_amount")
 if st.button("Save CPF", use_container_width=True, key="save_cpf"):
-    save_cpf_df(pd.DataFrame([{"name": "CPF Account", "amount": float(cpf_amount)}]))
-    st.success(f"CPF updated: {fmt(cpf_amount)}")
-    save_and_rerun()
+    if cpf_amount and cpf_amount > 0:
+        save_cpf_df(pd.DataFrame([{"name": "CPF Account", "amount": float(cpf_amount)}]))
+        st.success(f"CPF updated: {fmt(cpf_amount)}")
+        save_and_rerun()
+    else:
+        st.warning("Enter an amount greater than zero.")
 
 # ============================================================
 # 11 — MEDISAVE
 # ============================================================
 st.markdown('<div class="section-title">\U0001f3e5 Medisave</div>', unsafe_allow_html=True)
 
-current_medisave = float(medisave_df.iloc[0]["amount"]) if not medisave_df.empty else 0.0
-
-st.markdown(
-    f'<div class="list-row"><span>Medisave Account</span>'
-    f'<span class="amount">{fmt(current_medisave)}</span></div>',
-    unsafe_allow_html=True,
-)
-ms_amount = st.number_input("Update Amount", min_value=0.0, step=100.0, format="%.2f", value=current_medisave, key="ms_amount")
+ms_amount = st.number_input("Update Amount", min_value=0.0, step=100.0, format="%.2f", value=None, placeholder="0.00", key="ms_amount")
 if st.button("Save Medisave", use_container_width=True, key="save_ms"):
-    save_medisave_df(pd.DataFrame([{"name": "Medisave Account", "amount": float(ms_amount)}]))
-    st.success(f"Medisave updated: {fmt(ms_amount)}")
-    save_and_rerun()
+    if ms_amount and ms_amount > 0:
+        save_medisave_df(pd.DataFrame([{"name": "Medisave Account", "amount": float(ms_amount)}]))
+        st.success(f"Medisave updated: {fmt(ms_amount)}")
+        save_and_rerun()
+    else:
+        st.warning("Enter an amount greater than zero.")
 
 # ============================================================
 # 12 — PROPERTY
 # ============================================================
 st.markdown('<div class="section-title">\U0001f3e0 Property</div>', unsafe_allow_html=True)
 
-current_property = float(property_df.iloc[0]["amount"]) if not property_df.empty else 0.0
-
-st.markdown(
-    f'<div class="list-row"><span>Property</span>'
-    f'<span class="amount">{fmt(current_property)}</span></div>',
-    unsafe_allow_html=True,
-)
-prop_amount = st.number_input("Update Amount", min_value=0.0, step=1000.0, format="%.2f", value=current_property, key="prop_amount")
+prop_amount = st.number_input("Update Amount", min_value=0.0, step=1000.0, format="%.2f", value=None, placeholder="0.00", key="prop_amount")
 if st.button("Save Property", use_container_width=True, key="save_prop"):
-    save_property_df(pd.DataFrame([{"name": "Property", "amount": float(prop_amount), "notes": ""}]))
-    st.success(f"Property updated: {fmt(prop_amount)}")
-    save_and_rerun()
+    if prop_amount and prop_amount > 0:
+        save_property_df(pd.DataFrame([{"name": "Property", "amount": float(prop_amount), "notes": ""}]))
+        st.success(f"Property updated: {fmt(prop_amount)}")
+        save_and_rerun()
+    else:
+        st.warning("Enter an amount greater than zero.")
 
 # — CPF, Medisave & Property totals (informational) —
 total_cpf = float(cpf_df["amount"].sum()) if not cpf_df.empty else 0.0
