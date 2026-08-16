@@ -219,6 +219,18 @@ div[data-testid="stDateInput"] input {
     transition: border-color 0.25s ease, background 0.25s ease !important;
     caret-color: var(--accent) !important;
 }
+div[data-testid="stTextInput"],
+div[data-testid="stNumberInput"],
+div[data-testid="stTextArea"],
+div[data-testid="stDateInput"] {
+    background: transparent !important;
+}
+div[data-testid="stTextInput"] > div,
+div[data-testid="stNumberInput"] > div,
+div[data-testid="stDateInput"] > div {
+    background: #1E2A3A !important;
+    border-radius: var(--radius-md) var(--radius-md) 0 0 !important;
+}
 div[data-testid="stSelectbox"] > div > div {
     font-family: var(--font-body) !important;
     color: var(--text) !important;
@@ -232,10 +244,7 @@ input:focus, textarea:focus {
 input::placeholder, textarea::placeholder {
     color: var(--text3) !important;
 }
-div[data-testid="stTextInput"] > div,
-div[data-testid="stNumberInput"] > div,
-div[data-testid="stTextArea"] > div,
-div[data-testid="stDateInput"] > div {
+div[data-testid="stTextArea"] > div {
     background: transparent !important;
 }
 div[data-testid="stTextInput"] > div > div,
