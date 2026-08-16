@@ -519,8 +519,8 @@ st.markdown(
 )
 nw2 = st.columns(3)
 with nw2[0]:
-    st.markdown(metric_card("CPF", fmt(total_cpf), color="var(--accent)"), unsafe_allow_html=True)
+    st.markdown(metric_card("CPF", fmt(total_cpf), color="var(--accent)", value_size=22, pad="12px 16px"), unsafe_allow_html=True)
 with nw2[1]:
-    st.markdown(metric_card("Medisave", fmt(total_medisave), color="var(--accent)"), unsafe_allow_html=True)
+    st.markdown(metric_card("Medisave", fmt(total_medisave), color="var(--accent)", value_size=22, pad="12px 16px"), unsafe_allow_html=True)
 with nw2[2]:
-    st.markdown(metric_card("Property", fmt(total_property), color="var(--accent)"), unsafe_allow_html=True)
+    st.markdown(metric_card("Property", fmt(total_property), color="var(--accent)", value_size=22, pad="12px 16px"), unsafe_allow_html=True)
