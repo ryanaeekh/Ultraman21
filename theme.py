@@ -240,7 +240,8 @@ div[data-testid="stDateInput"] > div {
 }
 div[data-testid="stTextInput"] > div > div,
 div[data-testid="stNumberInput"] > div > div,
-div[data-testid="stTextArea"] > div > div {
+div[data-testid="stTextArea"] > div > div,
+div[data-testid="stDateInput"] > div > div {
     background: transparent !important;
 }
 label, .stSelectbox label, .stTextInput label, .stNumberInput label, .stTextArea label {
