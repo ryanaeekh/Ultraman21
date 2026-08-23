@@ -6,13 +6,13 @@ from datetime import date, timedelta
 import pandas as pd
 import streamlit as st
 
-st.set_page_config(page_title="Mission 21", page_icon="\U0001f3af", layout="wide", initial_sidebar_state="collapsed")
+st.set_page_config(page_title="Mission 33", page_icon="\U0001f3af", layout="wide", initial_sidebar_state="collapsed")
 
 from theme import inject_theme, nav_menu, page_header
 from utils import load_planner, load_settings, clean_text
 
 inject_theme()
-nav_menu("Mission 21")
+nav_menu("Mission 33")
 
 today = date.today()
 today_str = str(today)
