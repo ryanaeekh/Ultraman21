@@ -84,7 +84,7 @@ today_row = countdown_df[countdown_df["date"] == today_str]
 saved_earning = bool(today_row.iloc[0]["earning_done"]) if not today_row.empty else False
 saved_exercise = bool(today_row.iloc[0]["exercise_done"]) if not today_row.empty else False
 
-earning_done = st.checkbox("$250 Daily Earning", value=saved_earning, key="cd_earning_done")
+earning_done = st.checkbox("$250 Daily Earning (target: $6,500/month)", value=saved_earning, key="cd_earning_done")
 exercise_done = st.checkbox("Exercise", value=saved_exercise, key="cd_exercise_done")
 
 if st.button("Save Today", use_container_width=True, key="cd_save"):
