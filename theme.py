@@ -881,6 +881,7 @@ _PAGES = {
     "InnerWork": "pages/thyself.py",
     "News": "pages/news.py",
     "B.Mission": "pages/bmission.py",
+    "Countdown": "pages/countdown.py",
     "Settings": "pages/settings.py",
 }
 

@@ -64,6 +64,9 @@ PROPERTY_SHEET = "property"
 FINANCE_TOTALS_SHEET = "finance_totals"
 FINANCE_TOTALS_COLUMNS = ["income_total", "expense_total"]
 
+COUNTDOWN_LOG_SHEET = "countdown_log"
+COUNTDOWN_LOG_COLUMNS = ["date", "earning_done", "exercise_done"]
+
 BMISSION_GOALS_SHEET = "bmission_goals"
 BMISSION_GOALS_COLUMNS = ["goal", "target_date", "status", "notes"]
 
@@ -269,6 +272,22 @@ def save_assets_df(df: pd.DataFrame) -> None:
             df[col] = ""
     save_sheet(ASSETS_SHEET, df[ASSETS_COLUMNS], ASSETS_COLUMNS)
     load_assets.clear()
+
+
+@st.cache_data(ttl=60, show_spinner=False)
+def load_countdown_log() -> pd.DataFrame:
+    df = load_sheet(COUNTDOWN_LOG_SHEET, COUNTDOWN_LOG_COLUMNS)
+    for col in ["earning_done", "exercise_done"]:
+        df[col] = df[col].apply(safe_bool)
+    return df
+
+
+def save_countdown_log_df(df: pd.DataFrame) -> None:
+    for col in COUNTDOWN_LOG_COLUMNS:
+        if col not in df.columns:
+            df[col] = ""
+    save_sheet(COUNTDOWN_LOG_SHEET, df[COUNTDOWN_LOG_COLUMNS], COUNTDOWN_LOG_COLUMNS)
+    load_countdown_log.clear()
 
 
 @st.cache_data(ttl=60, show_spinner=False)
